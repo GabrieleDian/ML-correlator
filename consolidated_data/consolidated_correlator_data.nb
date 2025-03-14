@@ -1,0 +1,1046 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 10.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     39472,       1037]
+NotebookOptionsPosition[     38830,       1009]
+NotebookOutlinePosition[     39186,       1025]
+CellTagsIndexPosition[     39143,       1022]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["General-Purpose Functions", "Section",
+ CellChangeTimes->{{3.681829064221945*^9, 3.6818290669811907`*^9}, {
+  3.6818294983162947`*^9, 3.681829501955982*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"fourPointDataDir", "=", 
+   RowBox[{"FileNameJoin", "[", 
+    RowBox[{"{", 
+     RowBox[{"NotebookDirectory", "[", "]"}], "}"}], "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"SetDirectory", "[", "fourPointDataDir", "]"}], ";"}], 
+  "\n"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"niceTime", "[", "timeInSec_", "]"}], ":=", 
+   RowBox[{"If", "[", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"timeInSec", "<", 
+       RowBox[{"(", 
+        RowBox[{"$TimeUnit", "/", "100"}], ")"}]}], "||", 
+      RowBox[{"Not", "[", 
+       RowBox[{"NumericQ", "[", "timeInSec", "]"}], "]"}], "||", 
+      RowBox[{
+       RowBox[{"Precision", "[", "timeInSec", "]"}], "==", "0"}]}], ",", 
+     "\"\<\>\"", ",", 
+     RowBox[{"Block", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"measure", "=", 
+         RowBox[{"Select", "[", 
+          RowBox[{
+           RowBox[{"Transpose", "[", 
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{
+                 RowBox[{"Quotient", "[", 
+                  RowBox[{
+                   RowBox[{"Mod", "[", 
+                    RowBox[{"timeInSec", ",", "#1"}], "]"}], ",", "#2"}], 
+                  "]"}], "&"}], "@@@", 
+                RowBox[{"Partition", "[", 
+                 RowBox[{
+                  RowBox[{"{", 
+                   RowBox[{
+                    RowBox[{"timeInSec", " ", "10"}], ",", 
+                    "3.15569277216`*^7", ",", 
+                    RowBox[{"3600", "*", "24."}], ",", "3600.", ",", "60.", 
+                    ",", "1.", ",", 
+                    RowBox[{"10", "^", 
+                    RowBox[{"-", "3"}]}], ",", 
+                    RowBox[{"10.", "^", 
+                    RowBox[{"-", "6"}]}], ",", 
+                    RowBox[{"10.", "^", 
+                    RowBox[{"-", "9"}]}]}], "}"}], ",", "2", ",", "1"}], 
+                 "]"}]}], ")"}], ",", 
+              RowBox[{"{", 
+               RowBox[{
+               "\"\< years\>\"", ",", "\"\< days\>\"", ",", "\"\< hours\>\"", 
+                ",", "\"\< minutes\>\"", ",", "\"\< seconds\>\"", ",", 
+                "\"\< ms\>\"", ",", "\"\< \[Mu]s\>\"", ",", "\"\< ns\>\""}], 
+               "}"}]}], "}"}], "]"}], ",", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"#", "[", 
+              RowBox[{"[", "1", "]"}], "]"}], ">", "0"}], "&"}]}], "]"}]}], 
+        "}"}], ",", 
+       RowBox[{"If", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"Length", "[", "measure", "]"}], ">", "0"}], ",", 
+         RowBox[{"Row", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{
+             RowBox[{"Row", "[", 
+              RowBox[{"#", ",", "\"\<\>\""}], "]"}], "&"}], "/@", 
+            RowBox[{"measure", "[", 
+             RowBox[{"[", 
+              RowBox[{"1", ";;", 
+               RowBox[{"Min", "[", 
+                RowBox[{"2", ",", 
+                 RowBox[{"Length", "[", "measure", "]"}]}], "]"}]}], "]"}], 
+             "]"}]}], ",", "\"\<, \>\""}], "]"}], ",", "\"\<\>\""}], "]"}]}], 
+      "]"}]}], "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"map", "[", 
+    RowBox[{"function_", ",", "list_"}], "]"}], ":=", 
+   RowBox[{"If", "[", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"Length", "[", "list", "]"}], ">", "0"}], ",", 
+     RowBox[{"Module", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"monitor", "=", "0"}], ",", 
+         RowBox[{"len", "=", 
+          RowBox[{"Length", "[", "list", "]"}]}], ",", "newFcn", ",", 
+         RowBox[{"t00", "=", 
+          RowBox[{"AbsoluteTime", "[", "]"}]}]}], "}"}], ",", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"newFcn", "[", "i_", "]"}], ":=", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"monitor", "=", "i"}], ";", 
+           RowBox[{"function", "[", 
+            RowBox[{"list", "[", 
+             RowBox[{"[", "i", "]"}], "]"}], "]"}]}], ")"}]}], ";", 
+        RowBox[{"Monitor", "[", 
+         RowBox[{
+          RowBox[{"Map", "[", 
+           RowBox[{"newFcn", ",", 
+            RowBox[{"Range", "[", "len", "]"}]}], "]"}], ",", 
+          RowBox[{"(", 
+           RowBox[{"Column", "[", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"ProgressIndicator", "[", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"(", 
+                   RowBox[{"monitor", "-", "1"}], ")"}], "/", "len"}], ",", 
+                 RowBox[{"ImageSize", "\[Rule]", 
+                  RowBox[{"{", 
+                   RowBox[{"1250", ",", "30"}], "}"}]}], ",", 
+                 RowBox[{"ImageMargins", "\[Rule]", "0"}], ",", 
+                 RowBox[{"BaselinePosition", "\[Rule]", "Center"}]}], "]"}], 
+               ",", 
+               RowBox[{"If", "[", 
+                RowBox[{
+                 RowBox[{"monitor", "\[GreaterEqual]", "1"}], ",", 
+                 RowBox[{"Row", "[", 
+                  RowBox[{"{", 
+                   RowBox[{
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    RowBox[{"monitor", ">", "1"}], ",", 
+                    RowBox[{"Row", "[", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"niceTime", "[", 
+                    RowBox[{"Round", "[", 
+                    RowBox[{
+                    RowBox[{"AbsoluteTime", "[", "]"}], "-", "t00"}], "]"}], 
+                    "]"}], ",", "\"\< so far; approx. \>\"", ",", 
+                    RowBox[{"niceTime", "[", 
+                    RowBox[{"Round", "[", 
+                    RowBox[{
+                    RowBox[{"(", 
+                    RowBox[{
+                    RowBox[{"(", 
+                    RowBox[{
+                    RowBox[{"AbsoluteTime", "[", "]"}], "-", "t00"}], ")"}], 
+                    "/", 
+                    RowBox[{"(", 
+                    RowBox[{"monitor", "-", "1"}], ")"}]}], ")"}], "*", 
+                    RowBox[{"(", 
+                    RowBox[{"len", "-", "monitor", "+", "1"}], ")"}]}], "]"}],
+                     "]"}], ",", "\"\< remaining.\>\""}], "}"}], "]"}], ",", 
+                    "\"\<                                              \
+\>\""}], "]"}], ",", "\"\< (\>\"", ",", 
+                    RowBox[{"monitor", "-", "1"}], ",", "\"\</\>\"", ",", 
+                    "len", ",", "\"\<)\>\""}], "}"}], "]"}], ",", 
+                 "\"\<\>\""}], "]"}]}], "}"}], ",", 
+             RowBox[{"Alignment", "\[Rule]", "Left"}], ",", 
+             RowBox[{"Spacings", "\[Rule]", "0.1"}]}], "]"}], ")"}]}], 
+         "]"}]}]}], "]"}], ",", 
+     RowBox[{"Map", "[", 
+      RowBox[{"function", ",", "list"}], "]"}]}], "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"littleGroup", "[", "graph_", "]"}], ":=", 
+   RowBox[{"Block", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"num", "=", 
+        RowBox[{"Numerator", "[", "graph", "]"}]}], ",", 
+       RowBox[{"den", "=", 
+        RowBox[{"Denominator", "[", "graph", "]"}]}]}], "}"}], ",", 
+     RowBox[{
+      RowBox[{"num", "=", 
+       RowBox[{"Join", "@@", 
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"Function", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"y", ",", "z"}], "}"}], ",", 
+            RowBox[{
+             RowBox[{"y", "&"}], "/@", 
+             RowBox[{"Range", "[", "z", "]"}]}]}], "]"}], "@@@", 
+          RowBox[{
+           RowBox[{"FactorList", "[", "num", "]"}], "[", 
+           RowBox[{"[", 
+            RowBox[{"2", ";;", 
+             RowBox[{"-", "1"}]}], "]"}], "]"}]}], ")"}]}]}], ";", 
+      RowBox[{"den", "=", 
+       RowBox[{"Join", "@@", 
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"Function", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"y", ",", "z"}], "}"}], ",", 
+            RowBox[{
+             RowBox[{"y", "&"}], "/@", 
+             RowBox[{"Range", "[", "z", "]"}]}]}], "]"}], "@@@", 
+          RowBox[{
+           RowBox[{"FactorList", "[", "den", "]"}], "[", 
+           RowBox[{"[", 
+            RowBox[{"2", ";;", 
+             RowBox[{"-", "1"}]}], "]"}], "]"}]}], ")"}]}]}], ";", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"-", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"Count", "[", 
+            RowBox[{"num", ",", "#", ",", 
+             RowBox[{"{", 
+              RowBox[{"0", ",", "\[Infinity]"}], "}"}]}], "]"}], "-", 
+           RowBox[{"Count", "[", 
+            RowBox[{"den", ",", "#", ",", 
+             RowBox[{"{", 
+              RowBox[{"0", ",", "\[Infinity]"}], "}"}]}], "]"}]}], ")"}]}], 
+        "&"}], "/@", 
+       RowBox[{"Sort", "[", 
+        RowBox[{"DeleteDuplicates", "[", 
+         RowBox[{"Flatten", "[", 
+          RowBox[{"List", "@@@", 
+           RowBox[{"Cases", "[", 
+            RowBox[{"graph", ",", "_x", ",", 
+             RowBox[{"{", 
+              RowBox[{"0", ",", "\[Infinity]"}], "}"}]}], "]"}]}], "]"}], 
+         "]"}], "]"}]}]}]}], "]"}]}], ";"}]}], "Code",
+ InitializationCell->False,
+ CellChangeTimes->{{3.677315225458961*^9, 3.677315244790854*^9}, 
+   3.677391434326429*^9, {3.6777505125290537`*^9, 3.677750513309366*^9}, {
+   3.678611449440639*^9, 3.678611450283798*^9}, {3.678944277602825*^9, 
+   3.678944293076913*^9}, {3.678956677810173*^9, 3.678956678169677*^9}, {
+   3.678957304673132*^9, 3.678957339441195*^9}, {3.6789680977856827`*^9, 
+   3.678968107502527*^9}, {3.679039588430431*^9, 3.679039589338649*^9}, {
+   3.679043810299493*^9, 3.6790438112437897`*^9}, {3.680075643300172*^9, 
+   3.6800756435856237`*^9}, 3.680504573701972*^9, {3.680585495070661*^9, 
+   3.680585511119328*^9}, {3.681820956937718*^9, 3.681820963463985*^9}, {
+   3.6818209984771023`*^9, 3.681821027739057*^9}, {3.681823691088591*^9, 
+   3.681823691379702*^9}, {3.6818290876043377`*^9, 3.6818291038637*^9}, 
+   3.6818294914725246`*^9, 3.681830107536461*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Basic Data Functions", "Section",
+ CellChangeTimes->{{3.681829504531954*^9, 3.681829507283875*^9}, {
+  3.681829628198319*^9, 3.681829629518283*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"planarGraphDials", "[", "loop_", "]"}], ":=", 
+   RowBox[{"Block", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"fileName", "=", 
+       RowBox[{"FileNameJoin", "[", 
+        RowBox[{"{", 
+         RowBox[{"fourPointDataDir", ",", 
+          RowBox[{"(", 
+           RowBox[{"(", 
+            RowBox[{"\"\<fGraph_dials_\>\"", "<>", 
+             RowBox[{"ToString", "[", "loop", "]"}], "<>", "\"\<.tex\>\""}], 
+            ")"}], ")"}]}], "}"}], "]"}]}], "}"}], ",", 
+     RowBox[{"If", "[", 
+      RowBox[{
+       RowBox[{"FileExistsQ", "[", "fileName", "]"}], ",", 
+       RowBox[{"Set", "[", 
+        RowBox[{
+         RowBox[{"planarGraphDials", "[", "loop", "]"}], ",", 
+         RowBox[{"ReadList", "[", "fileName", "]"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"{", "}"}], "}"}]}], "]"}]}], "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"planarGraphEdges", "[", "loop_", "]"}], ":=", 
+   RowBox[{"Block", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"fileName", "=", 
+        RowBox[{"FileNameJoin", "[", 
+         RowBox[{"{", 
+          RowBox[{"fourPointDataDir", ",", 
+           RowBox[{"(", 
+            RowBox[{"(", 
+             RowBox[{"\"\<fGraph_edges_\>\"", "<>", 
+              RowBox[{"ToString", "[", "loop", "]"}], "<>", "\"\<.tex\>\""}], 
+             ")"}], ")"}]}], "}"}], "]"}]}], ",", "raw", ",", "rule"}], "}"}],
+      ",", 
+     RowBox[{"If", "[", 
+      RowBox[{
+       RowBox[{"FileExistsQ", "[", "fileName", "]"}], ",", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"raw", "=", 
+          RowBox[{"ReadList", "[", "fileName", "]"}]}], ";", 
+         RowBox[{"rule", "=", 
+          RowBox[{"Thread", "[", 
+           RowBox[{"Rule", "[", 
+            RowBox[{
+             RowBox[{"Range", "[", 
+              RowBox[{"Binomial", "[", 
+               RowBox[{
+                RowBox[{"4", "+", "loop"}], ",", "2"}], "]"}], "]"}], ",", 
+             RowBox[{"Subsets", "[", 
+              RowBox[{
+               RowBox[{"Range", "[", 
+                RowBox[{"4", "+", "loop"}], "]"}], ",", 
+               RowBox[{"{", "2", "}"}]}], "]"}]}], "]"}], "]"}]}], ";", 
+         RowBox[{"Set", "[", 
+          RowBox[{
+           RowBox[{"planarGraphEdges", "[", "loop", "]"}], ",", 
+           RowBox[{"(", 
+            RowBox[{"raw", "/.", "rule"}], ")"}]}], "]"}]}], ")"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"{", "}"}], "}"}]}], "]"}]}], "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"fGraphNums", "[", "loop_", "]"}], ":=", 
+   RowBox[{"Block", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"fileName", "=", 
+        RowBox[{"FileNameJoin", "[", 
+         RowBox[{"{", 
+          RowBox[{"fourPointDataDir", ",", 
+           RowBox[{"(", 
+            RowBox[{"\"\<fGraph_nums_\>\"", "<>", 
+             RowBox[{"ToString", "[", "loop", "]"}], "<>", "\"\<.tex\>\""}], 
+            ")"}]}], "}"}], "]"}]}], ",", "raw", ",", "rule"}], "}"}], ",", 
+     RowBox[{"If", "[", 
+      RowBox[{
+       RowBox[{"FileExistsQ", "[", "fileName", "]"}], ",", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"raw", "=", 
+          RowBox[{"ReadList", "[", "fileName", "]"}]}], ";", 
+         RowBox[{"rule", "=", 
+          RowBox[{"Thread", "[", 
+           RowBox[{"Rule", "[", 
+            RowBox[{
+             RowBox[{"Range", "[", 
+              RowBox[{"Binomial", "[", 
+               RowBox[{
+                RowBox[{"4", "+", "loop"}], ",", "2"}], "]"}], "]"}], ",", 
+             RowBox[{"Subsets", "[", 
+              RowBox[{
+               RowBox[{"Range", "[", 
+                RowBox[{"4", "+", "loop"}], "]"}], ",", 
+               RowBox[{"{", "2", "}"}]}], "]"}]}], "]"}], "]"}]}], ";", 
+         RowBox[{"raw", "=", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"Times", "@@@", "#"}], "&"}], "/@", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{
+               RowBox[{
+                RowBox[{"x", "@@@", "#"}], "&"}], "/@", "#"}], "&"}], "/@", 
+             RowBox[{"(", 
+              RowBox[{"raw", "/.", "rule"}], ")"}]}], ")"}]}]}], ";", 
+         RowBox[{"Set", "[", 
+          RowBox[{
+           RowBox[{"fGraphNums", "[", "loop", "]"}], ",", "raw"}], "]"}]}], 
+        ")"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"{", "}"}], "}"}]}], "]"}]}], "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"fGraphList", "[", "loop_", "]"}], ":=", 
+    RowBox[{"If", "[", 
+     RowBox[{
+      RowBox[{"FileExistsQ", "[", 
+       RowBox[{"FileNameJoin", "[", 
+        RowBox[{"{", 
+         RowBox[{"fourPointDataDir", ",", 
+          RowBox[{"(", 
+           RowBox[{"\"\<fGraph_nums_\>\"", "<>", 
+            RowBox[{"ToString", "[", "loop", "]"}], "<>", "\"\<.tex\>\""}], 
+           ")"}]}], "}"}], "]"}], "]"}], ",", 
+      RowBox[{"Set", "[", 
+       RowBox[{
+        RowBox[{"fGraphList", "[", "loop", "]"}], ",", 
+        RowBox[{"(", 
+         RowBox[{"Join", "@@", 
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"fGraphNums", "[", "loop", "]"}], 
+            RowBox[{"(", 
+             RowBox[{"1", "/", 
+              RowBox[{"(", 
+               RowBox[{"Times", "@@@", 
+                RowBox[{"(", 
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{"x", "@@@", "#"}], "&"}], "/@", 
+                  RowBox[{"planarGraphEdges", "[", "loop", "]"}]}], ")"}]}], 
+               ")"}]}], ")"}]}], ")"}]}], ")"}]}], "]"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"{", "}"}], "}"}]}], "]"}]}], ";"}], "\n"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"amplitudeCoefficients", "[", "loop_", "]"}], ":=", 
+   RowBox[{"Block", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"fileName", "=", 
+       RowBox[{"FileNameJoin", "[", 
+        RowBox[{"{", 
+         RowBox[{"fourPointDataDir", ",", 
+          RowBox[{"(", 
+           RowBox[{"(", 
+            RowBox[{"\"\<amplitudeCoefficients_\>\"", "<>", 
+             RowBox[{"ToString", "[", "loop", "]"}], "<>", "\"\<.tex\>\""}], 
+            ")"}], ")"}]}], "}"}], "]"}]}], "}"}], ",", 
+     RowBox[{"If", "[", 
+      RowBox[{
+       RowBox[{"FileExistsQ", "[", "fileName", "]"}], ",", 
+       RowBox[{"Set", "[", 
+        RowBox[{
+         RowBox[{"amplitudeCoefficients", "[", "loop", "]"}], ",", 
+         RowBox[{"(", 
+          RowBox[{"<<", 
+           RowBox[{"(", "fileName", ")"}]}], ")"}]}], "]"}], ",", 
+       RowBox[{"{", "}"}]}], "]"}]}], "]"}]}], ";"}]}], "Code",
+ InitializationCell->False,
+ CellChangeTimes->{{3.677315225458961*^9, 3.677315244790854*^9}, 
+   3.677391434326429*^9, {3.6777505125290537`*^9, 3.677750513309366*^9}, {
+   3.678611449440639*^9, 3.678611450283798*^9}, {3.678944277602825*^9, 
+   3.678944293076913*^9}, {3.678956677810173*^9, 3.678956678169677*^9}, {
+   3.678957304673132*^9, 3.678957339441195*^9}, {3.6789680977856827`*^9, 
+   3.678968107502527*^9}, {3.679039588430431*^9, 3.679039589338649*^9}, {
+   3.679043810299493*^9, 3.6790438112437897`*^9}, {3.680075643300172*^9, 
+   3.6800756435856237`*^9}, 3.680504573701972*^9, {3.680585495070661*^9, 
+   3.680585511119328*^9}, {3.681820956937718*^9, 3.681820963463985*^9}, {
+   3.6818209984771023`*^9, 3.681821027739057*^9}, {3.681823691088591*^9, 
+   3.681823691379702*^9}, {3.6818290876043377`*^9, 3.6818291038637*^9}, {
+   3.681829253684263*^9, 3.681829254681932*^9}, {3.681829295792912*^9, 
+   3.681829297540175*^9}, {3.6818294873931017`*^9, 3.6818294879738083`*^9}, 
+   3.681829545697706*^9, {3.681829611290778*^9, 3.681829612240788*^9}, {
+   3.6818297222599573`*^9, 3.6818297253230658`*^9}, {3.681829823230369*^9, 
+   3.681829829826683*^9}, 3.6818300658279457`*^9, {3.681830099168335*^9, 
+   3.681830110415265*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Graph Analysis", "Section",
+ CellChangeTimes->{{3.681829632358218*^9, 3.6818296344702263`*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"graphIsomorphisms", "[", "fcnList__", "]"}], "/;", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"Length", "[", 
+       RowBox[{"{", "fcnList", "}"}], "]"}], "\[Equal]", "2"}], ")"}]}], ":=", 
+   RowBox[{"Block", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"factors", "=", 
+        RowBox[{"{", "fcnList", "}"}]}], ",", "isoList", ",", "bases", ",", 
+       "nums", ",", 
+       RowBox[{"baseLabels", "=", 
+        RowBox[{"DeleteDuplicates", "[", 
+         RowBox[{"Cases", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"{", "fcnList", "}"}], "[", 
+            RowBox[{"[", "1", "]"}], "]"}], ",", 
+           RowBox[{
+            RowBox[{"x", "[", "y__", "]"}], "\[RuleDelayed]", "y"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"0", ",", "\[Infinity]"}], "}"}]}], "]"}], "]"}]}]}], 
+      "}"}], ",", 
+     RowBox[{"If", "[", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"Length", "[", 
+         RowBox[{"DeleteDuplicates", "[", "factors", "]"}], "]"}], "\[Equal]",
+         "1"}], ",", 
+       RowBox[{"(", 
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"bases", "=", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"Function", "[", 
+              RowBox[{
+               RowBox[{"{", "q", "}"}], ",", 
+               RowBox[{"List", "@@@", 
+                RowBox[{"DeleteDuplicates", "[", 
+                 RowBox[{"Cases", "[", 
+                  RowBox[{
+                   RowBox[{"Denominator", "[", "q", "]"}], ",", 
+                   RowBox[{"x", "[", "y__", "]"}], ",", 
+                   RowBox[{"{", 
+                    RowBox[{"0", ",", "\[Infinity]"}], "}"}]}], "]"}], 
+                 "]"}]}]}], "]"}], "/@", "factors"}], ")"}]}], ";", 
+          RowBox[{"nums", "=", 
+           RowBox[{"(", 
+            RowBox[{"factors", "*", 
+             RowBox[{"(", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"(", 
+                 RowBox[{"Times", "@@", 
+                  RowBox[{"(", 
+                   RowBox[{"x", "@@@", "#"}], ")"}]}], ")"}], "&"}], "/@", 
+               "bases"}], ")"}]}], ")"}]}], ";", 
+          RowBox[{"bases", "=", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"Graph", "[", 
+              RowBox[{"UndirectedEdge", "@@@", "#"}], "]"}], "&"}], "/@", 
+            "bases"}]}], ";", 
+          RowBox[{"isoList", "=", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"FindGraphIsomorphism", "[", 
+               RowBox[{"#1", ",", "#2", ",", "All"}], "]"}], "&"}], "@@", 
+             "bases"}], ")"}]}], ";", 
+          RowBox[{"If", "[", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"Length", "[", "isoList", "]"}], "\[Equal]", "0"}], ",", 
+            
+            RowBox[{"{", "}"}], ",", 
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{"isoList", "=", 
+               RowBox[{"(", 
+                RowBox[{
+                 RowBox[{"Function", "[", 
+                  RowBox[{
+                   RowBox[{"{", "iso", "}"}], ",", 
+                   RowBox[{"Thread", "[", 
+                    RowBox[{"Rule", "@@", 
+                    RowBox[{"(", 
+                    RowBox[{"baseLabels", "/.", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"{", "}"}], ",", "iso"}], "}"}]}], ")"}]}], 
+                    "]"}]}], "]"}], "/@", "isoList"}], ")"}]}], ";", 
+              RowBox[{"isoList", "=", 
+               RowBox[{"Select", "[", 
+                RowBox[{"isoList", ",", 
+                 RowBox[{
+                  RowBox[{"SameQ", "[", 
+                   RowBox[{
+                    RowBox[{"nums", "[", 
+                    RowBox[{"[", "2", "]"}], "]"}], ",", 
+                    RowBox[{"(", 
+                    RowBox[{
+                    RowBox[{"nums", "[", 
+                    RowBox[{"[", "1", "]"}], "]"}], "/.", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"x", "[", "y__", "]"}], "\[RuleDelayed]", 
+                    RowBox[{"(", 
+                    RowBox[{"x", "@@", 
+                    RowBox[{"Sort", "[", 
+                    RowBox[{
+                    RowBox[{"{", "y", "}"}], "/.", "#"}], "]"}]}], ")"}]}], 
+                    "}"}]}], ")"}]}], "]"}], "&"}]}], "]"}]}]}], ")"}]}], 
+           "]"}]}], ")"}], ")"}], ",", 
+       RowBox[{"(", 
+        RowBox[{"Which", "[", 
+         RowBox[{
+          RowBox[{"Not", "[", 
+           RowBox[{"SameQ", "@@", 
+            RowBox[{"(", 
+             RowBox[{"LeafCount", "/@", "factors"}], ")"}]}], "]"}], ",", 
+          RowBox[{"{", "}"}], ",", "True", ",", 
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"bases", "=", 
+             RowBox[{"(", 
+              RowBox[{
+               RowBox[{"Function", "[", 
+                RowBox[{
+                 RowBox[{"{", "q", "}"}], ",", 
+                 RowBox[{"List", "@@@", 
+                  RowBox[{"DeleteDuplicates", "[", 
+                   RowBox[{"Cases", "[", 
+                    RowBox[{
+                    RowBox[{"Denominator", "[", "q", "]"}], ",", 
+                    RowBox[{"x", "[", "y__", "]"}], ",", 
+                    RowBox[{"{", 
+                    RowBox[{"0", ",", "\[Infinity]"}], "}"}]}], "]"}], 
+                   "]"}]}]}], "]"}], "/@", "factors"}], ")"}]}], ";", 
+            RowBox[{"nums", "=", 
+             RowBox[{"(", 
+              RowBox[{"factors", "*", 
+               RowBox[{"(", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"(", 
+                   RowBox[{"Times", "@@", 
+                    RowBox[{"(", 
+                    RowBox[{"x", "@@@", "#"}], ")"}]}], ")"}], "&"}], "/@", 
+                 "bases"}], ")"}]}], ")"}]}], ";", 
+            RowBox[{"bases", "=", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"Graph", "[", 
+                RowBox[{"UndirectedEdge", "@@@", "#"}], "]"}], "&"}], "/@", 
+              "bases"}]}], ";", 
+            RowBox[{"isoList", "=", 
+             RowBox[{"(", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"FindGraphIsomorphism", "[", 
+                 RowBox[{"#1", ",", "#2", ",", "All"}], "]"}], "&"}], "@@", 
+               "bases"}], ")"}]}], ";", 
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"Length", "[", "isoList", "]"}], "\[Equal]", "0"}], 
+              ",", 
+              RowBox[{"{", "}"}], ",", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{"isoList", "=", 
+                 RowBox[{"(", 
+                  RowBox[{
+                   RowBox[{"Function", "[", 
+                    RowBox[{
+                    RowBox[{"{", "iso", "}"}], ",", 
+                    RowBox[{"Thread", "[", 
+                    RowBox[{"Rule", "@@", 
+                    RowBox[{"(", 
+                    RowBox[{"baseLabels", "/.", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"{", "}"}], ",", "iso"}], "}"}]}], ")"}]}], 
+                    "]"}]}], "]"}], "/@", "isoList"}], ")"}]}], ";", 
+                RowBox[{"isoList", "=", 
+                 RowBox[{"Select", "[", 
+                  RowBox[{"isoList", ",", 
+                   RowBox[{
+                    RowBox[{"SameQ", "[", 
+                    RowBox[{
+                    RowBox[{"nums", "[", 
+                    RowBox[{"[", "2", "]"}], "]"}], ",", 
+                    RowBox[{"(", 
+                    RowBox[{
+                    RowBox[{"nums", "[", 
+                    RowBox[{"[", "1", "]"}], "]"}], "/.", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"x", "[", "y__", "]"}], "\[RuleDelayed]", 
+                    RowBox[{"(", 
+                    RowBox[{"x", "@@", 
+                    RowBox[{"Sort", "[", 
+                    RowBox[{
+                    RowBox[{"{", "y", "}"}], "/.", "#"}], "]"}]}], ")"}]}], 
+                    "}"}]}], ")"}]}], "]"}], "&"}]}], "]"}]}]}], ")"}]}], 
+             "]"}]}], ")"}]}], "]"}], ")"}]}], "]"}]}], "]"}]}], 
+  ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"graphIsomorphism", "[", "fcnList__", "]"}], "/;", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"Length", "[", 
+       RowBox[{"{", "fcnList", "}"}], "]"}], "\[Equal]", "2"}], ")"}]}], ":=", 
+   RowBox[{"Block", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"factors", "=", 
+        RowBox[{"{", "fcnList", "}"}]}], ",", "isoList", ",", "bases", ",", 
+       "nums", ",", 
+       RowBox[{"baseLabels", "=", 
+        RowBox[{"DeleteDuplicates", "[", 
+         RowBox[{"Cases", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"{", "fcnList", "}"}], "[", 
+            RowBox[{"[", "1", "]"}], "]"}], ",", 
+           RowBox[{
+            RowBox[{"x", "[", "y__", "]"}], "\[RuleDelayed]", "y"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"0", ",", "\[Infinity]"}], "}"}]}], "]"}], "]"}]}]}], 
+      "}"}], ",", 
+     RowBox[{"If", "[", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"Length", "[", 
+         RowBox[{"DeleteDuplicates", "[", "factors", "]"}], "]"}], "\[Equal]",
+         "1"}], ",", 
+       RowBox[{"Thread", "[", 
+        RowBox[{"Rule", "[", 
+         RowBox[{"baseLabels", ",", "baseLabels"}], "]"}], "]"}], ",", 
+       RowBox[{"(", 
+        RowBox[{"Which", "[", 
+         RowBox[{
+          RowBox[{"Not", "[", 
+           RowBox[{"SameQ", "@@", 
+            RowBox[{"(", 
+             RowBox[{"LeafCount", "/@", "factors"}], ")"}]}], "]"}], ",", 
+          RowBox[{"{", "}"}], ",", "True", ",", 
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"bases", "=", 
+             RowBox[{"(", 
+              RowBox[{
+               RowBox[{"Function", "[", 
+                RowBox[{
+                 RowBox[{"{", "q", "}"}], ",", 
+                 RowBox[{"List", "@@@", 
+                  RowBox[{"DeleteDuplicates", "[", 
+                   RowBox[{"Cases", "[", 
+                    RowBox[{
+                    RowBox[{"Denominator", "[", "q", "]"}], ",", 
+                    RowBox[{"x", "[", "y__", "]"}], ",", 
+                    RowBox[{"{", 
+                    RowBox[{"0", ",", "\[Infinity]"}], "}"}]}], "]"}], 
+                   "]"}]}]}], "]"}], "/@", "factors"}], ")"}]}], ";", 
+            RowBox[{"nums", "=", 
+             RowBox[{"(", 
+              RowBox[{"factors", "*", 
+               RowBox[{"(", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"(", 
+                   RowBox[{"Times", "@@", 
+                    RowBox[{"(", 
+                    RowBox[{"x", "@@@", "#"}], ")"}]}], ")"}], "&"}], "/@", 
+                 "bases"}], ")"}]}], ")"}]}], ";", 
+            RowBox[{"bases", "=", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"Graph", "[", 
+                RowBox[{"UndirectedEdge", "@@@", "#"}], "]"}], "&"}], "/@", 
+              "bases"}]}], ";", 
+            RowBox[{"isoList", "=", 
+             RowBox[{"(", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"FindGraphIsomorphism", "[", 
+                 RowBox[{"#1", ",", "#2", ",", "All"}], "]"}], "&"}], "@@", 
+               "bases"}], ")"}]}], ";", 
+            RowBox[{"If", "[", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"Length", "[", "isoList", "]"}], "\[Equal]", "0"}], 
+              ",", 
+              RowBox[{"{", "}"}], ",", 
+              RowBox[{"(", 
+               RowBox[{
+                RowBox[{"isoList", "=", 
+                 RowBox[{"(", 
+                  RowBox[{
+                   RowBox[{"Function", "[", 
+                    RowBox[{
+                    RowBox[{"{", "iso", "}"}], ",", 
+                    RowBox[{"Thread", "[", 
+                    RowBox[{"Rule", "@@", 
+                    RowBox[{"(", 
+                    RowBox[{"baseLabels", "/.", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"{", "}"}], ",", "iso"}], "}"}]}], ")"}]}], 
+                    "]"}]}], "]"}], "/@", "isoList"}], ")"}]}], ";", 
+                RowBox[{"isoList", "=", 
+                 RowBox[{"Select", "[", 
+                  RowBox[{"isoList", ",", 
+                   RowBox[{
+                    RowBox[{"SameQ", "[", 
+                    RowBox[{
+                    RowBox[{"nums", "[", 
+                    RowBox[{"[", "2", "]"}], "]"}], ",", 
+                    RowBox[{"(", 
+                    RowBox[{
+                    RowBox[{"nums", "[", 
+                    RowBox[{"[", "1", "]"}], "]"}], "/.", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"x", "[", "y__", "]"}], "\[RuleDelayed]", 
+                    RowBox[{"(", 
+                    RowBox[{"x", "@@", 
+                    RowBox[{"Sort", "[", 
+                    RowBox[{
+                    RowBox[{"{", "y", "}"}], "/.", "#"}], "]"}]}], ")"}]}], 
+                    "}"}]}], ")"}]}], "]"}], "&"}], ",", "1"}], "]"}]}]}], 
+               ")"}]}], "]"}]}], ")"}]}], "]"}], ")"}]}], "]"}]}], "]"}]}], 
+  ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"graphEquivalentQ", "[", "fcnList__", "]"}], "/;", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"Length", "[", 
+       RowBox[{"{", "fcnList", "}"}], "]"}], "\[Equal]", "2"}], ")"}]}], ":=", 
+   RowBox[{"Not", "[", 
+    RowBox[{
+     RowBox[{"graphIsomorphism", "[", "fcnList", "]"}], "===", 
+     RowBox[{"{", "}"}]}], "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"distinctGraphs", "[", "seedList_", "]"}], ":=", 
+   RowBox[{"DeleteDuplicates", "[", 
+    RowBox[{"seedList", ",", "graphEquivalentQ"}], "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"graphAutomorphisms", "[", "graph_", "]"}], ":=", 
+   RowBox[{"graphIsomorphisms", "[", 
+    RowBox[{"graph", ",", "graph"}], "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"graphSymmetryFactor", "[", "graph_", "]"}], ":=", 
+   RowBox[{"Length", "[", 
+    RowBox[{"graphAutomorphisms", "[", "graph", "]"}], "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"canonicalizeGraph", "[", "graph_", "]"}], ":=", 
+    RowBox[{"Block", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"baseEdges", "=", 
+         RowBox[{"List", "@@@", 
+          RowBox[{"DeleteDuplicates", "[", 
+           RowBox[{"Cases", "[", 
+            RowBox[{
+             RowBox[{"Denominator", "[", "graph", "]"}], ",", 
+             RowBox[{"x", "[", "y__", "]"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"0", ",", "\[Infinity]"}], "}"}]}], "]"}], "]"}]}]}], 
+        ",", "baseLabels", ",", "baseGraph", ",", "auto"}], "}"}], ",", 
+      RowBox[{
+       RowBox[{"baseLabels", "=", 
+        RowBox[{"DeleteDuplicates", "[", 
+         RowBox[{"Flatten", "[", "baseEdges", "]"}], "]"}]}], ";", 
+       RowBox[{"baseGraph", "=", 
+        RowBox[{"Graph", "[", 
+         RowBox[{"UndirectedEdge", "@@@", "baseEdges"}], "]"}]}], ";", 
+       RowBox[{"auto", "=", 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"Function", "[", 
+            RowBox[{
+             RowBox[{"{", "iso", "}"}], ",", 
+             RowBox[{"Thread", "[", 
+              RowBox[{"Rule", "@@", 
+               RowBox[{"(", 
+                RowBox[{"baseLabels", "/.", 
+                 RowBox[{"{", 
+                  RowBox[{
+                   RowBox[{"{", "}"}], ",", "iso"}], "}"}]}], ")"}]}], 
+              "]"}]}], "]"}], "/@", 
+           RowBox[{"FindGraphIsomorphism", "[", 
+            RowBox[{"baseGraph", ",", 
+             RowBox[{"CanonicalGraph", "[", "baseGraph", "]"}]}], "]"}]}], 
+          ")"}], "[", 
+         RowBox[{"[", "1", "]"}], "]"}]}], ";", 
+       RowBox[{"graph", "/.", 
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"x", "[", "q__", "]"}], "\[RuleDelayed]", 
+          RowBox[{"x", "@@", 
+           RowBox[{"(", 
+            RowBox[{"Sort", "[", 
+             RowBox[{
+              RowBox[{"{", "q", "}"}], "/.", "auto"}], "]"}], ")"}]}]}], 
+         "}"}]}]}]}], "]"}]}], ";"}], "\n"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"orderedVertsToFaces", "[", "dialList_", "]"}], ":=", 
+   RowBox[{"Block", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"edgeRules", ",", "fullEdgeList"}], "}"}], ",", 
+     RowBox[{
+      RowBox[{"edgeRules", "=", 
+       RowBox[{"Join", "@@", 
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{
+             RowBox[{"Rule", "[", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{"#1", ",", "j"}], "}"}], ",", 
+               RowBox[{"{", 
+                RowBox[{"j", ",", "#2"}], "}"}]}], "]"}], "&"}], "@@@", 
+            RowBox[{"Partition", "[", 
+             RowBox[{
+              RowBox[{"dialList", "[", 
+               RowBox[{"[", "j", "]"}], "]"}], ",", "2", ",", "1", ",", "1"}],
+              "]"}]}], ")"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"j", ",", 
+            RowBox[{"Length", "[", "dialList", "]"}]}], "}"}]}], "]"}]}]}], 
+      ";", 
+      RowBox[{"fullEdgeList", "=", 
+       RowBox[{"edgeRules", "[", 
+        RowBox[{"[", 
+         RowBox[{"All", ",", "1"}], "]"}], "]"}]}], ";", 
+      RowBox[{"Sort", "@", 
+       RowBox[{"DeleteDuplicates", "[", 
+        RowBox[{
+         RowBox[{"Function", "[", 
+          RowBox[{
+           RowBox[{"{", "start", "}"}], ",", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"Function", "[", 
+              RowBox[{
+               RowBox[{"{", "term", "}"}], ",", 
+               RowBox[{
+                RowBox[{"Sort", "[", 
+                 RowBox[{"Partition", "[", 
+                  RowBox[{
+                   RowBox[{"Reverse", "@", "term"}], ",", 
+                   RowBox[{"Length", "[", "term", "]"}], ",", "1", ",", "1"}],
+                   "]"}], "]"}], "[", 
+                RowBox[{"[", "1", "]"}], "]"}]}], "]"}], "@", 
+             RowBox[{"DeleteDuplicates", "[", 
+              RowBox[{"Join", "@@", 
+               RowBox[{"NestWhile", "[", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"Append", "[", 
+                   RowBox[{"#", ",", 
+                    RowBox[{"(", 
+                    RowBox[{
+                    RowBox[{"#", "[", 
+                    RowBox[{"[", 
+                    RowBox[{"-", "1"}], "]"}], "]"}], "/.", "edgeRules"}], 
+                    ")"}]}], "]"}], "&"}], ",", 
+                 RowBox[{"{", "start", "}"}], ",", 
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{"Length", "[", 
+                    RowBox[{"DeleteDuplicates", "[", "#", "]"}], "]"}], 
+                   "\[Equal]", 
+                   RowBox[{"Length", "[", "#", "]"}]}], "&"}]}], "]"}]}], 
+              "]"}]}], ")"}]}], "]"}], "/@", "fullEdgeList"}], "]"}]}]}]}], 
+    "]"}]}], ";"}]}], "Code",
+ InitializationCell->False,
+ CellChangeTimes->{{3.677315225458961*^9, 3.677315244790854*^9}, 
+   3.677391434326429*^9, {3.6777505125290537`*^9, 3.677750513309366*^9}, {
+   3.678611449440639*^9, 3.678611450283798*^9}, {3.678944277602825*^9, 
+   3.678944293076913*^9}, {3.678956677810173*^9, 3.678956678169677*^9}, {
+   3.678957304673132*^9, 3.678957339441195*^9}, {3.6789680977856827`*^9, 
+   3.678968107502527*^9}, {3.679039588430431*^9, 3.679039589338649*^9}, {
+   3.679043810299493*^9, 3.6790438112437897`*^9}, {3.680075643300172*^9, 
+   3.6800756435856237`*^9}, 3.680504573701972*^9, {3.680585495070661*^9, 
+   3.680585511119328*^9}, {3.681820956937718*^9, 3.681820963463985*^9}, {
+   3.6818209984771023`*^9, 3.681821027739057*^9}, {3.681823691088591*^9, 
+   3.681823691379702*^9}, {3.6818290876043377`*^9, 3.681829098024617*^9}, {
+   3.681829639692747*^9, 3.681829682109028*^9}}]
+}, Open  ]]
+},
+WindowSize->{808, 911},
+WindowMargins->{{428, Automatic}, {Automatic, 45}},
+FrontEndVersion->"10.1 for Mac OS X x86 (32-bit, 64-bit Kernel) (March 23, \
+2015)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 163, 2, 64, "Section"],
+Cell[746, 26, 9948, 252, 130, "Code",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[10731, 283, 154, 2, 64, "Section"],
+Cell[10888, 287, 7789, 198, 130, "Code",
+ InitializationCell->False]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[18714, 490, 101, 1, 64, "Section"],
+Cell[18818, 493, 19996, 513, 178, "Code",
+ InitializationCell->False]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
