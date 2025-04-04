@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[    315563,       6812]
-NotebookOptionsPosition[    308210,       6681]
-NotebookOutlinePosition[    308634,       6698]
-CellTagsIndexPosition[    308591,       6695]
+NotebookDataLength[    324637,       7062]
+NotebookOptionsPosition[    316859,       6925]
+NotebookOutlinePosition[    317283,       6942]
+CellTagsIndexPosition[    317240,       6939]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -6589,7 +6589,7 @@ Cell[BoxData["\<\"graph_walks_7.csv\"\>"], "Output",
  CellLabel->
   "Out[166]=",ExpressionUUID->"acdfd487-014b-4609-8ee6-4bf4e5291a49"]
 }, Open  ]]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -6676,6 +6676,250 @@ Cell[BoxData["220"], "Output",
  CellChangeTimes->{3.9527455511616583`*^9},
  CellLabel->"Out[74]=",ExpressionUUID->"0e4c6c7a-aae0-495e-b1a4-42a97e20dcfa"]
 }, Open  ]]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Visualization", "Section",ExpressionUUID->"f663ae12-8995-49c9-a24d-a31dde5478f4"],
+
+Cell[BoxData[{
+ RowBox[{"SetAttributes", "[", 
+  RowBox[{"ExpToGraph", ",", "Listable"}], "]"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"ExpToGraph", "[", "0", "]"}], "=", 
+   RowBox[{"Graph", "[", 
+    RowBox[{"{", "}"}], "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"ExpToGraph", "[", "exp_", "]"}], ":=", " ", 
+  RowBox[{"Module", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"num", ",", "den", ",", "temp"}], "}"}], ",", "\n", 
+    RowBox[{
+     RowBox[{"den", "=", 
+      RowBox[{"UndirectedEdge", "@@@", 
+       RowBox[{"ProdToList", "[", 
+        RowBox[{"Denominator", "[", "exp", "]"}], "]"}]}]}], ";", "\n", 
+     RowBox[{"num", "=", 
+      RowBox[{"UndirectedEdge", "@@@", 
+       RowBox[{"ProdToList", "[", 
+        RowBox[{"Numerator", "[", "exp", "]"}], "]"}]}]}], ";", "\n", 
+     RowBox[{"If", "[", 
+      RowBox[{
+       RowBox[{"num", "==", 
+        RowBox[{"{", "1", "}"}]}], ",", 
+       RowBox[{"Return", "[", 
+        RowBox[{"Graph", "[", 
+         RowBox[{"den", ",", 
+          RowBox[{"VertexLabels", "->", "\"\<Name\>\""}]}], "]"}], "]"}]}], 
+      "]"}], ";", "\n", 
+     RowBox[{"temp", "=", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"Rule", "[", 
+         RowBox[{"#", ",", "Dashed"}], "]"}], "&"}], "/@", "num"}]}], ";", 
+     "\n", 
+     RowBox[{"Graph", "[", 
+      RowBox[{
+       RowBox[{"Join", "[", 
+        RowBox[{"den", ",", "num"}], "]"}], ",", 
+       RowBox[{"VertexLabels", "->", "\"\<Name\>\""}], ",", 
+       RowBox[{"EdgeStyle", "->", "temp"}]}], "]"}]}]}], "\n", 
+   "]"}]}]}], "Code",
+ CellLabel->
+  "In[167]:=",ExpressionUUID->"e11fb07d-ce2f-4b73-b865-44fc0eeceb6e"],
+
+Cell[BoxData[{
+ RowBox[{"SetAttributes", "[", 
+  RowBox[{"ExpToFGraph", ",", "Listable"}], "]"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"ExpToFGraph", "[", "0", "]"}], "=", 
+   RowBox[{"Graph", "[", 
+    RowBox[{"{", "}"}], "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"ExpToFGraph", "[", 
+    RowBox[{"exp_", ",", 
+     RowBox[{"curv_", ":", "0.2"}]}], "]"}], ":=", " ", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+      "num", ",", "den", ",", "temp", ",", "temp2", ",", "coordinates"}], 
+      "}"}], ",", "\n", 
+     RowBox[{
+      RowBox[{"den", "=", 
+       RowBox[{"UndirectedEdge", "@@@", 
+        RowBox[{"ProdToList", "[", 
+         RowBox[{"Denominator", "[", "exp", "]"}], "]"}]}]}], ";", "\n", 
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"!", 
+         RowBox[{"PlanarGraphQ", "[", 
+          RowBox[{"Graph", "[", "den", "]"}], "]"}]}], ",", 
+        RowBox[{"Return", "[", "$Failed", "]"}]}], "]"}], ";", "\n", 
+      RowBox[{"num", "=", 
+       RowBox[{"UndirectedEdge", "@@@", 
+        RowBox[{"ProdToList", "[", 
+         RowBox[{"Numerator", "[", "exp", "]"}], "]"}]}]}], ";", "\n", 
+      RowBox[{"coordinates", "=", 
+       RowBox[{"GraphEmbedding", "[", 
+        RowBox[{"Graph", "[", 
+         RowBox[{"den", ",", 
+          RowBox[{"GraphLayout", "->", "\"\<TutteEmbedding\>\""}]}], "]"}], 
+        "]"}]}], ";", "\n", 
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"num", "==", 
+         RowBox[{"{", "1", "}"}]}], ",", 
+        RowBox[{"Return", "[", 
+         RowBox[{"Graph", "[", 
+          RowBox[{"den", ",", 
+           RowBox[{"VertexLabels", "->", "\"\<Name\>\""}], ",", 
+           RowBox[{"VertexCoordinates", "->", "coordinates"}]}], "]"}], 
+         "]"}]}], "]"}], ";", "\n", 
+      RowBox[{"temp", "=", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"Rule", "[", 
+          RowBox[{"#", ",", "Dashed"}], "]"}], "&"}], "/@", "num"}]}], ";", 
+      "\n", 
+      RowBox[{"temp2", "=", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"Rule", "[", 
+          RowBox[{"#", ",", 
+           RowBox[{"GraphElementData", "[", 
+            RowBox[{"{", 
+             RowBox[{"\"\<CurvedArc\>\"", ",", 
+              RowBox[{"\"\<Curvature\>\"", "->", 
+               RowBox[{"-", "curv"}]}]}], "}"}], "]"}]}], "]"}], "&"}], "/@", 
+        "num"}]}], ";", "\n", 
+      RowBox[{"Graph", "[", 
+       RowBox[{
+        RowBox[{"Join", "[", 
+         RowBox[{"den", ",", "num"}], "]"}], ",", 
+        RowBox[{"VertexLabels", "->", "\"\<Name\>\""}], ",", 
+        RowBox[{"EdgeShapeFunction", "->", " ", "temp2"}], ",", 
+        RowBox[{"EdgeStyle", "->", "temp"}], ",", " ", 
+        RowBox[{"VertexCoordinates", "->", "coordinates"}]}], "]"}]}]}], "\n",
+     "]"}]}], "\n"}], "\n"}], "Code",
+ CellLabel->
+  "In[170]:=",ExpressionUUID->"cbc591a9-9240-4084-a227-1279cbbe6264"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"ExpToDCI", "[", 
+   RowBox[{"exp_List", ",", 
+    RowBox[{"n_", ":", "4"}]}], "]"}], ":=", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"ExpToDCI", "[", 
+     RowBox[{"#", ",", "n"}], "]"}], "&"}], "/@", "exp"}]}], "\n", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"ExpToDCI", "[", 
+    RowBox[{"exp_Integer", ",", 
+     RowBox[{"n_", ":", "4"}]}], "]"}], "=", 
+   RowBox[{"Graph", "[", 
+    RowBox[{"{", "}"}], "]"}]}], ";"}], "\n", 
+ RowBox[{
+  RowBox[{"ExpToDCI", "[", 
+   RowBox[{"exp_Times", ",", 
+    RowBox[{"n_", ":", "4"}]}], "]"}], ":=", " ", 
+  RowBox[{"Block", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"num", ",", "den", ",", "temp", ",", "coordinates"}], "}"}], ",",
+     "\n", 
+    RowBox[{"(*", 
+     RowBox[{
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{
+         RowBox[{"Needs", "[", "\"\<IGraphM`\>\"", "]"}], "===", "$Failed"}], 
+        ",", " ", 
+        RowBox[{"Print", "[", "\"\<Install IGraphM\>\"", "]"}]}], "]"}], 
+      ";"}], "*)"}], "\n", 
+    RowBox[{
+     RowBox[{"den", "=", 
+      RowBox[{"UndirectedEdge", "@@@", 
+       RowBox[{"ProdToList", "[", 
+        RowBox[{
+         RowBox[{"Denominator", "[", "exp", "]"}], "/.", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"x", "[", 
+            RowBox[{"i_", ",", "j_"}], "]"}], "/;", 
+           RowBox[{"j", "<=", "n"}]}], "->", "1"}]}], "]"}]}]}], ";", "\n", 
+     RowBox[{"If", "[", 
+      RowBox[{
+       RowBox[{"!", 
+        RowBox[{"PlanarGraphQ", "[", 
+         RowBox[{"Graph", "[", "den", "]"}], "]"}]}], ",", 
+       RowBox[{"Return", "[", "$Failed", "]"}]}], "]"}], ";", "\n", "\n", 
+     RowBox[{"If", "[", 
+      RowBox[{
+       RowBox[{"SubsetQ", "[", 
+        RowBox[{"den", ",", 
+         RowBox[{"EdgeList", "@", " ", 
+          RowBox[{"CycleGraph", "[", "n", "]"}]}]}], "]"}], ",", "\n", 
+       RowBox[{"coordinates", "=", 
+        RowBox[{"GraphEmbedding", "[", 
+         RowBox[{"IGLayoutTutte", "[", 
+          RowBox[{
+           RowBox[{"Graph", "[", "den", "]"}], ",", 
+           RowBox[{"\"\<OuterFace\>\"", "->", 
+            RowBox[{"Range", "[", "n", "]"}]}]}], "]"}], "]"}]}], ",", "\n", 
+       RowBox[{
+        RowBox[{"coordinates", "=", 
+         RowBox[{"GraphEmbedding", "[", 
+          RowBox[{"IGLayoutTutte", "[", 
+           RowBox[{
+            RowBox[{"Graph", "[", 
+             RowBox[{"Join", "[", 
+              RowBox[{"den", ",", 
+               RowBox[{"EdgeList", "@", " ", 
+                RowBox[{"CycleGraph", "[", "n", "]"}]}]}], "]"}], "]"}], ",", 
+            
+            RowBox[{"\"\<OuterFace\>\"", "->", 
+             RowBox[{"Range", "[", "n", "]"}]}]}], "]"}], "]"}]}], ";"}]}], 
+      "\n", "]"}], ";", "\n", "\n", 
+     RowBox[{"If", "[", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"Numerator", "[", "exp", "]"}], "===", "1"}], ",", " ", "\n", 
+       
+       RowBox[{"Return", "[", 
+        RowBox[{"Graph", "[", 
+         RowBox[{"den", ",", 
+          RowBox[{"VertexLabels", "->", "\"\<Name\>\""}], ",", 
+          RowBox[{"VertexCoordinates", "->", "coordinates"}]}], "]"}], "]"}], 
+       ",", "\n", 
+       RowBox[{
+        RowBox[{"num", "=", 
+         RowBox[{"UndirectedEdge", "@@@", 
+          RowBox[{"ProdToList", "[", 
+           RowBox[{"Numerator", "[", "exp", "]"}], "]"}]}]}], ";", "\n", 
+        RowBox[{"temp", "=", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"Rule", "[", 
+            RowBox[{"#", ",", "Dashed"}], "]"}], "&"}], "/@", "num"}]}], ";", 
+        "\n", 
+        RowBox[{"Return", "[", 
+         RowBox[{"Graph", "[", 
+          RowBox[{
+           RowBox[{"Join", "[", 
+            RowBox[{"den", ",", "num"}], "]"}], ",", 
+           RowBox[{"VertexLabels", "->", "\"\<Name\>\""}], ",", 
+           RowBox[{"EdgeStyle", "->", "temp"}], ",", 
+           RowBox[{"VertexCoordinates", "->", "coordinates"}]}], "]"}], 
+         "]"}]}]}], "\n", "]"}], ";"}]}], "\n", "]"}]}]}], "Code",
+ CellLabel->
+  "In[173]:=",ExpressionUUID->"8dd8c4e6-4b83-4b3d-8776-19f734f5d7f0"]
 }, Open  ]]
 }, Open  ]]
 },
@@ -6791,9 +7035,9 @@ Cell[CellGroupData[{
 Cell[304036, 6563, 773, 21, 111, "Input",ExpressionUUID->"541f6b81-8043-440f-865c-9a0e0916e123"],
 Cell[304812, 6586, 177, 3, 51, "Output",ExpressionUUID->"acdfd487-014b-4609-8ee6-4bf4e5291a49"]
 }, Open  ]]
-}, Open  ]],
+}, Closed]],
 Cell[CellGroupData[{
-Cell[305038, 6595, 157, 3, 81, "Subsection",ExpressionUUID->"b4ea417f-e5a5-42de-bb03-ed053c9a8247"],
+Cell[305038, 6595, 157, 3, 55, "Subsection",ExpressionUUID->"b4ea417f-e5a5-42de-bb03-ed053c9a8247"],
 Cell[CellGroupData[{
 Cell[305220, 6602, 302, 5, 45, "Input",ExpressionUUID->"068ffb22-ac1a-48c3-884f-8702d33e2c18"],
 Cell[305525, 6609, 321, 4, 52, "Output",ExpressionUUID->"c2bc20bb-76b0-4eba-aa99-193bfc5ada7b"]
@@ -6812,6 +7056,12 @@ Cell[CellGroupData[{
 Cell[307813, 6669, 201, 3, 45, "Input",ExpressionUUID->"cbb66147-0f79-491d-b942-e731e742b257"],
 Cell[308017, 6674, 153, 2, 51, "Output",ExpressionUUID->"0e4c6c7a-aae0-495e-b1a4-42a97e20dcfa"]
 }, Open  ]]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[308219, 6682, 87, 0, 77, "Section",ExpressionUUID->"f663ae12-8995-49c9-a24d-a31dde5478f4"],
+Cell[308309, 6684, 1624, 46, 311, "Code",ExpressionUUID->"e11fb07d-ce2f-4b73-b865-44fc0eeceb6e"],
+Cell[309936, 6732, 2876, 77, 464, "Code",ExpressionUUID->"cbc591a9-9240-4084-a227-1279cbbe6264"],
+Cell[312815, 6811, 4016, 110, 622, "Code",ExpressionUUID->"8dd8c4e6-4b83-4b3d-8776-19f734f5d7f0"]
 }, Open  ]]
 }, Open  ]]
 }
