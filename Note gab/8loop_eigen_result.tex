@@ -127,6 +127,39 @@
 	$$[151, 244, 921, 1467, 1484, 1486]$$
 	
 	
+	\section{Denominator Graph Classification}
+	
+	We now focus exclusively on the structure of the denominator graph. Rather than predicting the coefficient of each individual $f$-graph, we group all $f$-graphs that share the same denominator and ask a coarser question: \emph{does at least one $f$-graph in the family contribute to the correlator?} 
+	
+	We assign a binary label to each denominator graph:
+	\begin{itemize}
+		\item \textbf{1} if at least one $f$-graph with this denominator has a non-zero coefficient,
+		\item \textbf{0} if all $f$-graphs with this denominator have vanishing coefficients.
+	\end{itemize}
+	
+	This shifts the focus from fine-grained coefficient prediction to identifying which denominator topologies are relevant for the correlator.
+	
+	We trained a Random Forest classifier using only the spectral features of the denominator graph, and evaluated performance across three loop orders: 8, 9, and 10 loops. For each loop order, we report results using an 80/20 train-test split. For the 9-loop case, we also tested on the full dataset to assess whether perfect classification is possible.
+	
+	\subsection*{Results Summary}
+	
+	\begin{table}[h!]
+		\centering
+		\begin{tabular}{|c|c|c|c|}
+			\hline
+			\textbf{Loop Order} & \textbf{Accuracy (80/20 split)} & \textbf{Macro F1-score} & \textbf{Accuracy (full)} \\
+			\hline
+			8 & 0.7770 & 0.78 & 1 \\
+			9 & 0.7635 & 0.75 & 0.9998 \\
+			10 & 0.7959 & 0.76 & 0.99986 \\
+			\hline
+		\end{tabular}
+		\caption{Random Forest classification performance using only denominator graph features. The macro F1-score averages performance across the two classes (0 and 1).}
+		\label{tab:denominator_summary}
+	\end{table}
+	
+	At 8 and 10 loops, the model achieves around 78--80\% accuracy, indicating that the denominator structure is informative but not fully predictive of whether the family contributes. At 9 loops, a model trained on the full dataset achieves nearly perfect classification, suggesting that the signal is in principle learnable from the denominator graph alone in that case.
+	
 	
 	
 \end{document}
