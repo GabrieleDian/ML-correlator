@@ -1,0 +1,130 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{authblk}
+
+\title{Predicting Vanishing Coefficients of $f$-Graphs with Machine Learning}
+\author{}
+\date{}
+
+\begin{document}
+	
+	\maketitle
+	
+	\section{Setup and Motivation}
+	
+	We consider the set of $f$-graphs contributing to the four-point correlator at fixed loop order in planar $\mathcal{N}=4$ supersymmetric Yang–Mills. Each $f$-graph is associated with a rational function integrand, and is characterized combinatorially by a pair of graphs: a ``numerator graph'' and a ``denominator graph'', the latter being defined by the pattern of solid lines in the graphical representation.
+	
+	Our goal is to train machine learning models capable of predicting whether the coefficient associated with a given $f$-graph is zero or non-zero. 
+	
+	\section{Feature Construction}
+	
+	For each $f$-graph, we construct two main sets of features:
+	
+	\begin{itemize}
+		\item \textbf{Denominator spectrum:} We compute the eigenvalue spectrum of the adjacency matrix associated with the denominator graph (i.e., the subgraph defined by the solid lines). This captures global structural information about the propagator topology.
+		
+		\item \textbf{Difference spectrum:} Since different $f$-graphs can share the same denominator graph but still have different coefficients, we introduce a second matrix: the difference between the adjacency matrices of the denominator and numerator graphs. We compute the spectrum of this matrix as well. This difference spectrum captures interference-like structural effects between numerator and denominator topologies.
+	\end{itemize}
+	
+	Importantly, the denominator spectrum alone is not sufficient to uniquely determine the coefficient. In fact, we observe instances of $f$-graphs with the same denominator spectrum but different coefficients. The result from training various models on the full set of data also tell us that the Difference spectrum is also not enough to classify the coefficients. Therefore, we aim to evaluate whether machine learning models can exploit the combined spectral information to learn the relevant combinatorial patterns.
+	
+	\section{Models and Methodology}
+	
+	We experiment with a range of classification models, including:
+	\begin{itemize}
+		\item Logistic Regression
+		\item Support Vector Machines (SVM)
+		\item Decision Trees
+		\item Random Forests
+	\end{itemize}
+	
+	Our classification target is the column \texttt{COEFFICIENT\_DEN}, which takes binary values: $1$ if the coefficient is non-zero, and $0$ otherwise.
+	
+	We perform initial experiments on the full dataset (which contains all possible twelve-point $f$-graphs at this loop order), as our goal is to determine whether a perfect classifier exists. In such a context, overfitting is not a concern: we are not interested in generalization to unseen examples, but in whether a model can in principle learn the structure of the data.
+	
+	\section{8-loop result}
+	
+	We evaluate each model using an 80/20 train-test split. That is, 80\% of the full dataset is used for training, and the remaining 20\% is reserved for testing the model’s ability to classify unseen examples.
+	
+	\subsection{Logistic Regression}
+	
+	\begin{itemize}
+		\item \textbf{Accuracy:} 0.8007
+		\item \textbf{Precision/Recall (Class 0):} 0.84 / 0.83
+		\item \textbf{Precision/Recall (Class 1):} 0.74 / 0.76
+	\end{itemize}
+	
+	Logistic regression performs reasonably well, with an overall accuracy of 80\% and fairly balanced precision and recall. This suggests that while the problem is not linearly separable, the spectral features contain enough structure for a linear model to capture a significant portion of the signal.
+	
+	\subsection{Decision Tree}
+	
+	\begin{itemize}
+		\item \textbf{Accuracy:} 0.7472
+		\item \textbf{Precision/Recall (Class 0):} 0.79 / 0.80
+		\item \textbf{Precision/Recall (Class 1):} 0.68 / 0.67
+	\end{itemize}
+	
+	The decision tree model achieves slightly lower performance than logistic regression. While it captures some nonlinear structure, its tendency to overfit on the training data may reduce its generalization capability. The precision and recall for class 1 (non-zero coefficients) are notably lower than for class 0.
+	
+	\subsection{Random Forest}
+	
+	\begin{itemize}
+		\item \textbf{Accuracy:} 0.8339
+		\item \textbf{Precision/Recall (Class 0):} 0.88 / 0.85
+		\item \textbf{Precision/Recall (Class 1):} 0.77 / 0.82
+	\end{itemize}
+	
+	Random Forests outperform both logistic regression and the single decision tree, achieving the best overall accuracy and a good balance between precision and recall across both classes. This indicates that the relationship between features and the coefficient label is likely nonlinear and combinatorial in nature. The ensemble method is better suited to capturing such structure, and the results suggest it is able to learn meaningful decision boundaries from the spectral input.
+	
+	\subsection{Perfect Classification and Feature Importance}
+	
+	To investigate whether a perfect classifier exists for this problem, we trained various models on the \emph{entire} dataset, bypassing the train/test split. The aim of this experiment is not to measure generalization, but rather to determine whether the provided features contain enough information to reconstruct the coefficient labels exactly.
+
+	
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{|l|c|}
+		\hline
+		\textbf{Model} & \textbf{Accuracy on Full Dataset} \\
+		\hline
+		Logistic Regression & 0.8007 \\
+		Decision Tree       & 0.7472 \\
+		SVM (polynomial kernel) & 0.8600 \\
+		Random Forest (all features) & \textbf{1.0000} \\
+		Random Forest (without denominator features) & 0.9978 \\
+		\hline
+	\end{tabular}
+	\caption{Classification accuracy of different models trained on the full dataset. Random Forest achieves perfect accuracy, indicating that the coefficient labels are in principle learnable from the given features. Removing the denominator features causes a small but non-negligible drop in performance.}
+	\label{tab:full_dataset_results}
+\end{table}
+	
+	A Random Forest classifier trained on the full dataset was able to achieve \textbf{perfect accuracy}. This suggests that the structure of the data is, in principle, learnable: the classification boundary exists and can be captured by a sufficiently flexible model. This aligns with the expectation that the relation between the spectrum-based features and the coefficient label is combinatorial in nature and well-suited to decision-tree based models.
+	
+	
+	We analyzed the feature importances extracted from the perfect Random Forest model. The top five features are shown below:
+	
+	\begin{center}
+		\begin{tabular}{ll}
+			\textbf{Feature} & \textbf{Importance} \\
+			\hline
+			\texttt{FGRAPH\_EIGEN11} & 0.113 \\
+			\texttt{DEN\_EIGEN11} & 0.111 \\
+			\texttt{FGRAPH\_EIGEN10} & 0.101 \\
+			\texttt{FGRAPH\_EIGEN7} & 0.060 \\
+			\texttt{FGRAPH\_EIGEN9} & 0.052 \\
+		\end{tabular}
+	\end{center}
+	
+	Interestingly, the most important features are a mix of eigenvalues of the full $f$-graph (i.e., the numerator-denominator difference spectrum) and of the denominator graph alone. This suggests that both spectra are independently informative, and the model relies on their interaction to successfully separate the classes.
+	
+	To assess the necessity of the denominator graph spectrum, we repeated the experiment after removing all features derived from it. In this reduced-feature scenario, the Random Forest accuracy on the full dataset dropped slightly to 0.9978. While still very high, this indicates that the denominator spectrum plays a meaningful role in distinguishing subtle cases.
+	
+	The fact that perfect classification is no longer achieved when these features are removed confirms that they carry essential structural information, even if not sufficient alone to separate all cases.
+	
+	
+	
+	
+\end{document}
+	
