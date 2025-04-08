@@ -126,6 +126,28 @@
 	The missclassified graphs in this case are 6 out of 2709, and have indices:
 	$$[151, 244, 921, 1467, 1484, 1486]$$
 	
+	\section{10-loop result}
+	
+	\begin{table}[h!]
+		\centering
+		\begin{tabular}{lcccc}
+			\hline
+			\textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-score} & \textbf{Support} \\
+			\hline
+			0 & 0.91 & 0.97 & 0.94 & 152,742 \\
+			1 & 0.76 & 0.45 & 0.56 & 27,287 \\
+			\hline
+			\textbf{Accuracy} & & & 0.89 & 180,029 \\
+			\textbf{Macro Avg} & 0.83 & 0.71 & 0.75 & 180,029 \\
+			\textbf{Weighted Avg} & 0.89 & 0.89 & 0.88 & 180,029 \\
+			\hline
+		\end{tabular}
+		\caption{Random Forest classification report. Accuracy: 0.8949. Computational time 11 min 30 sec.}
+		\label{tab:rf_10_loop}
+	\end{table}
+	
+	Misclassified indices:
+	[4724, 7075, 19810, 281029, 290977, 291224, 291226, 672010, 824379]
 	
 	\section{Denominator Graph Classification}
 	
