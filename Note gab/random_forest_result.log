@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.3.28)  14 APR 2025 16:15
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.3.28)  14 APR 2025 17:50
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -360,58 +360,43 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 14.
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-<4loop.pdf, id=44, 216.81pt x 77.28876pt>
+<4loop.pdf, id=16, 216.81pt x 77.28876pt>
 File: 4loop.pdf Graphic file (type pdf)
 <use 4loop.pdf>
 Package pdftex.def Info: 4loop.pdf  used on input line 29.
 (pdftex.def)             Requested size: 260.17068pt x 92.74603pt.
-
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-[1
+ [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf/fonts/enc/
 dvips/cm-super/cm-super-ts1.enc} <./4loop.pdf>]
-Overfull \hbox (69.62254pt too wide) in paragraph at lines 93--103
+Overfull \hbox (69.62254pt too wide) in paragraph at lines 79--89
  [][] 
  []
 
-[2] [3] [4]
-Overfull \hbox (32.17183pt too wide) in paragraph at lines 168--179
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[2] [3]
+Overfull \hbox (45.7692pt too wide) in paragraph at lines 132--142
  [][] 
  []
 
-[5]
-Overfull \hbox (1.49954pt too wide) in paragraph at lines 229--231
-[]\OT1/cmr/m/n/10.95 Misclassified in-dices: [4724, 7075, 19810, 281029, 290977
-, 291224, 291226,
- []
-
-[6]
-Overfull \hbox (45.7692pt too wide) in paragraph at lines 253--263
- [][] 
- []
-
-[7] [8] (./random_forest_result.aux)
+[4] (./random_forest_result.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
 Package rerunfilecheck Info: File `random_forest_result.out' has not changed.
-(rerunfilecheck)             Checksum: 27D00944D1CFF5F52F0C6D23FB96258F;1626.
+(rerunfilecheck)             Checksum: FD2F96A13DA2791439B822E16E58B7F1;510.
  ) 
 Here is how much of TeX's memory you used:
- 11001 strings out of 474222
- 171614 string characters out of 5748733
- 1937975 words of memory out of 5000000
- 33114 multiletter control sequences out of 15000+600000
- 568291 words of font info for 75 fonts, out of 8000000 for 9000
+ 10977 strings out of 474222
+ 171313 string characters out of 5748733
+ 1935975 words of memory out of 5000000
+ 33104 multiletter control sequences out of 15000+600000
+ 567984 words of font info for 74 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,9n,79p,527b,504s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,9n,79p,397b,463s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
 e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texl
@@ -422,10 +407,10 @@ t/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts
 /public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/publi
 c/amsfonts/cm/cmtt10.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1095
 .pfb>
-Output written on random_forest_result.pdf (8 pages, 151291 bytes).
+Output written on random_forest_result.pdf (4 pages, 138139 bytes).
 PDF statistics:
- 163 PDF objects out of 1000 (max. 8388607)
- 126 compressed objects within 2 object streams
- 26 named destinations out of 1000 (max. 500000)
- 86 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 110 PDF objects out of 1000 (max. 8388607)
+ 78 compressed objects within 1 object stream
+ 12 named destinations out of 1000 (max. 500000)
+ 30 words of extra memory for PDF output out of 10000 (max. 10000000)
 
