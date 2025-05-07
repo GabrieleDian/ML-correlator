@@ -1,5 +1,4 @@
 import torch
-import torch
 import torch.nn.functional as F
 from torch_geometric.nn import RGCNConv, global_mean_pool
 from torch_geometric.data import Data
@@ -47,4 +46,4 @@ if __name__ == "__main__":
     with torch.no_grad():
         output = model(data)
 
-    print(in_channels)
+    print("GNN output (untrained):", output.item())
