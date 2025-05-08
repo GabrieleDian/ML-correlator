@@ -1,6 +1,9 @@
 # f-Graph Data
 
-This folder contains CSV files providing graph data and coefficients for various loop orders. The data is organized as follows:
+This folder contains CSV files providing graph data and coefficients for various loop orders. The file Extract_data.nb is the Mathematica
+notebook used to generate the CSV files.
+
+The data is organized as follows:
 
 ## File Structure
 
