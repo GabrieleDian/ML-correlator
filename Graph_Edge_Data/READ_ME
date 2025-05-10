@@ -1,0 +1,45 @@
+# f-Graph Data
+
+This folder contains CSV files providing graph data and coefficients for various loop orders. The file Extract_data.nb is the Mathematica
+notebook used to generate the CSV files.
+
+The data is organized as follows:
+
+## File Structure
+
+For each loop order `l`, there are two types of CSV files:
+
+1. **Graph Data Files** (`graph_data_l.csv`, for `l = 5` to `9`):
+    - **Columns**:
+        - `NUM_EDGES`: Numerator edges of the graph.
+        - `DEN_EDGES`: Denominator edges of the graph.
+        - `COEFFICIENTS`: Rational coefficients corresponding to each graph.
+    - **Note:** `graph_data_10.csv` is not included due to its large size (~350 MB), which exceeds GitHub’s upload limits.
+
+2. **Denominator Graph Data Files** (`den_graph_data_l.csv`, for `l = 5` to `10`):
+    - **Columns**:
+        - `DEN_EDGES`: Denominator edges.
+        - `COEFFICIENTS`: 
+            - `0` → No f-graph with the given denominator contributes to the correlator.
+            - `1` → An f-graph with the given denominator contributes to the correlator.
+
+## Available Files
+
+| File Name             | Loop Order (l) | Description                                     |
+|-----------------------|----------------|-------------------------------------------------|
+| graph_data_5.csv      | 5              | Full graph data (numerator & denominator edges, coefficients) |
+| graph_data_6.csv      | 6              | Same as above                                   |
+| graph_data_7.csv      | 7              | Same as above                                   |
+| graph_data_8.csv      | 8              | Same as above                                   |
+| graph_data_9.csv      | 9              | Same as above                                   |
+| den_graph_data_5.csv  | 5              | Denominator edges and coefficients (0/1)        |
+| den_graph_data_6.csv  | 6              | Same as above                                   |
+| den_graph_data_7.csv  | 7              | Same as above                                   |
+| den_graph_data_8.csv  | 8              | Same as above                                   |
+| den_graph_data_9.csv  | 9              | Same as above                                   |
+| den_graph_data_10.csv | 10             | Same as above                                   |
+
+## Notes
+
+- `graph_data_10.csv`GitHub, but it is available.
+
