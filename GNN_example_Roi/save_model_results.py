@@ -49,6 +49,10 @@ def save_model_architecture(model, save_dir="results"):
 
 def append_evaluation_results(file_path, metrics, loop):
     with open(file_path, 'a') as f:
-        f.write(f"\n\n--- Evaluation Results (loop = {loop}) ---\n")
+        if isinstance(loop, list):
+            loop_str = ", ".join(map(str, loop))
+        else:
+            loop_str = str(loop)
+        f.write(f"\n\n--- Evaluation Results (loop = {loop_str}) ---\n")
         for key, value in metrics.items():
             f.write(f"{key}: {value}\n")

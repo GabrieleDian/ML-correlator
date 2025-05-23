@@ -1,10 +1,18 @@
 SimpleGNN(
-  (conv1): GCNConv(4, 32)
-  (norm1): GraphNorm(32)
-  (conv2): GCNConv(32, 32)
-  (norm2): GraphNorm(32)
-  (conv3): GCNConv(32, 32)
-  (norm3): GraphNorm(32)
-  (lin): Linear(in_features=32, out_features=2, bias=True)
-  (dropout): Dropout(p=0, inplace=False)
+  (conv1): GCNConv(4, 64)
+  (norm1): GraphNorm(64)
+  (conv2): GCNConv(64, 64)
+  (norm2): GraphNorm(64)
+  (conv3): GCNConv(64, 64)
+  (norm3): GraphNorm(64)
+  (lin): Linear(in_features=64, out_features=2, bias=True)
+  (dropout): Dropout(p=0.2, inplace=False)
 )
+
+--- Evaluation Results (loop = 7, 8, 9) ---
+Accuracy: 0.7803468208092486
+Precision: [0.86734694 0.69210867]
+Recall: [0.74074074 0.8372457 ]
+F1 Score: [0.79905993 0.75779037]
+Confusion Matrix: [[680 238]
+ [104 535]]
