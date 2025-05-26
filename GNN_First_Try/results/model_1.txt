@@ -75,3 +75,23 @@ Recall: [0.72719033 0.78406847]
 F1 Score: [0.77532614 0.7192029 ]
 Confusion Matrix: [[4814 1806]
  [ 984 3573]]
+
+
+--- Evaluation Results (loop = 10) ---
+Set Type: Test
+Accuracy: 0.776092134024991
+Precision: [0.83288757 0.66647548]
+Recall: [0.8281704  0.67388363]
+F1 Score: [0.83052229 0.67015908]
+Confusion Matrix: [[16816  3489]
+ [ 3374  6972]]
+
+
+--- Evaluation Results (loop = 10) ---
+Set Type: Train
+Accuracy: 0.777938189737441
+Precision: [0.83607124 0.66465438]
+Recall: [0.82930562 0.67539165]
+F1 Score: [0.83267469 0.66998   ]
+Confusion Matrix: [[67741 13943]
+ [13282 27635]]

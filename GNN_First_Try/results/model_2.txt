@@ -10,36 +10,80 @@ SimpleGNN(
 )
 
 --- Evaluation Results (loop = 7) ---
-Accuracy: 0.6666666666666666
-Precision: [0.45454545 0.77272727]
-Recall: [0.5        0.73913043]
-F1 Score: [0.47619048 0.75555556]
-Confusion Matrix: [[ 5  5]
- [ 6 17]]
+Set Type: Test
+Accuracy: 0.8181818181818182
+Precision: [0.75 0.84]
+Recall: [0.6        0.91304348]
+F1 Score: [0.66666667 0.875     ]
+Confusion Matrix: [[ 6  4]
+ [ 2 21]]
+
+
+--- Evaluation Results (loop = 7) ---
+Set Type: Train
+Accuracy: 0.8015267175572519
+Precision: [0.73333333 0.8372093 ]
+Recall: [0.70212766 0.85714286]
+F1 Score: [0.7173913  0.84705882]
+Confusion Matrix: [[33 14]
+ [12 72]]
 
 
 --- Evaluation Results (loop = 8) ---
-Accuracy: 0.7247386759581882
-Precision: [0.7238806 0.7254902]
-Recall: [0.69784173 0.75      ]
-F1 Score: [0.71062271 0.73754153]
-Confusion Matrix: [[ 97  42]
- [ 37 111]]
+Set Type: Test
+Accuracy: 0.7456445993031359
+Precision: [0.78947368 0.71676301]
+Recall: [0.64748201 0.83783784]
+F1 Score: [0.71146245 0.77258567]
+Confusion Matrix: [[ 90  49]
+ [ 24 124]]
+
+
+--- Evaluation Results (loop = 8) ---
+Set Type: Train
+Accuracy: 0.8008733624454148
+Precision: [0.86206897 0.75917768]
+Recall: [0.70921986 0.88984509]
+F1 Score: [0.77821012 0.81933439]
+Confusion Matrix: [[400 164]
+ [ 64 517]]
 
 
 --- Evaluation Results (loop = 9) ---
-Accuracy: 0.7953488372093023
-Precision: [0.8588839  0.71521036]
-Recall: [0.79183915 0.80072464]
-F1 Score: [0.824      0.75555556]
-Confusion Matrix: [[1339  352]
- [ 220  884]]
+Set Type: Test
+Accuracy: 0.782468694096601
+Precision: [0.83696329 0.70875421]
+Recall: [0.79538734 0.76268116]
+F1 Score: [0.81564585 0.73472949]
+Confusion Matrix: [[1345  346]
+ [ 262  842]]
+
+
+--- Evaluation Results (loop = 9) ---
+Set Type: Train
+Accuracy: 0.7905520264829561
+Precision: [0.83624077 0.73016203]
+Recall: [0.80377644 0.77134079]
+F1 Score: [0.81968728 0.75018675]
+Confusion Matrix: [[5321 1299]
+ [1042 3515]]
 
 
 --- Evaluation Results (loop = 10) ---
-Accuracy: 0.8009526605983491
-Precision: [0.84943909 0.7055292 ]
-Recall: [0.85023393 0.70423352]
-F1 Score: [0.84983632 0.70488076]
-Confusion Matrix: [[17264  3041]
- [ 3060  7286]]
+Set Type: Test
+Accuracy: 0.8014420410427066
+Precision: [0.87447985 0.68258186]
+Recall: [0.81763113 0.76966944]
+F1 Score: [0.84510053 0.72351445]
+Confusion Matrix: [[16602  3703]
+ [ 2383  7963]]
+
+
+--- Evaluation Results (loop = 10) ---
+Set Type: Train
+Accuracy: 0.8021631144933565
+Precision: [0.87669723 0.67964808]
+Recall: [0.8181284  0.77029108]
+F1 Score: [0.84640082 0.7221363 ]
+Confusion Matrix: [[66828 14856]
+ [ 9399 31518]]
