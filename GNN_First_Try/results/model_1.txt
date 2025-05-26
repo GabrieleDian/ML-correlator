@@ -1,0 +1,77 @@
+SimpleGNN(
+  (conv1): GCNConv(4, 32)
+  (norm1): GraphNorm(32)
+  (conv2): GCNConv(32, 32)
+  (norm2): GraphNorm(32)
+  (lin): Linear(in_features=32, out_features=2, bias=True)
+  (dropout): Dropout(p=0, inplace=False)
+)
+
+def forward(self, data):
+	x, edge_index = data.x, data.edge_index
+        batch = data.batch # For multiple graphs in a batch
+        x = F.relu(self.norm1(self.conv1(x, edge_index)))
+        x = F.relu(self.norm2(self.conv2(x, edge_index)))
+        x = global_mean_pool(x, batch)
+        return self.lin(x)
+
+The number of epochs is at most 70.
+
+--- Evaluation Results (loop = 7) ---
+Set Type: Test
+Accuracy: 0.696969696969697
+Precision: [0.5       0.7826087]
+Recall: [0.5       0.7826087]
+F1 Score: [0.5       0.7826087]
+Confusion Matrix: [[ 5  5]
+ [ 5 18]]
+
+
+--- Evaluation Results (loop = 7) ---
+Set Type: Train
+Accuracy: 0.6641221374045801
+Precision: [0.53846154 0.7173913 ]
+Recall: [0.44680851 0.78571429]
+F1 Score: [0.48837209 0.75      ]
+Confusion Matrix: [[21 26]
+ [18 66]]
+
+
+--- Evaluation Results (loop = 8) ---
+Set Type: Test
+Accuracy: 0.7317073170731707
+Precision: [0.74603175 0.72049689]
+Recall: [0.67625899 0.78378378]
+F1 Score: [0.70943396 0.75080906]
+Confusion Matrix: [[ 94  45]
+ [ 32 116]]
+
+
+--- Evaluation Results (loop = 8) ---
+Set Type: Train
+Accuracy: 0.7510917030567685
+Precision: [0.77514793 0.73197492]
+Recall: [0.69680851 0.80378657]
+F1 Score: [0.73389356 0.7662018 ]
+Confusion Matrix: [[393 171]
+ [114 467]]
+
+
+--- Evaluation Results (loop = 9) ---
+Set Type: Test
+Accuracy: 0.7617173524150268
+Precision: [0.84935242 0.66490964]
+Recall: [0.73684211 0.79981884]
+F1 Score: [0.78910703 0.72615132]
+Confusion Matrix: [[1246  445]
+ [ 221  883]]
+
+
+--- Evaluation Results (loop = 9) ---
+Set Type: Train
+Accuracy: 0.7503802451462825
+Precision: [0.83028631 0.66424986]
+Recall: [0.72719033 0.78406847]
+F1 Score: [0.77532614 0.7192029 ]
+Confusion Matrix: [[4814 1806]
+ [ 984 3573]]

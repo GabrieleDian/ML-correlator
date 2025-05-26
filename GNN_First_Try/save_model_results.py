@@ -4,7 +4,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 # Function to evaluate the accuracy and other mertics of the model.
 
-def evaluate_model(model, data_loader, device):
+def evaluate_model(model, data_loader, device, set_type = "Test"):
     model.eval()
     y_true = []
     y_pred = []
@@ -21,10 +21,11 @@ def evaluate_model(model, data_loader, device):
     y_pred = torch.cat(y_pred).numpy()
 
     metrics = {
+        "Set Type": set_type if set_type == "Test" else "Train",
         "Accuracy": accuracy_score(y_true, y_pred),
         "Precision": precision_score(y_true, y_pred, average=None, zero_division=0),
-        "Recall": recall_score(y_true, y_pred, average= None, zero_division=0),
-        "F1 Score": f1_score(y_true, y_pred, average= None, zero_division=0),
+        "Recall": recall_score(y_true, y_pred, average=None, zero_division=0),
+        "F1 Score": f1_score(y_true, y_pred, average=None, zero_division=0),
         "Confusion Matrix": confusion_matrix(y_true, y_pred)
     }
 
