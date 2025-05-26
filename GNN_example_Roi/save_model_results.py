@@ -25,7 +25,8 @@ def evaluate_model(model, data_loader, device):
         "Precision": precision_score(y_true, y_pred, average=None, zero_division=0),
         "Recall": recall_score(y_true, y_pred, average= None, zero_division=0),
         "F1 Score": f1_score(y_true, y_pred, average= None, zero_division=0),
-        "Confusion Matrix": confusion_matrix(y_true, y_pred)
+        "Confusion Matrix": confusion_matrix(y_true, y_pred),
+        "Number of epochs trained": model.epoch,
     }
 
     return metrics
