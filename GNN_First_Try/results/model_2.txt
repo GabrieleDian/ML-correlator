@@ -87,3 +87,37 @@ Recall: [0.8181284  0.77029108]
 F1 Score: [0.84640082 0.7221363 ]
 Confusion Matrix: [[66828 14856]
  [ 9399 31518]]
+
+-------------- EXPERIMENTING WITH LR ---------------------------------------------
+
+Setting lr = 0.0001 and 60 more epochs later
+
+--- Evaluation Results (loop = 10) ---
+Set Type: Test
+Accuracy: 0.8104466412188835
+Precision: [0.84356483 0.7373378 ]
+Recall: [0.87638513 0.68103615]
+F1 Score: [0.85966184 0.70806954]
+Confusion Matrix: [[17795  2510]
+ [ 3300  7046]]
+
+
+--- Evaluation Results (loop = 10) ---
+Set Type: Train
+Accuracy: 0.8153930228954087
+Precision: [0.8492117  0.74025018]
+Recall: [0.87899711 0.68841802]
+F1 Score: [0.86384773 0.71339386]
+Confusion Matrix: [[71800  9884]
+ [12749 28168]]
+
+Setting lr = 0.00005 and 60 more epochs later
+
+--- Evaluation Results (loop = 10) ---
+Set Type: Test
+Accuracy: 0.8165802094548302
+Precision: [0.87813546 0.71021716]
+Recall: [0.83964541 0.77131258]
+F1 Score: [0.85845921 0.73950514]
+Confusion Matrix: [[17049  3256]
+ [ 2366  7980]]

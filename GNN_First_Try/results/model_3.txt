@@ -1,0 +1,70 @@
+SimpleGNN(
+  (conv1): GCNConv(4, 32)
+  (norm1): GraphNorm(32)
+  (conv2): GCNConv(32, 32)
+  (norm2): GraphNorm(32)
+  (pool): EdgePooling(32)
+  (conv3): GCNConv(32, 32)
+  (norm3): GraphNorm(32)
+  (lin): Linear(in_features=32, out_features=2, bias=True)
+  (dropout): Dropout(p=0.2, inplace=False)
+)
+
+--- Evaluation Results (loop = 7) ---
+Set Type: Test
+Accuracy: 0.7272727272727273
+Precision: [0.55555556 0.79166667]
+Recall: [0.5        0.82608696]
+F1 Score: [0.52631579 0.80851064]
+Confusion Matrix: [[ 5  5]
+ [ 4 19]]
+
+
+--- Evaluation Results (loop = 7) ---
+Set Type: Train
+Accuracy: 0.8320610687022901
+Precision: [0.80487805 0.84444444]
+Recall: [0.70212766 0.9047619 ]
+F1 Score: [0.75       0.87356322]
+Confusion Matrix: [[33 14]
+ [ 8 76]]
+
+
+--- Evaluation Results (loop = 8) ---
+Set Type: Test
+Accuracy: 0.7421602787456446
+Precision: [0.79279279 0.71022727]
+Recall: [0.63309353 0.84459459]
+F1 Score: [0.704      0.77160494]
+Confusion Matrix: [[ 88  51]
+ [ 23 125]]
+
+
+--- Evaluation Results (loop = 8) ---
+Set Type: Train
+Accuracy: 0.7930131004366813
+Precision: [0.82765531 0.76625387]
+Recall: [0.7322695  0.85197935]
+F1 Score: [0.7770461  0.80684597]
+Confusion Matrix: [[413 151]
+ [ 86 495]]
+
+
+--- Evaluation Results (loop = 9) ---
+Set Type: Test
+Accuracy: 0.786046511627907
+Precision: [0.83262325 0.71961806]
+Recall: [0.80898876 0.7509058 ]
+F1 Score: [0.82063587 0.73492908]
+Confusion Matrix: [[1368  323]
+ [ 275  829]]
+
+
+--- Evaluation Results (loop = 9) ---
+Set Type: Train
+Accuracy: 0.7948465598997942
+Precision: [0.82696086 0.74824561]
+Recall: [0.8265861 0.7487382]
+F1 Score: [0.82677344 0.74849183]
+Confusion Matrix: [[5472 1148]
+ [1145 3412]]
