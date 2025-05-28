@@ -1,0 +1,31 @@
+{
+  "os": "Linux-6.8.0-52-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.12.3",
+  "startedAt": "2025-05-28T18:25:09.868814Z",
+  "program": "/home/gabriele/Documents/GitHub/ML-correlator/wandb_experiment/L1/01_intro_starter.ipynb",
+  "codePath": "wandb_experiment/L1/01_intro_starter.ipynb",
+  "git": {
+    "remote": "https://github.com/GabrieleDian/ML-correlator.git",
+    "commit": "23e62e8e6f9928f066a6902fd5129661a56a08e5"
+  },
+  "email": "dian.gabriele@gmail.com",
+  "root": "/home/gabriele/Documents/GitHub/ML-correlator/wandb_experiment/L1",
+  "host": "gabriele-Latitude-5410",
+  "executable": "/home/gabriele/Documents/GitHub/ML-correlator/.venv/bin/python",
+  "codePathLocal": "01_intro_starter.ipynb",
+  "cpu_count": 4,
+  "cpu_count_logical": 8,
+  "disk": {
+    "/": {
+      "total": "502392610816",
+      "used": "146375942144"
+    }
+  },
+  "memory": {
+    "total": "16385368064"
+  },
+  "cpu": {
+    "count": 4,
+    "countLogical": 8
+  }
+}
