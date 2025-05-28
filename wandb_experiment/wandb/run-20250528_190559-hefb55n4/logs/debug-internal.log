@@ -1,0 +1,17 @@
+{"time":"2025-05-28T19:05:59.318358384+02:00","level":"INFO","msg":"stream: starting","core version":"0.19.11","symlink path":"/home/gabriele/Documents/GitHub/ML-correlator/wandb_experiment/wandb/run-20250528_190559-hefb55n4/logs/debug-core.log"}
+{"time":"2025-05-28T19:05:59.674030611+02:00","level":"INFO","msg":"created new stream","id":"hefb55n4"}
+{"time":"2025-05-28T19:05:59.674075404+02:00","level":"INFO","msg":"stream: started","id":"hefb55n4"}
+{"time":"2025-05-28T19:05:59.674147866+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"hefb55n4"}
+{"time":"2025-05-28T19:05:59.674178678+02:00","level":"INFO","msg":"sender: started","stream_id":"hefb55n4"}
+{"time":"2025-05-28T19:05:59.674209535+02:00","level":"INFO","msg":"handler: started","stream_id":"hefb55n4"}
+{"time":"2025-05-28T19:06:00.01904012+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-05-28T19:06:45.720208951+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-28T19:06:45.73501638+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-05-28T19:06:45.735065553+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-05-28T19:06:46.737853228+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading config.yaml","runtime_seconds":0.336527281,"progress":"538B/538B"}],"total_operations":1}}
+{"time":"2025-05-28T19:06:46.811827735+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-05-28T19:06:47.226438485+02:00","level":"INFO","msg":"stream: closing","id":"hefb55n4"}
+{"time":"2025-05-28T19:06:47.226450166+02:00","level":"INFO","msg":"handler: closed","stream_id":"hefb55n4"}
+{"time":"2025-05-28T19:06:47.226456955+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"hefb55n4"}
+{"time":"2025-05-28T19:06:47.226465037+02:00","level":"INFO","msg":"sender: closed","stream_id":"hefb55n4"}
+{"time":"2025-05-28T19:06:47.226498869+02:00","level":"INFO","msg":"stream: closed","id":"hefb55n4"}

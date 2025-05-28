@@ -1,0 +1,1 @@
+{"train/epoch":2,"train/example_ct":16000,"_step":127,"val/val_accuracy":0.6775,"val/val_loss":1.1202266216278076,"_wandb":{"runtime":3},"_runtime":3.8843168219999997,"train/train_loss":1.311065912246704,"_timestamp":1.7484565310793953e+09}
