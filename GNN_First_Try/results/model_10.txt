@@ -1,0 +1,80 @@
+SimpleGNN(
+  (conv1): GCNConv(4, 32)
+  (norm1): GraphNorm(32)
+  (conv2): GCNConv(32, 32)
+  (norm2): GraphNorm(32)
+  (conv3): GCNConv(32, 32)
+  (norm3): GraphNorm(32)
+  (conv4): GCNConv(32, 32)
+  (norm4): GraphNorm(32)
+  (conv5): GCNConv(32, 32)
+  (norm5): GraphNorm(32)
+  (pool): DeepSetsAggregation(local_nn=Sequential(
+    (0): Linear(in_features=32, out_features=32, bias=True)
+    (1): ReLU()
+  ), global_nn=Sequential(
+    (0): Linear(in_features=32, out_features=32, bias=True)
+    (1): ReLU()
+  ))
+  (lin): Linear(in_features=32, out_features=2, bias=True)
+  (dropout): Dropout(p=0.2, inplace=False)
+)
+
+--- Evaluation Results (loop = 7) ---
+Set Type: Test
+Accuracy: 0.7575757575757576
+Precision: [0.66666667 0.77777778]
+Recall: [0.4        0.91304348]
+F1 Score: [0.5  0.84]
+Confusion Matrix: [[ 4  6]
+ [ 2 21]]
+
+
+--- Evaluation Results (loop = 7) ---
+Set Type: Train
+Accuracy: 0.8702290076335878
+Precision: [0.91666667 0.85263158]
+Recall: [0.70212766 0.96428571]
+F1 Score: [0.79518072 0.90502793]
+Confusion Matrix: [[33 14]
+ [ 3 81]]
+
+
+--- Evaluation Results (loop = 8) ---
+Set Type: Test
+Accuracy: 0.735191637630662
+Precision: [0.78378378 0.70454545]
+Recall: [0.62589928 0.83783784]
+F1 Score: [0.696     0.7654321]
+Confusion Matrix: [[ 87  52]
+ [ 24 124]]
+
+
+--- Evaluation Results (loop = 8) ---
+Set Type: Train
+Accuracy: 0.8026200873362446
+Precision: [0.88409091 0.75177305]
+Recall: [0.68971631 0.91222031]
+F1 Score: [0.7749004  0.82426128]
+Confusion Matrix: [[389 175]
+ [ 51 530]]
+
+
+--- Evaluation Results (loop = 9) ---
+Set Type: Test
+Accuracy: 0.7914132379248658
+Precision: [0.84798995 0.71654198]
+Recall: [0.79834418 0.7807971 ]
+F1 Score: [0.82241852 0.74729085]
+Confusion Matrix: [[1350  341]
+ [ 242  862]]
+
+
+--- Evaluation Results (loop = 9) ---
+Set Type: Train
+Accuracy: 0.7973517043929498
+Precision: [0.84275146 0.73756219]
+Recall: [0.80876133 0.78077683]
+F1 Score: [0.82540661 0.75855453]
+Confusion Matrix: [[5354 1266]
+ [ 999 3558]]

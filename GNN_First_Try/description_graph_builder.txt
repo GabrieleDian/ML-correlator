@@ -1,0 +1,42 @@
+## Feature Space Breakdown (26 dimensions total)
+
+### 1. Basic Graph Features (1 dimension)
+- **Degree centrality** (1): The number of edges connected to each node
+
+### 2. Face-Based Features (4 dimensions)
+These capture planar graph structure through face analysis:
+- **Number of faces** (1): How many faces (enclosed regions) contain this node
+- **Average face size** (1): Mean number of vertices in faces containing this node  
+- **Maximum face size** (1): Largest face size containing this node
+- **Face size variance** (1): Variance in sizes of faces containing this node
+
+### 3. Advanced Spectral Features (6 dimensions)
+These use eigenanalysis of the graph Laplacian:
+- **Algebraic connectivity** (1): Second smallest eigenvalue (Fiedler value)
+- **Spectral gap** (1): Difference between first and second eigenvalues
+- **Largest eigenvalue** (1): Maximum eigenvalue of the Laplacian
+- **Fiedler vector value** (1): Node's component in the Fiedler eigenvector
+- **Eigenvector energy** (1): Sum of squares of first 5 eigenvector components
+- **Third eigenvector value** (1): Node's component in third eigenvector
+
+### 4. Dual Graph Features (5 dimensions)
+These approximate properties of the graph's dual representation:
+- **Dual degree** (1): Estimated degree in the dual graph
+- **Dual clustering** (1): Clustering coefficient in dual graph approximation
+- **Dual/original degree ratio** (1): Ratio of dual to original node degree
+- **Dual betweenness** (1): Product of dual degree and dual clustering
+- **Face-edge ratio** (1): Normalized dual degree measure
+
+### 5. Centrality Features (6 dimensions)
+Various measures of node importance:
+- **Degree centrality** (1): Normalized degree measure
+- **Betweenness centrality** (1): Fraction of shortest paths through this node
+- **Closeness centrality** (1): Inverse of average distance to all other nodes
+- **Eigenvector centrality** (1): Influence based on connections to high-degree nodes
+- **Clustering coefficient** (1): Fraction of triangles around the node
+- **PageRank** (1): Random walk-based importance measure
+
+### 6. Laplacian Eigenvectors (4 dimensions)
+Added by the `AddLaplacianEigenvectorPE` transform:
+- **Top 4 eigenvectors** (4): Positional encoding from Laplacian eigenvectors
+
