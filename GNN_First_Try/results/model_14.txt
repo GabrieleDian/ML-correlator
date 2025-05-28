@@ -1,0 +1,19 @@
+SimpleGNN(
+  (conv1): GINConv(nn=26)
+  (norm1): GraphNorm(32)
+  (conv2): GINConv(nn=32)
+  (norm2): GraphNorm(32)
+  (conv3): GINConv(nn=32)
+  (norm3): GraphNorm(32)
+  (conv4): GINConv(nn=32)
+  (norm4): GraphNorm(32)
+  (pool): DeepSetsAggregation(local_nn=Sequential(
+    (0): Linear(in_features=32, out_features=32, bias=True)
+    (1): ReLU()
+  ), global_nn=Sequential(
+    (0): Linear(in_features=32, out_features=32, bias=True)
+    (1): ReLU()
+  ))
+  (lin): Linear(in_features=32, out_features=2, bias=True)
+  (dropout): Dropout(p=0.2, inplace=False)
+)
