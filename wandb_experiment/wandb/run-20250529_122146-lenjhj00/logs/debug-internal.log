@@ -1,0 +1,35 @@
+{"time":"2025-05-29T12:21:47.142683734+02:00","level":"INFO","msg":"stream: starting","core version":"0.19.11","symlink path":"/home/gabriele/Documents/GitHub/ML-correlator/wandb_experiment/wandb/run-20250529_122146-lenjhj00/logs/debug-core.log"}
+{"time":"2025-05-29T12:21:47.411056563+02:00","level":"INFO","msg":"created new stream","id":"lenjhj00"}
+{"time":"2025-05-29T12:21:47.4110757+02:00","level":"INFO","msg":"stream: started","id":"lenjhj00"}
+{"time":"2025-05-29T12:21:47.411098251+02:00","level":"INFO","msg":"handler: started","stream_id":"lenjhj00"}
+{"time":"2025-05-29T12:21:47.411114688+02:00","level":"INFO","msg":"sender: started","stream_id":"lenjhj00"}
+{"time":"2025-05-29T12:21:47.411083079+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"lenjhj00"}
+{"time":"2025-05-29T12:21:47.664819363+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-05-29T12:21:57.267018278+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-29T12:21:57.267674752+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-29T12:21:57.274234796+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-29T12:21:57.306112255+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-29T12:21:57.311953818+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-29T12:21:57.319909191+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-29T12:21:57.328151407+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-29T12:21:57.366680084+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-29T12:21:57.374097618+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-29T12:21:57.374666304+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-29T12:21:57.380926474+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-29T12:21:57.626697069+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-29T12:21:57.632273773+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-29T12:21:57.634697014+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-29T12:21:57.641849462+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-29T12:21:57.653624361+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-29T12:21:57.665002662+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-29T12:21:57.670331201+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-29T12:21:57.678048461+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-29T12:21:57.687338468+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-05-29T12:21:57.687405776+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-05-29T12:21:58.351889099+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-05-29T12:21:58.582176748+02:00","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2025-05-29T12:21:58.586557821+02:00","level":"INFO","msg":"stream: closing","id":"lenjhj00"}
+{"time":"2025-05-29T12:21:58.586573873+02:00","level":"INFO","msg":"handler: closed","stream_id":"lenjhj00"}
+{"time":"2025-05-29T12:21:58.586586017+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"lenjhj00"}
+{"time":"2025-05-29T12:21:58.586598048+02:00","level":"INFO","msg":"sender: closed","stream_id":"lenjhj00"}
+{"time":"2025-05-29T12:21:58.586656172+02:00","level":"INFO","msg":"stream: closed","id":"lenjhj00"}

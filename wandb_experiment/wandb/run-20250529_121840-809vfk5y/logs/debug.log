@@ -1,0 +1,25 @@
+2025-05-29 12:18:40,636 INFO    MainThread:238477 [wandb_init.py:setup_run_log_directory():724] Logging user logs to /home/gabriele/Documents/GitHub/ML-correlator/wandb_experiment/wandb/run-20250529_121840-809vfk5y/logs/debug.log
+2025-05-29 12:18:40,636 INFO    MainThread:238477 [wandb_init.py:setup_run_log_directory():725] Logging internal logs to /home/gabriele/Documents/GitHub/ML-correlator/wandb_experiment/wandb/run-20250529_121840-809vfk5y/logs/debug-internal.log
+2025-05-29 12:18:40,636 INFO    MainThread:238477 [wandb_init.py:init():852] calling init triggers
+2025-05-29 12:18:40,636 INFO    MainThread:238477 [wandb_init.py:init():857] wandb.init called with sweep_config: {}
+config: {'lr': 0.001, 'epochs': 70, 'weight_decay': 0.0005, 'hidden_channels': 16, 'dropout': 0.2, 'in_channels': 4, 'batch_size': 20, '_wandb': {}}
+2025-05-29 12:18:41,746 INFO    MainThread:238477 [wandb_init.py:init():893] starting backend
+2025-05-29 12:18:41,746 INFO    MainThread:238477 [wandb_init.py:init():897] sending inform_init request
+2025-05-29 12:18:41,747 INFO    MainThread:238477 [backend.py:_multiprocessing_setup():101] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2025-05-29 12:18:41,747 INFO    MainThread:238477 [wandb_init.py:init():907] backend started and connected
+2025-05-29 12:18:41,749 INFO    MainThread:238477 [wandb_run.py:_label_probe_notebook():1376] probe notebook
+2025-05-29 12:18:41,749 INFO    MainThread:238477 [wandb_init.py:init():1005] updated telemetry
+2025-05-29 12:18:41,752 INFO    MainThread:238477 [wandb_init.py:init():1029] communicating run to backend with 90.0 second timeout
+2025-05-29 12:18:42,318 INFO    MainThread:238477 [wandb_init.py:init():1104] starting run threads in backend
+2025-05-29 12:18:42,424 INFO    MainThread:238477 [wandb_run.py:_console_start():2573] atexit reg
+2025-05-29 12:18:42,424 INFO    MainThread:238477 [wandb_run.py:_redirect():2421] redirect: wrap_raw
+2025-05-29 12:18:42,424 INFO    MainThread:238477 [wandb_run.py:_redirect():2490] Wrapping output streams.
+2025-05-29 12:18:42,425 INFO    MainThread:238477 [wandb_run.py:_redirect():2513] Redirects installed.
+2025-05-29 12:18:42,425 INFO    MainThread:238477 [wandb_init.py:init():1150] run started, returning control to user process
+2025-05-29 12:20:21,448 INFO    MainThread:238477 [wandb_run.py:_finish():2321] finishing run dian-gabriele-desydeutsches-elektronen-synchrotron/simple_GNN_7_loop/809vfk5y
+2025-05-29 12:20:21,449 INFO    MainThread:238477 [wandb_run.py:_atexit_cleanup():2538] got exitcode: 0
+2025-05-29 12:20:21,449 INFO    MainThread:238477 [wandb_run.py:_restore():2520] restore
+2025-05-29 12:20:21,450 INFO    MainThread:238477 [wandb_run.py:_restore():2526] restore done
+2025-05-29 12:20:22,567 INFO    MainThread:238477 [wandb_run.py:_footer_history_summary_info():4188] rendering history
+2025-05-29 12:20:22,567 INFO    MainThread:238477 [wandb_run.py:_footer_history_summary_info():4220] rendering summary
+2025-05-29 12:20:22,568 INFO    MainThread:238477 [wandb_run.py:_footer_sync_info():4149] logging synced files
