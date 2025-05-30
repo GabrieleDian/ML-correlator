@@ -4,7 +4,8 @@ import networkx as nx
 from torch_geometric.data import Data
 from torch_geometric.utils import degree
 from torch_geometric.transforms import AddLaplacianEigenvectorPE
-from typing import List, Optional, Dict, Set
+from typing import List, Optional, Tuple
+from sklearn.preprocessing import StandardScaler
 
 
 class GraphBuilder:
@@ -22,7 +23,7 @@ class GraphBuilder:
         'dual': ['dual_degree', 'dual_clustering', 'dual_degree_ratio', 'dual_betweenness', 'face_edge_ratio'],
         'centrality': ['betweenness_centrality', 'closeness_centrality', 'eigenvector_centrality', 
                       'clustering_coefficient', 'pagerank'],
-        'laplacian_pe': ['laplacian_eigenvectors']  # Added by AddLaplacianEigenvectorPE
+        'laplacian_pe': ['laplacian_eigenvectors']  
     }
     
     def __init__(self, solid_edges, coeff, node_labels=None, 
@@ -338,6 +339,59 @@ class GraphBuilder:
                              if group in self.FEATURE_GROUPS}
         }
         return info
+
+def create_graph_dataset(graphs_data: List[Tuple[List, int]], 
+                        feature_config) -> List[Data]:
+    """
+    Create dataset from graph data using improved GraphBuilder
+    
+    Args:
+        graphs_data: List of (edges, label) tuples
+        feature_config: Configuration for GraphBuilder
+        
+    Returns:
+        List of PyTorch Geometric Data objects
+    """
+    
+    dataset = []
+    all_features = []
+    
+    # First pass: collect all features for normalization
+    print("Extracting features...")
+    for edges, label in graphs_data:
+        builder = GraphBuilder(
+            solid_edges=edges,
+            coeff=label,
+            **feature_config
+        )
+        data = builder.build()
+        dataset.append(data)
+        all_features.append(data.x.numpy())
+    
+    # Compute normalization statistics
+    all_features = np.vstack(all_features)
+    scaler = StandardScaler()
+    scaler.fit(all_features)
+    
+    # Second pass: normalize features
+    print("Normalizing features...")
+    for i, data in enumerate(dataset):
+        # Get the starting index for this graph's features
+        start_idx = sum(d.num_nodes for d in dataset[:i])
+        end_idx = start_idx + data.num_nodes
+        
+        # Normalize
+        normalized_features = scaler.transform(data.x.numpy())
+        data.x = torch.FloatTensor(normalized_features)
+    
+    print(f"Created dataset with {len(dataset)} graphs")
+    print(f"Feature dimensions: {dataset[0].x.shape[1]}")
+    print(f"Feature names: {dataset[0].feature_names}")
+    
+    return dataset, scaler
+
+
+
 
 
 # Example usage:
