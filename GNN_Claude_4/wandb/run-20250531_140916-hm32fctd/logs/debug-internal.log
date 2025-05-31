@@ -1,0 +1,16 @@
+{"time":"2025-05-31T14:09:16.999004787+02:00","level":"INFO","msg":"stream: starting","core version":"0.19.11","symlink path":"/home/gabriele/Documents/GitHub/ML-correlator/GNN_Claude_4/wandb/run-20250531_140916-hm32fctd/logs/debug-core.log"}
+{"time":"2025-05-31T14:09:17.357811175+02:00","level":"INFO","msg":"created new stream","id":"hm32fctd"}
+{"time":"2025-05-31T14:09:17.357828423+02:00","level":"INFO","msg":"stream: started","id":"hm32fctd"}
+{"time":"2025-05-31T14:09:17.357884179+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"hm32fctd"}
+{"time":"2025-05-31T14:09:17.357890908+02:00","level":"INFO","msg":"handler: started","stream_id":"hm32fctd"}
+{"time":"2025-05-31T14:09:17.357899366+02:00","level":"INFO","msg":"sender: started","stream_id":"hm32fctd"}
+{"time":"2025-05-31T14:09:17.667030978+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-05-31T14:09:42.172777677+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-05-31T14:09:42.172821286+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-05-31T14:09:43.060499926+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-05-31T14:09:43.175360781+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading history steps 45-69, summary","runtime_seconds":0.11429952}],"total_operations":1}}
+{"time":"2025-05-31T14:09:43.373626546+02:00","level":"INFO","msg":"stream: closing","id":"hm32fctd"}
+{"time":"2025-05-31T14:09:43.373640129+02:00","level":"INFO","msg":"handler: closed","stream_id":"hm32fctd"}
+{"time":"2025-05-31T14:09:43.373647347+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"hm32fctd"}
+{"time":"2025-05-31T14:09:43.373652295+02:00","level":"INFO","msg":"sender: closed","stream_id":"hm32fctd"}
+{"time":"2025-05-31T14:09:43.373684484+02:00","level":"INFO","msg":"stream: closed","id":"hm32fctd"}

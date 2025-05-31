@@ -1,0 +1,5 @@
+2025-05-30 17:52:36,941 INFO    MainThread:367395 [wandb_init.py:setup_run_log_directory():724] Logging user logs to /home/gabriele/Documents/GitHub/ML-correlator/GNN_Claude_4/wandb/run-20250530_175236-yqe3s3eq/logs/debug.log
+2025-05-30 17:52:36,941 INFO    MainThread:367395 [wandb_init.py:setup_run_log_directory():725] Logging internal logs to /home/gabriele/Documents/GitHub/ML-correlator/GNN_Claude_4/wandb/run-20250530_175236-yqe3s3eq/logs/debug-internal.log
+2025-05-30 17:52:36,941 INFO    MainThread:367395 [wandb_init.py:init():852] calling init triggers
+2025-05-30 17:52:36,941 INFO    MainThread:367395 [wandb_init.py:init():857] wandb.init called with sweep_config: {}
+config: {'model_name': 'gin', 'hidden_channels': 64, 'num_layers': 3, 'dropout': 0.2, 'lr': 0.1, 'weight_decay': 0.0005, 'epochs': 70, 'batch_size': 32, 'k_folds': 4, 'early_stop_patience': 20, 'scheduler_type': 'onecycle', 'use_wandb': True, 'project': 'gnn-planar-graphs', 'experiment_name': 'balanced_features_gin', 'in_channels': 13, '_wandb': {}}

@@ -1,0 +1,31 @@
+{
+  "os": "Linux-6.8.0-52-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.12.3",
+  "startedAt": "2025-05-30T15:43:39.331686Z",
+  "program": "/home/gabriele/Documents/GitHub/ML-correlator/GNN_Claude_4/Claude_main_v2.ipynb",
+  "codePath": "GNN_Claude_4/Claude_main_v2.ipynb",
+  "git": {
+    "remote": "https://github.com/GabrieleDian/ML-correlator.git",
+    "commit": "0801b2e8d95e5e167a22e0a05c361c1bae78b672"
+  },
+  "email": "dian.gabriele@gmail.com",
+  "root": "/home/gabriele/Documents/GitHub/ML-correlator/GNN_Claude_4",
+  "host": "gabriele-Latitude-5410",
+  "executable": "/home/gabriele/Documents/GitHub/ML-correlator/.venv/bin/python",
+  "codePathLocal": "Claude_main_v2.ipynb",
+  "cpu_count": 4,
+  "cpu_count_logical": 8,
+  "disk": {
+    "/": {
+      "total": "502392610816",
+      "used": "176367857664"
+    }
+  },
+  "memory": {
+    "total": "16385368064"
+  },
+  "cpu": {
+    "count": 4,
+    "countLogical": 8
+  }
+}
