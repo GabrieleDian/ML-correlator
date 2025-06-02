@@ -1,0 +1,7 @@
+{"time":"2025-06-02T10:40:35.547528853+02:00","level":"INFO","msg":"stream: starting","core version":"0.19.11","symlink path":"/home/gabriele/Documents/GitHub/ML-correlator/GNN_Claude_4/wandb/run-20250602_104035-mf1v91ln/logs/debug-core.log"}
+{"time":"2025-06-02T10:40:35.846361202+02:00","level":"INFO","msg":"created new stream","id":"mf1v91ln"}
+{"time":"2025-06-02T10:40:35.846385233+02:00","level":"INFO","msg":"stream: started","id":"mf1v91ln"}
+{"time":"2025-06-02T10:40:35.846401314+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"mf1v91ln"}
+{"time":"2025-06-02T10:40:35.846447241+02:00","level":"INFO","msg":"sender: started","stream_id":"mf1v91ln"}
+{"time":"2025-06-02T10:40:35.846484267+02:00","level":"INFO","msg":"handler: started","stream_id":"mf1v91ln"}
+{"time":"2025-06-02T10:40:36.175757829+02:00","level":"INFO","msg":"Starting system monitor"}

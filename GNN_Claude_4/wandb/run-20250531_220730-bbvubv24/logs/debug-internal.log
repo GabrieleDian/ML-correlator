@@ -1,0 +1,7 @@
+{"time":"2025-05-31T22:07:30.17531808+02:00","level":"INFO","msg":"stream: starting","core version":"0.19.11","symlink path":"/home/gabriele/Documents/GitHub/ML-correlator/GNN_Claude_4/wandb/run-20250531_220730-bbvubv24/logs/debug-core.log"}
+{"time":"2025-05-31T22:07:30.522045695+02:00","level":"INFO","msg":"created new stream","id":"bbvubv24"}
+{"time":"2025-05-31T22:07:30.522077013+02:00","level":"INFO","msg":"stream: started","id":"bbvubv24"}
+{"time":"2025-05-31T22:07:30.522096263+02:00","level":"INFO","msg":"handler: started","stream_id":"bbvubv24"}
+{"time":"2025-05-31T22:07:30.522116458+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"bbvubv24"}
+{"time":"2025-05-31T22:07:30.522116626+02:00","level":"INFO","msg":"sender: started","stream_id":"bbvubv24"}
+{"time":"2025-05-31T22:07:30.832260133+02:00","level":"INFO","msg":"Starting system monitor"}
