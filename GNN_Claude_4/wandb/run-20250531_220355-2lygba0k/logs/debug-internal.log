@@ -1,0 +1,39 @@
+{"time":"2025-05-31T22:03:55.694504168+02:00","level":"INFO","msg":"stream: starting","core version":"0.19.11","symlink path":"/home/gabriele/Documents/GitHub/ML-correlator/GNN_Claude_4/wandb/run-20250531_220355-2lygba0k/logs/debug-core.log"}
+{"time":"2025-05-31T22:03:55.990690387+02:00","level":"INFO","msg":"created new stream","id":"2lygba0k"}
+{"time":"2025-05-31T22:03:55.990731042+02:00","level":"INFO","msg":"stream: started","id":"2lygba0k"}
+{"time":"2025-05-31T22:03:55.990779477+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"2lygba0k"}
+{"time":"2025-05-31T22:03:55.990785019+02:00","level":"INFO","msg":"sender: started","stream_id":"2lygba0k"}
+{"time":"2025-05-31T22:03:55.990818535+02:00","level":"INFO","msg":"handler: started","stream_id":"2lygba0k"}
+{"time":"2025-05-31T22:03:56.199312924+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-05-31T22:04:46.578755039+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-31T22:04:46.620567007+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-31T22:04:46.620602561+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-31T22:04:46.620607532+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-31T22:04:46.657046689+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-31T22:04:46.659062289+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-31T22:04:46.745295493+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-31T22:04:46.748367399+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-31T22:04:46.7618052+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-31T22:04:46.76645187+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-31T22:04:46.811825235+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-31T22:04:46.816250511+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-31T22:04:47.198904344+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-31T22:04:47.201623419+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-31T22:04:47.217680172+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-31T22:04:47.22186017+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-31T22:04:47.260642813+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-31T22:04:47.262094427+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-31T22:04:49.326340144+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-31T22:04:49.329264658+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-31T22:04:50.908662182+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-31T22:04:50.909078872+02:00","level":"INFO","msg":"Resuming system monitor"}
+{"time":"2025-05-31T22:04:56.139800895+02:00","level":"INFO","msg":"Pausing system monitor"}
+{"time":"2025-05-31T22:04:56.221985951+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-05-31T22:04:56.222112705+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-05-31T22:04:56.984804712+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-05-31T22:04:57.225071442+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading data","runtime_seconds":0.183989982}],"total_operations":1}}
+{"time":"2025-05-31T22:04:57.248199467+02:00","level":"INFO","msg":"stream: closing","id":"2lygba0k"}
+{"time":"2025-05-31T22:04:57.248219429+02:00","level":"INFO","msg":"handler: closed","stream_id":"2lygba0k"}
+{"time":"2025-05-31T22:04:57.248237039+02:00","level":"INFO","msg":"sender: closed","stream_id":"2lygba0k"}
+{"time":"2025-05-31T22:04:57.248228961+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"2lygba0k"}
+{"time":"2025-05-31T22:04:57.24828118+02:00","level":"INFO","msg":"stream: closed","id":"2lygba0k"}

@@ -127,20 +127,16 @@ def train(config, dataset):
         num_layers=getattr(config, 'num_layers', 3)
     ).to(device)
 
-    # Use a reasonable learning rate
-    lr = getattr(config, 'lr', 0.001)
-    if config.scheduler_type == 'onecycle' and lr > 0.01:
-        print(f"Warning: Learning rate {lr} is too high for OneCycleLR. Using 0.003 instead.")
-        lr = 0.003
-    
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=config.weight_decay)
 
-    # Configure scheduler
+    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
+
+    
+     # Configure scheduler
     scheduler_type = getattr(config, 'scheduler_type', None)
     if scheduler_type == 'onecycle':
         scheduler = torch.optim.lr_scheduler.OneCycleLR(
             optimizer, 
-            max_lr=lr * 3,  # Peak at 3x base lr
+            max_lr=config.lr * 3,  # Peak at 3x base lr
             epochs=config.epochs,
             steps_per_epoch=len(train_loader),
             pct_start=0.3,  # Spend 30% of time in warmup
