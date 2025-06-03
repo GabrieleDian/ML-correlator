@@ -1,0 +1,91 @@
+# Example WandB Sweep Configuration for GNN Hyperparameter Optimization
+
+```yaml
+# Name of the sweep
+sweep_name: gnn_hyperparameter_optimization
+
+# Hyperparameter ranges to search over (grid search)
+param_ranges:
+  hidden_channels: [32, 64, 128]
+  num_layers: [2, 3, 4]
+  dropout: [0.1, 0.2, 0.3]
+  lr: [0.001, 0.003, 0.01]
+  weight_decay: [0, 0.0001, 0.0005]
+
+# Fixed configuration parameters (not swept)
+fixed_config:
+  model_name: gin
+  epochs: 100
+  batch_size: 32
+  scheduler_type: onecycle
+  save_models: false
+
+# Optional: Subset configurations for different experiments
+experiments:
+  # Quick test with fewer combinations
+  quick_test:
+    param_ranges:
+      hidden_channels: [32, 64]
+      num_layers: [2, 3]
+      dropout: [0.1, 0.2]
+      lr: [0.001, 0.01]
+      weight_decay: [0, 0.0005]
+    fixed_config:
+      epochs: 50
+      
+  # Deep architecture search
+  deep_search:
+    param_ranges:
+      hidden_channels: [64, 128, 256]
+      num_layers: [3, 4, 5, 6]
+      dropout: [0.2, 0.3, 0.4]
+      lr: [0.0001, 0.0003, 0.001]
+      weight_decay: [0.0001, 0.0005, 0.001]
+      
+  # Learning rate focused search
+  lr_search:
+    param_ranges:
+      hidden_channels: [64]
+      num_layers: [3]
+      dropout: [0.2]
+      lr: [0.0001, 0.0003, 0.001, 0.003, 0.01, 0.03]
+      weight_decay: [0.0001]
+```
+
+## Usage Instructions
+
+1. **Basic usage with full configuration:**
+   ```python
+   from sweep_utils import run_sweep_from_config
+   sweep_id = run_sweep_from_config('sweep_config.yaml', dataset, 'your-project-name')
+   ```
+
+2. **Using a specific experiment configuration:**
+   ```python
+   import yaml
+   
+   # Load config and select experiment
+   with open('sweep_config.yaml', 'r') as f:
+       config = yaml.safe_load(f)
+   
+   # Use quick_test configuration
+   quick_config = config['experiments']['quick_test']
+   sweep_id = run_sweep(
+       param_ranges=quick_config['param_ranges'],
+       dataset=dataset,
+       project_name='your-project-name',
+       fixed_config=quick_config['fixed_config']
+   )
+   ```
+
+3. **Modifying for your use case:**
+   - Adjust `param_ranges` to change which hyperparameters to search and their values
+   - Modify `fixed_config` for parameters that should remain constant
+   - Add new experiments for different search strategies
+   - Change `model_name` to try different architectures ('gin', 'gat', 'hybrid', 'planar', 'simple')
+
+4. **Total combinations calculation:**
+   - Full config: 3×3×3×3×3 = 243 runs
+   - Quick test: 2×2×2×2×2 = 32 runs
+   - Deep search: 3×4×3×3×3 = 324 runs
+   - LR search: 1×1×1×6×1 = 6 runs

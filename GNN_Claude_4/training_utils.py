@@ -131,7 +131,7 @@ def train(config, dataset):
     optimizer = torch.optim.Adam(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
 
     
-     # Configure scheduler
+    # Configure scheduler
     scheduler_type = getattr(config, 'scheduler_type', None)
     if scheduler_type == 'onecycle':
         scheduler = torch.optim.lr_scheduler.OneCycleLR(
