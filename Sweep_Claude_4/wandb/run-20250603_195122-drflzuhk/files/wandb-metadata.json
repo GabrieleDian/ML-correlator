@@ -1,0 +1,31 @@
+{
+  "os": "Linux-6.8.0-52-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.12.3",
+  "startedAt": "2025-06-03T17:51:23.719350Z",
+  "program": "/home/gabriele/Documents/GitHub/ML-correlator/Sweep_Claude_4/sweep_notebook.ipynb",
+  "codePath": "Sweep_Claude_4/sweep_notebook.ipynb",
+  "git": {
+    "remote": "https://github.com/GabrieleDian/ML-correlator.git",
+    "commit": "b39ccf8bd4a3e7a97cf738243e9f60da0899d88c"
+  },
+  "email": "dian.gabriele@gmail.com",
+  "root": "/home/gabriele/Documents/GitHub/ML-correlator/Sweep_Claude_4",
+  "host": "gabriele-Latitude-5410",
+  "executable": "/home/gabriele/Documents/GitHub/ML-correlator/.venv/bin/python",
+  "codePathLocal": "sweep_notebook.ipynb",
+  "cpu_count": 4,
+  "cpu_count_logical": 8,
+  "disk": {
+    "/": {
+      "total": "502392610816",
+      "used": "204613365760"
+    }
+  },
+  "memory": {
+    "total": "16385363968"
+  },
+  "cpu": {
+    "count": 4,
+    "countLogical": 8
+  }
+}
