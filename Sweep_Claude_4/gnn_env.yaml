@@ -1,0 +1,36 @@
+name: gnn-sweep-env
+channels:
+  - pytorch
+  - pyg
+  - conda-forge
+  - defaults
+dependencies:
+  # Python
+  - python=3.10
+
+  # Core PyTorch with GPU support (assumes CUDA 12.1, change if needed)
+  - pytorch=2.7.0
+  - torchvision=0.22.0
+  - torchaudio=2.7.0
+  - pytorch-cuda=12.1  # <- Change to match your cluster CUDA version
+  - pip
+
+  # PyTorch Geometric and extensions
+  - pyg::torch-geometric=2.6.1
+  - pyg::torch-scatter=2.1.2
+
+  # ML and data science libraries
+  - numpy=2.2.6
+  - pandas=2.2.3
+  - scikit-learn=1.6.1
+
+  # Graph processing
+  - networkx=3.4.2
+
+  # Visualization
+  - matplotlib=3.10.3
+
+  # Logging and configuration
+  - pyyaml=6.0.2
+  - wandb=0.19.11
+
