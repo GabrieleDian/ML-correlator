@@ -1,0 +1,6 @@
+degree
+betweenness
+clustering
+closeness
+pagerank
+face_count
