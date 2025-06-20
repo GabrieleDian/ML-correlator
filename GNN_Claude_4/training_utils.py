@@ -110,10 +110,10 @@ def train(config, dataset):
 
     if getattr(config, 'use_wandb', False):
         wandb.init(
-            project=config.project,
-            name=getattr(config, 'experiment_name', config.model_name),
-            config=config.__dict__
-        )
+        project=config.project,
+        name=getattr(config, 'experiment_name', config.model_name),
+        config=config.__dict__
+    )
 
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False)
