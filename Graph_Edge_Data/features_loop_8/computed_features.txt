@@ -4,3 +4,4 @@ clustering
 closeness
 pagerank
 face_count
+laplacian_eigenvalues

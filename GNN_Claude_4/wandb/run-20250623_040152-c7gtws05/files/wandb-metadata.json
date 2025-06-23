@@ -1,0 +1,31 @@
+{
+  "os": "Linux-6.8.0-49-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.12.3",
+  "startedAt": "2025-06-23T02:01:53.022827Z",
+  "program": "/home/rigers/Documents/GitHub/ML-correlator/GNN_Claude_4/Claude_main_v2.ipynb",
+  "codePath": "GNN_Claude_4/Claude_main_v2.ipynb",
+  "git": {
+    "remote": "https://github.com/GabrieleDian/ML-correlator.git",
+    "commit": "27992b85a5cb0f78bce0eae8b7eb3c52c9f3e939"
+  },
+  "email": "aliajrigers@gmail.com",
+  "root": "/home/rigers/Documents/GitHub/ML-correlator/GNN_Claude_4",
+  "host": "rigersaliaj",
+  "executable": "/home/rigers/Documents/GitHub/Human-Learning/.venv/bin/python",
+  "codePathLocal": "Claude_main_v2.ipynb",
+  "cpu_count": 4,
+  "cpu_count_logical": 8,
+  "disk": {
+    "/": {
+      "total": "250375106560",
+      "used": "145021673472"
+    }
+  },
+  "memory": {
+    "total": "16569913344"
+  },
+  "cpu": {
+    "count": 4,
+    "countLogical": 8
+  }
+}
