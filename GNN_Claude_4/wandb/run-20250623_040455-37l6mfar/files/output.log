@@ -1,0 +1,19 @@
+
+Starting training...
+Model architecture: gin
+Hidden dim: 64, Layers: 3
+Initial LR: 0.0003599999999999992
+Epoch   0/100: Train Loss=0.6804, Acc=0.5913, Val Loss=0.6314, Acc=0.6411, LR=0.000384
+Epoch  10/100: Train Loss=0.5071, Acc=0.7590, Val Loss=0.5194, Acc=0.7596, LR=0.002927
+Epoch  20/100: Train Loss=0.4977, Acc=0.7712, Val Loss=0.5058, Acc=0.7422, LR=0.007226
+Epoch  30/100: Train Loss=0.4819, Acc=0.7651, Val Loss=0.4926, Acc=0.7143, LR=0.008995
+Epoch  40/100: Train Loss=0.4939, Acc=0.7633, Val Loss=0.4571, Acc=0.7875, LR=0.008460
+Epoch  50/100: Train Loss=0.4031, Acc=0.8201, Val Loss=0.3909, Acc=0.8293, LR=0.007141
+Epoch  60/100: Train Loss=0.3605, Acc=0.8428, Val Loss=0.4094, Acc=0.8049, LR=0.005298
+Epoch  70/100: Train Loss=0.3056, Acc=0.8638, Val Loss=0.4697, Acc=0.8118, LR=0.003298
+Epoch  80/100: Train Loss=0.2321, Acc=0.8952, Val Loss=0.4288, Acc=0.8397, LR=0.001535
+Epoch  90/100: Train Loss=0.1787, Acc=0.9188, Val Loss=0.4378, Acc=0.8223, LR=0.000360
+Epoch  99/100: Train Loss=0.1504, Acc=0.9293, Val Loss=0.4678, Acc=0.8293, LR=0.000000
+
+Best validation accuracy: 0.8571 at epoch 61
+[34m[1mwandb[0m: [32m[41mERROR[0m The nbformat package was not found. It is required to save notebook history.

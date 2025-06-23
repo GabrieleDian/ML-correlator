@@ -6,6 +6,7 @@ from pathlib import Path
 from tqdm import tqdm
 import os
 from joblib import Parallel, delayed
+from scipy.linalg import eigvals
 
 
 def load_graph_edges(loop_order, data_path=None):
@@ -38,6 +39,25 @@ def edges_to_networkx(edges):
     
     return G, len(nodes)
 
+def compute_laplacian_eigenvalues_normalized(graphs_batch):
+    """Compute normalized Laplacian eigenvalues for a batch of graphs."""
+    features = []
+
+    for edges in graphs_batch:
+        G, n_nodes= edges_to_networkx(edges)
+        
+        # Get the normalized Laplacian matrix
+        normalized_laplacian = nx.normalized_laplacian_matrix(G).toarray()
+        
+        # Compute eigenvalues
+        eigenvalues = eigvals(normalized_laplacian)
+        
+        # Sort eigenvalues in ascending order
+        eigenvalues = np.sort(np.real(eigenvalues))
+        
+        features.append(eigenvalues.tolist())
+    
+    return features
 
 def compute_degree_features(graphs_batch):
     """Compute degree for a batch of graphs."""
@@ -140,6 +160,7 @@ def compute_face_count_features(graphs_batch):
 
 # Dictionary mapping feature names to their computation functions
 FEATURE_FUNCTIONS = {
+    'laplacian_eigenvalues_normalized': compute_laplacian_eigenvalues_normalized,
     'degree': compute_degree_features,
     'betweenness': compute_betweenness_features,
     'clustering': compute_clustering_features,

@@ -1,0 +1,7 @@
+laplacian_eigenvalues_normalized
+degree
+betweenness
+clustering
+closeness
+pagerank
+face_count
