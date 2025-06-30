@@ -1,0 +1,35 @@
+{
+  "os": "Linux-6.8.0-52-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.12.3",
+  "startedAt": "2025-06-30T12:42:31.552936Z",
+  "args": [
+    "--config",
+    "config.yaml"
+  ],
+  "program": "/home/gabriele/Documents/GitHub/ML-correlator/Cluster_third_try/one_run_simple.py",
+  "codePath": "Cluster_third_try/one_run_simple.py",
+  "git": {
+    "remote": "https://github.com/GabrieleDian/ML-correlator.git",
+    "commit": "858f87d1baf1f5cc4e55a14bae40059eee2a671f"
+  },
+  "email": "dian.gabriele@gmail.com",
+  "root": "/home/gabriele/Documents/GitHub/ML-correlator/Cluster_third_try",
+  "host": "gabriele-Latitude-5410",
+  "executable": "/home/gabriele/Documents/GitHub/ML-correlator/.venv/bin/python",
+  "codePathLocal": "one_run_simple.py",
+  "cpu_count": 4,
+  "cpu_count_logical": 8,
+  "disk": {
+    "/": {
+      "total": "502392610816",
+      "used": "199108702208"
+    }
+  },
+  "memory": {
+    "total": "16385372160"
+  },
+  "cpu": {
+    "count": 4,
+    "countLogical": 8
+  }
+}
