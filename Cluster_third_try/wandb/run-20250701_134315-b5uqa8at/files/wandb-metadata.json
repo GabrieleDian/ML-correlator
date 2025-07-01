@@ -1,0 +1,35 @@
+{
+  "os": "Linux-6.8.0-49-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.12.3",
+  "startedAt": "2025-07-01T11:43:15.970456Z",
+  "args": [
+    "--loop",
+    "7"
+  ],
+  "program": "/home/rigers/Documents/GitHub/ML-correlator/Cluster_third_try/one_run_simple.py",
+  "codePath": "Cluster_third_try/one_run_simple.py",
+  "git": {
+    "remote": "https://github.com/GabrieleDian/ML-correlator.git",
+    "commit": "935fdc94a011c0073303e31f8ba48b017b8de700"
+  },
+  "email": "aliajrigers@gmail.com",
+  "root": "/home/rigers/Documents/GitHub/ML-correlator/Cluster_third_try",
+  "host": "rigersaliaj",
+  "executable": "/home/rigers/Documents/GitHub/Human-Learning/.venv/bin/python",
+  "codePathLocal": "one_run_simple.py",
+  "cpu_count": 4,
+  "cpu_count_logical": 8,
+  "disk": {
+    "/": {
+      "total": "250375106560",
+      "used": "145386831872"
+    }
+  },
+  "memory": {
+    "total": "16569905152"
+  },
+  "cpu": {
+    "count": 4,
+    "countLogical": 8
+  }
+}
