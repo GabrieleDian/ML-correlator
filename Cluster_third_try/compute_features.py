@@ -6,7 +6,7 @@ from pathlib import Path
 from tqdm import tqdm
 import os
 from joblib import Parallel, delayed
-from scipy.linalg import eigvals
+from scipy.linalg import eigh
 
 
 def load_graph_edges(loop_order, data_path=None):
@@ -39,26 +39,47 @@ def edges_to_networkx(edges):
     
     return G, len(nodes)
 
-def compute_laplacian_eigenvalues_normalized(graphs_batch):
-    """Compute normalized Laplacian eigenvalues for a batch of graphs."""
+# Number of eigenvectors to compute
+k=3
+# Compute the top k eigenvectors for the regular Laplacian of each graph
+def compute_ith_eigenvector(graphs_batch, k=k,i=0):
+    """Compute k eigenvectors with the largest eigenvalues for regular Laplacian."""
+    # Initialize list to store k different features
     features = []
 
     for edges in graphs_batch:
-        G, n_nodes= edges_to_networkx(edges)
+        G, n_nodes = edges_to_networkx(edges)
         
-        # Get the normalized Laplacian matrix
-        normalized_laplacian = nx.normalized_laplacian_matrix(G).toarray()
+        # Get the regular Laplacian matrix
+        laplacian_matrix = nx.laplacian_matrix(G).toarray()
         
-        # Compute eigenvalues
-        eigenvalues = eigvals(normalized_laplacian)
+        # Compute eigenvalues and eigenvectors
+        eigenvalues, eigenvectors = eigh(laplacian_matrix)
         
-        # Sort eigenvalues in ascending order
-        eigenvalues = np.sort(np.real(eigenvalues))
+        # Sort by eigenvalues in descending order (largest first)
+        idx = np.argsort(np.real(eigenvalues))[::-1]
+        eigenvalues = eigenvalues[idx]
+        eigenvectors = eigenvectors[:, idx]
+
+        # Take the first k eigenvectors (corresponding to largest eigenvalues)
+        top_k_eigenvectors = eigenvectors[:, :k]
         
-        features.append(eigenvalues.tolist())
-    
+        # Take real parts
+        top_k_eigenvectors = np.round(np.real(top_k_eigenvectors),8)
+        
+        features.append(top_k_eigenvectors[:,i-1].tolist())
     return features
 
+# Create a function that takes only the i-th output of the top_k_eigenvector function
+def create_eigen_function(i):
+    """Create a function that computes only the i-th eigenvector."""
+    def eigen_function(graphs_batch):
+        return compute_ith_eigenvector(graphs_batch, k=k, i=i)
+    return eigen_function
+# Create a dictionary of functions for each eigenvector
+eigenvector_functions = {f'eigen_{i}': create_eigen_function(i) for i in range(1, k+1)}
+
+# Compute degree features for a batch of graphs
 def compute_degree_features(graphs_batch):
     """Compute degree for a batch of graphs."""
     features = []
@@ -93,7 +114,7 @@ def compute_clustering_features(graphs_batch):
         clustering = nx.clustering(G)
         clustering_list = [clustering[i] for i in range(n_nodes)]
         features.append(clustering_list)
-    
+
     return features
 
 
@@ -157,10 +178,12 @@ def compute_face_count_features(graphs_batch):
     
     return features
 
+# Create a seperate dictionary for the eigenvector features
+#eigenvector_dict = {f'eigen_{i}': compute_top_k_eigenvector(k=k, i=i) for i in range(k)}
 
 # Dictionary mapping feature names to their computation functions
 FEATURE_FUNCTIONS = {
-    'laplacian_eigenvalues_normalized': compute_laplacian_eigenvalues_normalized,
+    **eigenvector_functions,  # Add eigenvector functions
     'degree': compute_degree_features,
     'betweenness': compute_betweenness_features,
     'clustering': compute_clustering_features,
@@ -168,8 +191,6 @@ FEATURE_FUNCTIONS = {
     'pagerank': compute_pagerank_features,
     'face_count': compute_face_count_features
 }
-
-
 def pad_features(features_list, max_nodes):
     """Pad features to have consistent size across all graphs."""
     padded = []
