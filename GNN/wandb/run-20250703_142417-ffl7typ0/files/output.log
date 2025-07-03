@@ -1,0 +1,47 @@
+
+Starting training...
+Model architecture: gin
+Hidden dim: 64, Layers: 3
+Initial LR: 5.999999999999994e-05
+Epoch   0/150: Train Loss=0.6203, Acc=0.6468, Val Loss=0.5720, Acc=0.6816, LR=0.000062
+Epoch  10/150: Train Loss=0.4838, Acc=0.7456, Val Loss=0.4866, Acc=0.7381, LR=0.000262
+Epoch  20/150: Train Loss=0.4348, Acc=0.7839, Val Loss=0.4505, Acc=0.7696, LR=0.000705
+Epoch  30/150: Train Loss=0.3941, Acc=0.8129, Val Loss=0.4018, Acc=0.8165, LR=0.001183
+Epoch  40/150: Train Loss=0.3571, Acc=0.8329, Val Loss=0.4140, Acc=0.7982, LR=0.001472
+Epoch  50/150: Train Loss=0.3354, Acc=0.8428, Val Loss=0.3491, Acc=0.8354, LR=0.001488
+Traceback (most recent call last):
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple.py", line 123, in <module>
+    main()
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple.py", line 106, in main
+    results = train(config, dataset)
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/training_utils.py", line 164, in train
+    train_loss, train_acc, train_metrics = train_epoch(
+                                           ^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/training_utils.py", line 31, in train_epoch
+    for batch in train_loader:
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/utils/data/dataloader.py", line 733, in __next__
+    data = self._next_data()
+           ^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/utils/data/dataloader.py", line 789, in _next_data
+    data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/utils/data/_utils/fetch.py", line 55, in fetch
+    return self.collate_fn(data)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch_geometric/loader/dataloader.py", line 20, in __call__
+    return Batch.from_data_list(batch, self.follow_batch,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch_geometric/data/batch.py", line 76, in from_data_list
+    batch, slice_dict, inc_dict = collate(
+                                  ^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch_geometric/data/collate.py", line 84, in collate
+    value, slices, incs = _collate(attr, values, data_list, stores,
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch_geometric/data/collate.py", line 133, in _collate
+    incs = get_incs(key, values, data_list, stores)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch_geometric/data/collate.py", line 269, in get_incs
+    repeats = torch.tensor(repeats)
+              ^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
