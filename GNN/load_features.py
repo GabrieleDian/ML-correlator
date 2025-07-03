@@ -116,7 +116,7 @@ if __name__ == "__main__":
     print("Testing feature loading...")
     
     # Check what features are available
-    loop = 8
+    loop = 7
     available = get_available_features(loop)
     print(f"\nAvailable features for loop {loop}: {available}")
     

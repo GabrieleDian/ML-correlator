@@ -46,34 +46,53 @@ class SimpleGraphBuilder:
         if selected_features is None:
             selected_features = list(self.features_dict.keys())
         
-        # Extract features for this graph
-        node_features = []
+                # Separate adjacency features from scalar features
+        adjacency_features = []
+        scalar_features = []
+        
         for feat_name in selected_features:
             if feat_name not in self.features_dict:
                 raise ValueError(f"Feature {feat_name} not available")
             
-            # Get features for this graph (already padded)
+            # Get features for this graph
             feat_array = self.features_dict[feat_name][self.graph_idx]
             
             # Only keep features for actual nodes (remove padding)
             feat_array = feat_array[:self.num_nodes]
             
-            node_features.append(feat_array.reshape(-1, 1))
-        
-        # Combine features
-        if node_features:
-            x = np.hstack(node_features)
-        else:
-            # Fallback: use degree
-            degrees = np.zeros(self.num_nodes)
-            for i, j in self.edge_list:
-                if i < self.num_nodes:
-                    degrees[i] += 1
-            x = degrees.reshape(-1, 1)
-        
-        # Convert to tensor
-        x = torch.FloatTensor(x)
-        y = torch.tensor(self.label, dtype=torch.long)
+            if feat_name == 'adjacency_columns':
+                # feat_array should be (num_nodes, num_nodes)
+                #print(f"DEBUG: adjacency feat_array shape: {feat_array.shape}")
+                adjacency_features.append(feat_array)
+            else:
+                # Scalar features
+                #print(f"DEBUG: scalar {feat_name} feat_array shape: {feat_array.shape}")
+                scalar_features.append(feat_array.reshape(-1, 1))
+    
+            # Combine features
+            if adjacency_features and not scalar_features:
+                # Only adjacency features
+                x = np.concatenate(adjacency_features, axis=1)
+            elif scalar_features and not adjacency_features:
+                # Only scalar features
+                x = np.hstack(scalar_features)
+            elif adjacency_features and scalar_features:
+                # Both types - concatenate adjacency first, then scalars
+                adj_features = np.concatenate(adjacency_features, axis=1)
+                scal_features = np.hstack(scalar_features)
+                x = np.hstack([adj_features, scal_features])
+            else:
+                # Fallback: use degree
+                degrees = np.zeros(self.num_nodes)
+                for i, j in self.edge_list:
+                    if i < self.num_nodes:
+                        degrees[i] += 1
+                x = degrees.reshape(-1, 1)
+            
+            print(f"DEBUG: Final x shape: {x.shape}")
+                    # Convert to tensor
+            x = torch.FloatTensor(x)
+            y = torch.tensor(self.label, dtype=torch.long)
         
         # Create Data object
         data = Data(x=x, edge_index=edge_index, num_nodes=self.num_nodes, y=y)
