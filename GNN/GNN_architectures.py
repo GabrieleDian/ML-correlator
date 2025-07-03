@@ -79,8 +79,6 @@ class GINNet(nn.Module):
         if batch is None:
             batch = torch.zeros(x.size(0), dtype=torch.long, device=x.device)
         x = global_add_pool(x, batch)
-        
-        # Classification
         return self.classifier(x)
 
 
