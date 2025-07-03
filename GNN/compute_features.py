@@ -90,8 +90,19 @@ def compute_degree_features(graphs_batch):
         features.append(degrees)
     
     return features
+# Compute adjacency matrix columns for a batch of graphs
+def adjacency_column_features(graphs_batch):
+    """Compute adjacency matrix columns for a batch of graphs."""
+    features = []
+    for edges in graphs_batch:
+        G, n_nodes = edges_to_networkx(edges)
+        adj_matrix = nx.adjacency_matrix(G, nodelist=range(n_nodes)).toarray()
+        # Each node gets its corresponding column
+        adj_columns = [adj_matrix[:, i] for i in range(n_nodes)]
+        features.append(adj_columns)
+    return features
 
-
+# Compute betweenness, clustering, closeness, pagerank, and face count features
 def compute_betweenness_features(graphs_batch):
     """Compute betweenness centrality for a batch of graphs."""
     features = []
@@ -184,6 +195,7 @@ def compute_face_count_features(graphs_batch):
 # Dictionary mapping feature names to their computation functions
 FEATURE_FUNCTIONS = {
     **eigenvector_functions,  # Add eigenvector functions
+    'adjacency_columns': adjacency_column_features,
     'degree': compute_degree_features,
     'betweenness': compute_betweenness_features,
     'clustering': compute_clustering_features,
