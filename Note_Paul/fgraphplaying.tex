@@ -1,0 +1,268 @@
+\documentclass[english,11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{mathtools}
+\usepackage{amssymb,amsmath}
+\usepackage{babel}
+\usepackage{hyperref}
+
+\usepackage{quiver}
+\tikzcdset{diagrams={nodes={inner sep=0pt}}}
+
+
+\title{f-graph coefficient rules}
+\begin{document}
+	\maketitle
+	
+	
+	\section{The cusp rule for planar f-graphs}
+	
+The basic cusp rule relates an $l$-loop graph with a double edge (or `cusp') to the sum of all graphs which reduce to it on squashing a double triangle. 
+To understand  this in more detail in the planar graph setting, take the double edge in question (marked red in the left diagram below) and consider all faces connected to the central vertex. If the face is not triangular, then add new edges with corresponding numerator edges to ensure they are all triangular. You will produce the diagram on the LHS below.  
+Then the cusp rule relates this coefficient to all $l+1$ loop diagrams related to  it by opening up the red double edge  to a double triangle as on the right:	
+%https://q.uiver.app/#q=WzAsMzEsWzMsMCwiXFxidWxsZXQiXSxbOCwwLCJcXHFxdWFkJiYmJiBcXGJ1bGxldCJdLFsxLDEsIlxcYnVsbGV0Il0sWzUsMSwiXFxidWxsZXQiXSxbMTAsMSwiXFxidWxsZXQiXSxbMTQsMSwiXFxidWxsZXQiXSxbMCwyLCJcXGJ1bGxldCJdLFs2LDIsIlxcYnVsbGV0Il0sWzksMiwiXFxidWxsZXQiXSxbMTUsMiwiXFxidWxsZXQiXSxbMTIsMywiXFxidWxsZXQiXSxbMTYsMywiU18xIl0sWzAsNCwiXFxidWxsZXQiXSxbMyw0LCJcXGJ1bGxldCJdLFs2LDQsIlxcYnVsbGV0Il0sWzcsNCwiUyJdLFs5LDQsIlxcYnVsbGV0Il0sWzE1LDQsIlxcYnVsbGV0Il0sWzEyLDUsIlxcYnVsbGV0Il0sWzE2LDUsIlNfMiJdLFswLDYsIlxcYnVsbGV0Il0sWzYsNiwiXFxidWxsZXQiXSxbOSw2LCJcXGJ1bGxldCJdLFsxNSw2LCJcXGJ1bGxldCJdLFsxLDcsIlxcYnVsbGV0Il0sWzUsNywiXFxidWxsZXQiXSxbMTAsNywiXFxidWxsZXQiXSxbMTQsNywiXFxidWxsZXQiXSxbMyw4LCJcXGJ1bGxldCJdLFsxMiw4LCJcXGJ1bGxldCJdLFsxMiwwXSxbMCwzLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzAsMTMsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMzAsNSwiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFszMCwxMCwiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFsyLDAsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMiwxMywiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFszLDcsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMywxMywiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFs0LDMwLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzQsMTAsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNSw5LCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzUsMTAsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNiwyLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzYsMTMsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNywxMywiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFs3LDE0LCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzgsNCwiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFs4LDEwLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzksMTAsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbOSwxNywiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFsxMCwxNywiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFsxMCwxOCwiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFsxMiw2LCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzEyLDEzLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzEyLDIwLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzEzLDE0LCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzEzLDIxLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzEzLDI1LCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzE2LDgsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMTYsMTAsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMTYsMjIsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMTcsMTgsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMTgsMTYsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMTgsMjMsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMTgsMjcsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMTgsMjksIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMjAsMTMsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMjAsMjQsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMjEsMTQsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMjIsMTgsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMjIsMjYsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMjMsMTcsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMjQsMTMsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMjQsMjgsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMjUsMjEsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMjYsMTgsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMjYsMjksIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMjcsMjMsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMjgsMTMsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMjgsMjUsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMjksMjcsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMTMsMTUsIiIsMCx7ImN1cnZlIjotMiwibGV2ZWwiOjIsInN0eWxlIjp7ImJvZHkiOnsibmFtZSI6ImRhc2hlZCJ9LCJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzE4LDE5LCIiLDAseyJsZXZlbCI6Miwic3R5bGUiOnsiYm9keSI6eyJuYW1lIjoiZGFzaGVkIn0sImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMTAsMTEsIiIsMCx7ImxldmVsIjoyLCJzdHlsZSI6eyJib2R5Ijp7Im5hbWUiOiJkYXNoZWQifSwiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFsxNiwxNywiIiwwLHsic3R5bGUiOnsiYm9keSI6eyJuYW1lIjoiZGFzaGVkIn0sImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMTMsMTUsIiIsMCx7ImN1cnZlIjoyLCJsZXZlbCI6Miwic3R5bGUiOnsiYm9keSI6eyJuYW1lIjoiZGFzaGVkIn0sImhlYWQiOnsibmFtZSI6Im5vbmUifX19XV0=
+\begin{tikzcd}[sep=scriptsize]
+	&&& \bullet &&&&&\qquad&&&& \bullet \\
+	& \bullet &&&& \bullet &&&&& \bullet &&&& \bullet \\
+	\bullet &&&&&& \bullet &&& \bullet &&&&&& \bullet \\
+	&&&&&&&&&&&& \bullet &&&& {S_1} \\
+	\bullet &&& \bullet &&& \bullet & S && \bullet &&&&&& \bullet \\
+	&&&&&&&&&&&& \bullet &&&& {S_2} \\
+	\bullet &&&&&& \bullet &&& \bullet &&&&&& \bullet \\
+	& \bullet &&&& \bullet &&&&& \bullet &&&& \bullet \\
+	&&& \bullet &&&&&&&&& \bullet
+	\arrow[no head, from=1-4, to=2-6]
+	\arrow[no head, from=1-4, to=5-4]
+	\arrow[no head, from=1-13, to=2-15]
+	\arrow[no head, from=1-13, to=4-13]
+	\arrow[no head, from=2-2, to=1-4]
+	\arrow[no head, from=2-2, to=5-4]
+	\arrow[no head, from=2-6, to=3-7]
+	\arrow[no head, from=2-6, to=5-4]
+	\arrow[no head, from=2-11, to=1-13]
+	\arrow[no head, from=2-11, to=4-13]
+	\arrow[no head, from=2-15, to=3-16]
+	\arrow[no head, from=2-15, to=4-13]
+	\arrow[no head, from=3-1, to=2-2]
+	\arrow[no head, from=3-1, to=5-4]
+	\arrow[no head, from=3-7, to=5-4]
+	\arrow[no head, from=3-7, to=5-7]
+	\arrow[no head, from=3-10, to=2-11]
+	\arrow[no head, from=3-10, to=4-13]
+	\arrow[no head, from=3-16, to=4-13]
+	\arrow[no head, from=3-16, to=5-16]
+	\arrow[no head, from=4-13, to=5-16, red, thick]
+	\arrow[no head, from=4-13, to=6-13, red, thick]
+	\arrow[no head, from=5-1, to=3-1]
+	\arrow[no head, from=5-1, to=5-4, red, thick]
+	\arrow[no head, from=5-1, to=7-1]
+	\arrow[no head, from=5-4, to=5-7, red, thick]
+	\arrow[no head, from=5-4, to=7-7]
+	\arrow[no head, from=5-4, to=8-6]
+	\arrow[no head, from=5-10, to=3-10]
+	\arrow[no head, from=5-10, to=4-13, red, thick]
+	\arrow[no head, from=5-10, to=7-10]
+	\arrow[no head, from=5-16, to=6-13, red, thick]
+	\arrow[no head, from=6-13, to=5-10, red, thick]
+	\arrow[no head, from=6-13, to=7-16]
+	\arrow[no head, from=6-13, to=8-15]
+	\arrow[no head, from=6-13, to=9-13]
+	\arrow[no head, from=7-1, to=5-4]
+	\arrow[no head, from=7-1, to=8-2]
+	\arrow[no head, from=7-7, to=5-7]
+	\arrow[no head, from=7-10, to=6-13]
+	\arrow[no head, from=7-10, to=8-11]
+	\arrow[no head, from=7-16, to=5-16]
+	\arrow[no head, from=8-2, to=5-4]
+	\arrow[no head, from=8-2, to=9-4]
+	\arrow[no head, from=8-6, to=7-7]
+	\arrow[no head, from=8-11, to=6-13]
+	\arrow[no head, from=8-11, to=9-13]
+	\arrow[no head, from=8-15, to=7-16]
+	\arrow[no head, from=9-4, to=5-4]
+	\arrow[no head, from=9-4, to=8-6]
+	\arrow[no head, from=9-13, to=8-15]
+	\arrow[curve={height=-12pt}, equals, dashed,  from=5-4, to=5-8]
+	\arrow[curve={height=12pt}, equals, dashed, from=5-4, to=5-8]
+	\arrow[equals, dashed,  from=6-13, to=6-17]
+	\arrow[equals, dashed,  from=4-13, to=4-17]
+	\arrow[no head, dashed, from=5-10, to=5-16]
+\end{tikzcd}
+	The key point here are the dashed numerator edges. On the LHS there are $d-4$ numerator edges ending on the set of $d-4$  vertices, $S$,  which can be repeated and can be the new numerator edges introduced by ensuring a triangulation above. Here $d$ is the degree of the central vertex in the left-hand diagram. On the RHS the central node has been split into two central nodes of degrees $d_1$ and $d_2$ respectively (with $d_1+d_2=d+4$). Then the numerators from the upper central vertex end on the set $S_1$ of size $d_1-4$ and the  numerators from the lower  central vertex end on the set $S_2$ of size $d_2-4$. 
+	Then on the RHS one can have any graph of this form with $S= S_1 \sqcup S_2$.
+	The cusp equation then relates the coefficient of the left-hand graph $c$ with the sum of the coefficients of all graphs on the RHS (which we can label by the set $S_1$) $c_{S_1}$
+	\begin{align}\label{ceqn}
+		c= \!\!\!\sum_{\substack{S_1\subset S\\|S_1|=d_1-4}} \!\!\! c_{S_1}\ .
+	\end{align}
+	Note that the diagram on the RHS has a dashed line from left to to right. If one obtains a graph of the form of the RHS without such a dashed line between the ends of the double triangle, then the corresponding lower loop graph will be non planar and thus have vanishing coefficient, $c=0$.
+	Thus we obtain relations only involving the $l+1$ loop graphs. 
+	Also it is important to note that the end points $S$ can be vertices connected to the central node, in which case the numerator edges  will cancel with denominator edges.  
+	
+	Note that the number of terms on the RHS of this equation~\eqref{ceqn} is $\left( \begin{matrix} d{-}4 \\ d_1{-}4 \end{matrix} \right)$. Thus if $d_1=d, d_2=4$ or $d_1=4, d_2=d$  there is just one term.
+	The above picture then looks as
+	
+	\[\begin{tikzcd}[sep=scriptsize]
+		&&& \bullet &&&&&&&&& \bullet \\
+		\\
+		\\
+		&&&&&&&&&&&& \bullet \\
+		\bullet &&& \bullet &&& \bullet & S && \bullet &&&&&& \bullet \\
+		&&&&&&&&&&&& \bullet &&&& S \\
+		\bullet &&&&&& \bullet &&& \bullet &&&&&& \bullet \\
+		& \bullet &&&& \bullet &&&&& \bullet &&&& \bullet \\
+		&&& \bullet &&&&&&&&& \bullet
+		\arrow[no head, from=1-4, to=5-1]
+		\arrow[no head, from=1-4, to=5-4]
+		\arrow[no head, from=1-4, to=5-7]
+		\arrow[no head, from=1-13, to=4-13]
+		\arrow[no head, from=1-13, to=5-16]
+		\arrow[no head, from=4-13, to=5-16]
+		\arrow[no head, from=4-13, to=6-13]
+		\arrow[no head, from=5-1, to=5-4]
+		\arrow[no head, from=5-1, to=7-1]
+		\arrow[no head, from=5-4, to=5-7]
+		\arrow[curve={height=12pt}, equals, dashed, from=5-4, to=5-8]
+		\arrow[no head, from=5-4, to=7-7]
+		\arrow[no head, from=5-4, to=8-6]
+		\arrow[no head, from=5-10, to=1-13]
+		\arrow[no head, from=5-10, to=4-13]
+		\arrow[dashed, no head, from=5-10, to=5-16]
+		\arrow[no head, from=5-10, to=7-10]
+		\arrow[no head, from=5-16, to=6-13]
+		\arrow[no head, from=6-13, to=5-10]
+		\arrow[equals, dashed, from=6-13, to=6-17]
+		\arrow[no head, from=6-13, to=7-16]
+		\arrow[no head, from=6-13, to=8-15]
+		\arrow[no head, from=6-13, to=9-13]
+		\arrow[no head, from=7-1, to=5-4]
+		\arrow[no head, from=7-1, to=8-2]
+		\arrow[no head, from=7-7, to=5-7]
+		\arrow[no head, from=7-10, to=6-13]
+		\arrow[no head, from=7-10, to=8-11]
+		\arrow[no head, from=7-16, to=5-16]
+		\arrow[no head, from=8-2, to=5-4]
+		\arrow[no head, from=8-2, to=9-4]
+		\arrow[no head, from=8-6, to=7-7]
+		\arrow[no head, from=8-11, to=6-13]
+		\arrow[no head, from=8-11, to=9-13]
+		\arrow[no head, from=8-15, to=7-16]
+		\arrow[no head, from=9-4, to=5-4]
+		\arrow[no head, from=9-4, to=8-6]
+		\arrow[no head, from=9-13, to=8-15]
+	\end{tikzcd}\]
+	and the rule simply says that the coefficient of the left diagram equls that of the right. Notice that the lower hal of the diagram is playing no role here, and this rule can be viewed as simply adding  a node, two edges and a numerator edge into the double triangle at the top of the left hand picture. Indeed this rule is equivalent to the square rule / rung rule. 
+	
+	Note a consequence of this binary rule is that if a graph has a square with a vertex in the middle, but with no corresponding numerator line, then it's coefficient must be equal to that of a lower loop non planar graph and hence vanish:	
+	\[\begin{tikzcd}[sep=scriptsize]
+		&& \bullet \\
+		\\
+		\bullet && \bullet && \bullet & { = 0} \\
+		\\
+		&& \bullet
+		\arrow[no head, from=1-3, to=3-5]
+		\arrow[no head,  from=1-3, to=5-3]
+		\arrow[no head, from=3-1, to=1-3]
+		\arrow[no head, from=3-1, to=3-3]
+		\arrow[no head, from=3-5, to=3-3]
+		\arrow[no head, from=3-5, to=5-3]
+		\arrow[no head, from=5-3, to=3-1]
+	\end{tikzcd}\]
+	
+	
+	
+	Anothe binary rule we can extract from~\eqref{ceqn} occurs when the left hand side vanishes and the right hand side has just two terms, so $d=6$, $d_1=d_2=5$. This occurs whenever  there is a double triangle with two degree 5 vertices at the top and the bottom and no numerator edge from left to right. We have	
+	% https://q.uiver.app/#q=WzAsMjIsWzEsMCwiXFxidWxsZXQiXSxbNSwwLCJcXGJ1bGxldCJdLFszLDIsIlxcYnVsbGV0Il0sWzcsMiwiQSJdLFswLDMsIlxcYnVsbGV0Il0sWzYsMywiXFxidWxsZXQiXSxbMyw0LCJcXGJ1bGxldCJdLFs3LDQsIkIiXSxbMSw2LCJcXGJ1bGxldCJdLFs1LDYsIlxcYnVsbGV0Il0sWzExLDAsIlxcYnVsbGV0Il0sWzE1LDAsIlxcYnVsbGV0Il0sWzEzLDIsIlxcYnVsbGV0Il0sWzE3LDIsIkEiXSxbMTAsMywiXFxidWxsZXQiXSxbMTYsMywiXFxidWxsZXQiXSxbMTMsNCwiXFxidWxsZXQiXSxbMTcsNCwiQiJdLFsxMSw2LCJcXGJ1bGxldCJdLFsxNSw2LCJcXGJ1bGxldCJdLFs5LDMsIisiXSxbMTksMywiPTAiXSxbMCwyLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzEsMiwiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFsyLDUsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMiw2LCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzQsMiwiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFs1LDYsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNiw0LCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzYsOSwiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFs4LDYsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNiw3LCIiLDAseyJzdHlsZSI6eyJib2R5Ijp7Im5hbWUiOiJkYXNoZWQifSwiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFsyLDMsIiIsMCx7InN0eWxlIjp7ImJvZHkiOnsibmFtZSI6ImRhc2hlZCJ9LCJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzEwLDEyLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzExLDEyLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzEyLDE1LCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzEyLDE2LCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzE0LDEyLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzE1LDE2LCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzE2LDE0LCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzE2LDE5LCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzE4LDE2LCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzE2LDEzLCIiLDAseyJzdHlsZSI6eyJib2R5Ijp7Im5hbWUiOiJkYXNoZWQifSwiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFsxMiwxNywiIiwwLHsic3R5bGUiOnsiYm9keSI6eyJuYW1lIjoiZGFzaGVkIn0sImhlYWQiOnsibmFtZSI6Im5vbmUifX19XV0=
+	\[\begin{tikzcd}[sep=small]
+		& \bullet &&&& \bullet &&&&&& \bullet &&&& \bullet \\
+		\\
+		&&& \bullet &&&& A &&&&&& \bullet &&&& A \\
+		\bullet &&&&&& \bullet &&& {+} & \bullet &&&&&& \bullet &&& {=0} \\
+		&&& \bullet &&&& B &&&&&& \bullet &&&& B \\
+		\\
+		& \bullet &&&& \bullet &&&&&& \bullet &&&& \bullet
+		\arrow[no head, from=1-2, to=3-4]
+		\arrow[no head, from=1-6, to=3-4]
+		\arrow[no head, from=1-12, to=3-14]
+		\arrow[no head, from=1-16, to=3-14]
+		\arrow[dashed, no head, from=3-4, to=3-8]
+		\arrow[no head, from=3-4, to=4-7]
+		\arrow[no head, from=3-4, to=5-4]
+		\arrow[no head, from=3-14, to=4-17]
+		\arrow[no head, from=3-14, to=5-14]
+		\arrow[dashed, no head, from=3-14, to=5-18]
+		\arrow[no head, from=4-1, to=3-4]
+		\arrow[no head, from=4-7, to=5-4]
+		\arrow[no head, from=4-11, to=3-14]
+		\arrow[no head, from=4-17, to=5-14]
+		\arrow[no head, from=5-4, to=4-1]
+		\arrow[dashed, no head, from=5-4, to=5-8]
+		\arrow[no head, from=5-4, to=7-6]
+		\arrow[dashed, no head, from=5-14, to=3-18]
+		\arrow[no head, from=5-14, to=4-11]
+		\arrow[no head, from=5-14, to=7-16]
+		\arrow[no head, from=7-2, to=5-4]
+		\arrow[no head, from=7-12, to=5-14]
+	\end{tikzcd}\]
+	
+	As we have previosuly noted,the numerator ends can be conected to the central vertices and  hence remove edges. So eg if $A$ and $B$ coincide with the upper and lower right vertex, this equation would read: 
+	% 
+	\[\begin{tikzcd}[sep=small]
+		& \bullet &&&& A &&&&&& \bullet &&&& A \\
+		\\
+		&&& \bullet &&&&&&&&&& \bullet \\
+		\bullet &&&&&& \bullet &&& {+} & \bullet &&&&&& \bullet &&& {=0} \\
+		&&& \bullet &&&&&&&&&& \bullet \\
+		\\
+		& \bullet &&&& B &&&&&& \bullet &&&& B
+		\arrow[no head, from=1-2, to=3-4]
+		\arrow[no head, from=1-12, to=3-14]
+		\arrow[no head, from=1-16, to=3-14]
+		\arrow[no head, from=3-4, to=4-7]
+		\arrow[no head, from=3-4, to=5-4]
+		\arrow[no head, from=3-14, to=4-17]
+		\arrow[no head, from=3-14, to=5-14]
+		\arrow[dashed, no head, from=3-14, to=7-16]
+		\arrow[no head, from=4-1, to=3-4]
+		\arrow[no head, from=4-7, to=5-4]
+		\arrow[no head, from=4-11, to=3-14]
+		\arrow[no head, from=4-17, to=5-14]
+		\arrow[no head, from=5-4, to=4-1]
+		\arrow[dashed, no head, from=5-14, to=1-16]
+		\arrow[no head, from=5-14, to=4-11]
+		\arrow[no head, from=5-14, to=7-16]
+		\arrow[no head, from=7-2, to=5-4]
+		\arrow[no head, from=7-12, to=5-14]
+	\end{tikzcd}\]
+	
+	
+I believe there is another two term identity obtained by jumping two loops by adding two vertices inside a triple triangle:
+% https://q.uiver.app/#q=WzAsMTQsWzMsMCwiXFxidWxsZXQiXSxbMCwzLCJcXGJ1bGxldCJdLFs2LDMsIlxcYnVsbGV0Il0sWzcsMiwiPSJdLFsyLDMsIlxcYnVsbGV0Il0sWzQsMywiXFxidWxsZXQiXSxbMTEsMCwiXFxidWxsZXQiXSxbOCwzLCJcXGJ1bGxldCJdLFsxNCwzLCJcXGJ1bGxldCJdLFsxMCwzLCJcXGJ1bGxldCJdLFsxMiwzLCJcXGJ1bGxldCJdLFsxMCwyLCJcXGJ1bGxldCJdLFsxMiwyLCJcXGJ1bGxldCJdLFs4LDIsIi0iXSxbMCwxLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzAsMiwiIiwyLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFswLDQsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMCw1LCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzEsNCwiIiwxLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFs0LDUsIiIsMSx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNSwyLCIiLDEseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzYsNywiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFs2LDgsIiIsMix7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNyw5LCIiLDEseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzksMTAsIiIsMSx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMTAsOCwiIiwxLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFs2LDExLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzExLDksIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNiwxMiwiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFsxMiwxMCwiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFsxMiw4LCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzExLDEyLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzExLDcsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XV0=
+\[\begin{tikzcd}[sep=small]
+	&&& \bullet &&&&&&&& \bullet \\
+	\\
+	&&&&&&& {=} & {-} && \bullet && \bullet \\
+	\bullet && \bullet && \bullet && \bullet && \bullet && \bullet && \bullet && \bullet
+	\arrow[no head, from=1-4, to=4-1]
+	\arrow[no head, from=1-4, to=4-3]
+	\arrow[no head, from=1-4, to=4-5]
+	\arrow[no head, from=1-4, to=4-7]
+	\arrow[no head, from=1-12, to=3-11]
+	\arrow[no head, from=1-12, to=3-13]
+	\arrow[no head, from=1-12, to=4-9]
+	\arrow[no head, from=1-12, to=4-15]
+	\arrow[no head, from=3-11, to=3-13]
+	\arrow[no head, from=3-11, to=4-9]
+	\arrow[no head, from=3-11, to=4-11]
+	\arrow[no head, from=3-13, to=4-13]
+	\arrow[no head, from=3-13, to=4-15]
+	\arrow[no head, from=4-1, to=4-3]
+	\arrow[no head, from=4-3, to=4-5]
+	\arrow[no head, from=4-5, to=4-7]
+	\arrow[no head, from=4-9, to=4-11]
+	\arrow[no head, from=4-11, to=4-13]
+	\arrow[no head, from=4-13, to=4-15]
+\end{tikzcd}\] 
+But this needs to be properly checked...
+I think it can be derived by doing two rung rules and one sideways rule. 
+
+	
+\end{document}
