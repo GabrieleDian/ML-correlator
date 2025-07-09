@@ -1,0 +1,16 @@
+{"time":"2025-07-09T16:14:05.338531114+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250709_161405-ftohh3t8/logs/debug-core.log"}
+{"time":"2025-07-09T16:14:05.645631878+02:00","level":"INFO","msg":"stream: created new stream","id":"ftohh3t8"}
+{"time":"2025-07-09T16:14:05.645681903+02:00","level":"INFO","msg":"handler: started","stream_id":"ftohh3t8"}
+{"time":"2025-07-09T16:14:05.64571061+02:00","level":"INFO","msg":"stream: started","id":"ftohh3t8"}
+{"time":"2025-07-09T16:14:05.645720137+02:00","level":"INFO","msg":"sender: started","stream_id":"ftohh3t8"}
+{"time":"2025-07-09T16:14:05.645749314+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"ftohh3t8"}
+{"time":"2025-07-09T16:14:05.892039267+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-07-09T16:14:15.54963185+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-07-09T16:14:15.549676757+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-07-09T16:14:16.551458323+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading wandb-summary.json","runtime_seconds":0.75623023,"progress":"469B/469B"},{"desc":"uploading config.yaml","runtime_seconds":0.537172797,"progress":"825B/825B"}],"total_operations":2}}
+{"time":"2025-07-09T16:14:16.551578067+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-07-09T16:14:17.087479038+02:00","level":"INFO","msg":"stream: closing","id":"ftohh3t8"}
+{"time":"2025-07-09T16:14:17.087494075+02:00","level":"INFO","msg":"handler: closed","stream_id":"ftohh3t8"}
+{"time":"2025-07-09T16:14:17.087508338+02:00","level":"INFO","msg":"sender: closed","stream_id":"ftohh3t8"}
+{"time":"2025-07-09T16:14:17.087502983+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"ftohh3t8"}
+{"time":"2025-07-09T16:14:17.087543083+02:00","level":"INFO","msg":"stream: closed","id":"ftohh3t8"}

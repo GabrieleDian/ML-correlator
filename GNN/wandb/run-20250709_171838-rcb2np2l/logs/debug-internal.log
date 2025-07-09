@@ -1,0 +1,16 @@
+{"time":"2025-07-09T17:18:38.625069443+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250709_171838-rcb2np2l/logs/debug-core.log"}
+{"time":"2025-07-09T17:18:38.905969789+02:00","level":"INFO","msg":"stream: created new stream","id":"rcb2np2l"}
+{"time":"2025-07-09T17:18:38.906016804+02:00","level":"INFO","msg":"stream: started","id":"rcb2np2l"}
+{"time":"2025-07-09T17:18:38.906028747+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"rcb2np2l"}
+{"time":"2025-07-09T17:18:38.906085108+02:00","level":"INFO","msg":"sender: started","stream_id":"rcb2np2l"}
+{"time":"2025-07-09T17:18:38.906060238+02:00","level":"INFO","msg":"handler: started","stream_id":"rcb2np2l"}
+{"time":"2025-07-09T17:18:39.151906147+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-07-09T17:18:54.595450315+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-07-09T17:18:54.59551394+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-07-09T17:18:55.597431849+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading output.log","runtime_seconds":0.333634599,"progress":"7.2KB/7.2KB"},{"desc":"uploading wandb-summary.json","runtime_seconds":0.333622669,"progress":"470B/470B"}],"total_operations":2}}
+{"time":"2025-07-09T17:18:55.626304187+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-07-09T17:18:55.977289924+02:00","level":"INFO","msg":"stream: closing","id":"rcb2np2l"}
+{"time":"2025-07-09T17:18:55.977310075+02:00","level":"INFO","msg":"handler: closed","stream_id":"rcb2np2l"}
+{"time":"2025-07-09T17:18:55.977320116+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"rcb2np2l"}
+{"time":"2025-07-09T17:18:55.977373784+02:00","level":"INFO","msg":"sender: closed","stream_id":"rcb2np2l"}
+{"time":"2025-07-09T17:18:55.977425592+02:00","level":"INFO","msg":"stream: closed","id":"rcb2np2l"}

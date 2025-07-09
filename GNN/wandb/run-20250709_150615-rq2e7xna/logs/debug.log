@@ -1,0 +1,13 @@
+2025-07-09 15:06:15,714 INFO    MainThread:223825 [wandb_init.py:setup_run_log_directory():703] Logging user logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250709_150615-rq2e7xna/logs/debug.log
+2025-07-09 15:06:15,714 INFO    MainThread:223825 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250709_150615-rq2e7xna/logs/debug-internal.log
+2025-07-09 15:06:15,714 INFO    MainThread:223825 [wandb_init.py:init():831] calling init triggers
+2025-07-09 15:06:15,714 INFO    MainThread:223825 [wandb_init.py:init():836] wandb.init called with sweep_config: {'dropout': 0.2, 'features': ['adjacency_columns'], 'hidden_channels': 64, 'lr': 0.005, 'weight_decay': 0.01}
+config: {'model_name': 'gin', 'hidden_channels': 64, 'num_layers': 3, 'dropout': 0.2, 'lr': 0.005, 'weight_decay': 0.01, 'epochs': 100, 'batch_size': 32, 'scheduler_type': 'onecycle', 'use_wandb': True, 'project': 'cluster-7-loop', 'experiment_name': 'sweep_gin_loop7_adjacency_columns', 'in_channels': 11, '_wandb': {}}
+2025-07-09 15:06:24,197 INFO    MainThread:223825 [wandb_run.py:_finish():2219] finishing run aliajrigers-desydeutsches-elektronen-synchrotron/cluster-7-loop/rq2e7xna
+2025-07-09 15:06:24,197 INFO    MainThread:223825 [wandb_run.py:_atexit_cleanup():2418] got exitcode: 0
+2025-07-09 15:06:24,197 INFO    MainThread:223825 [wandb_run.py:_restore():2400] restore
+2025-07-09 15:06:24,197 INFO    MainThread:223825 [wandb_run.py:_restore():2406] restore done
+2025-07-09 15:06:25,134 INFO    MainThread:223825 [wandb_run.py:_footer_history_summary_info():4000] rendering history
+2025-07-09 15:06:25,135 INFO    MainThread:223825 [wandb_run.py:_footer_history_summary_info():4032] rendering summary
+2025-07-09 15:06:25,136 INFO    MainThread:223825 [wandb_run.py:_footer_sync_info():3961] logging synced files
+2025-07-09 15:06:26,135 INFO    MsgRouterThr:223825 [mailbox.py:close():129] [no run ID] Closing mailbox, abandoning 1 handles.

@@ -1,0 +1,13 @@
+2025-07-09 16:05:34,815 INFO    MainThread:250752 [wandb_init.py:setup_run_log_directory():703] Logging user logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250709_160534-t0b0dp2h/logs/debug.log
+2025-07-09 16:05:34,815 INFO    MainThread:250752 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250709_160534-t0b0dp2h/logs/debug-internal.log
+2025-07-09 16:05:34,815 INFO    MainThread:250752 [wandb_init.py:init():831] calling init triggers
+2025-07-09 16:05:34,815 INFO    MainThread:250752 [wandb_init.py:init():836] wandb.init called with sweep_config: {'batch_size': 32, 'config': 'config.yaml', 'dropout': 0.3, 'epochs': 100, 'features': ['adjacency_columns'], 'hidden_channels': 64, 'learning_rate': 0.018191258465058164, 'loop': 7, 'num_layers': 2, 'weight_decay': 0.029087850061258615}
+config: {'model_name': 'gin', 'hidden_channels': 64, 'num_layers': 2, 'dropout': 0.3, 'lr': 0.018191258465058164, 'weight_decay': 0.001, 'epochs': 100, 'batch_size': 32, 'scheduler_type': 'onecycle', 'use_wandb': True, 'project': 'cluster-7-loop', 'experiment_name': 'gin_loop7_adjacency_columns', 'in_channels': 11, '_wandb': {}}
+2025-07-09 16:05:41,510 INFO    MainThread:250752 [wandb_run.py:_finish():2219] finishing run aliajrigers-desydeutsches-elektronen-synchrotron/ML-correlator-GNN/t0b0dp2h
+2025-07-09 16:05:41,510 INFO    MainThread:250752 [wandb_run.py:_atexit_cleanup():2418] got exitcode: 0
+2025-07-09 16:05:41,510 INFO    MainThread:250752 [wandb_run.py:_restore():2400] restore
+2025-07-09 16:05:41,511 INFO    MainThread:250752 [wandb_run.py:_restore():2406] restore done
+2025-07-09 16:05:42,724 INFO    MainThread:250752 [wandb_run.py:_footer_history_summary_info():4000] rendering history
+2025-07-09 16:05:42,725 INFO    MainThread:250752 [wandb_run.py:_footer_history_summary_info():4032] rendering summary
+2025-07-09 16:05:42,725 INFO    MainThread:250752 [wandb_run.py:_footer_sync_info():3961] logging synced files
+2025-07-09 16:05:43,725 INFO    MsgRouterThr:250752 [mailbox.py:close():129] [no run ID] Closing mailbox, abandoning 1 handles.
