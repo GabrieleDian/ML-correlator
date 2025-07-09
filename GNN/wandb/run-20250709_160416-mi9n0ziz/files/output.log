@@ -1,0 +1,213 @@
+Loaded config structure: ['data', 'features', 'model', 'training', 'experiment']
+Sweep parameters: {'batch_size': 16, 'config': 'config.yaml', 'dropout': 0.2, 'epochs': 100, 'features': ['adjacency_columns'], 'hidden_channels': 64, 'learning_rate': 0.013194381207635783, 'loop': 7, 'num_layers': 3, 'weight_decay': 0.023924195340347135}
+Training on loop 7 with features: ['adjacency_columns']
+
+Loading pre-computed features...
+Loading features: ['adjacency_columns']
+Loaded adjacency_columns: shape (164, 11, 11)
+Loading graph structures...
+Building dataset...
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+DEBUG: Final x shape: (11, 11)
+Created dataset with 164 graphs
+Feature dimension: 11
+Normalizing features...
+
+Dataset Statistics:
+  Number of graphs: 164
+  Average nodes: 11.0 (min: 11, max: 11)
+  Average edges: 25.0
+  Label distribution: 107 positive, 57 negative
+  Feature dimension: 11
+
+Training configuration:
+  Model: gin
+  Input features: 11
+  Hidden channels: 64
+  Epochs: 100
+
+Starting training...
+Using device: cpu
+Train size: 131, Val size: 33
+[34m[1mwandb[0m: [33mWARNING[0m Ignoring project 'cluster-7-loop' when running a sweep.
+[34m[1mwandb[0m: wandb.init() called while a run is active and reinit is set to 'default', so returning the previous run.
+
+Starting training...
+Model architecture: gin
+Hidden dim: 64, Layers: 3
+Initial LR: 0.0015833257449162919
+Epoch   0/100: Train Loss=0.7375, Acc=0.6260, Val Loss=0.6013, Acc=0.6970, LR=0.001688
+Epoch  10/100: Train Loss=0.7123, Acc=0.6412, Val Loss=0.6538, Acc=0.6970, LR=0.012930
+Epoch  20/100: Train Loss=0.6549, Acc=0.6412, Val Loss=0.6261, Acc=0.6970, LR=0.031876
+Epoch  30/100: Train Loss=0.6544, Acc=0.6412, Val Loss=0.6216, Acc=0.6970, LR=0.039559
+Epoch  40/100: Train Loss=0.6522, Acc=0.6412, Val Loss=0.6224, Acc=0.6970, LR=0.037173
+Epoch  50/100: Train Loss=0.6581, Acc=0.6412, Val Loss=0.6008, Acc=0.6970, LR=0.031345
+Epoch  60/100: Train Loss=0.6533, Acc=0.6412, Val Loss=0.6177, Acc=0.6970, LR=0.023229
+Epoch  70/100: Train Loss=0.6530, Acc=0.6412, Val Loss=0.6195, Acc=0.6970, LR=0.014432
+Epoch  80/100: Train Loss=0.6529, Acc=0.6412, Val Loss=0.6184, Acc=0.6970, LR=0.006697
+Epoch  90/100: Train Loss=0.6529, Acc=0.6412, Val Loss=0.6187, Acc=0.6970, LR=0.001556
+Epoch  99/100: Train Loss=0.6528, Acc=0.6412, Val Loss=0.6190, Acc=0.6970, LR=0.000002
+
+Best validation accuracy: 0.6970 at epoch 0

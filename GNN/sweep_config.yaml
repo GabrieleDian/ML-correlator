@@ -22,6 +22,7 @@ parameters:
   # Feature combinations to try
   features:
     values:
+      - ["adjacency_columns"]
       - ["degree", "betweenness"]
       - ["degree", "betweenness", "clustering"]
       - ["degree", "betweenness", "clustering", "closeness"]
