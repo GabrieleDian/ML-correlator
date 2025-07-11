@@ -1,0 +1,43 @@
+{
+  "os": "Linux-6.8.0-49-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.12.3",
+  "startedAt": "2025-07-11T13:03:05.154800Z",
+  "args": [
+    "--batch_size=16",
+    "--config=config.yaml",
+    "--dropout=0.45831229685873176",
+    "--epochs=100",
+    "--features=['adjacency_columns']",
+    "--hidden_channels=32",
+    "--learning_rate=0.00861572449964984",
+    "--loop=8",
+    "--num_layers=3",
+    "--weight_decay=0.0007430803741724322"
+  ],
+  "program": "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple_sweep.py",
+  "codePath": "GNN/one_run_simple_sweep.py",
+  "git": {
+    "remote": "https://github.com/GabrieleDian/ML-correlator.git",
+    "commit": "c7541e0cb8cd46e31a5a9783b7780106a4c7a0ef"
+  },
+  "email": "aliajrigers@gmail.com",
+  "root": "/home/rigers/Documents/GitHub/ML-correlator/GNN",
+  "host": "rigersaliaj",
+  "executable": "/home/rigers/Documents/GitHub/Human-Learning/.venv/bin/python",
+  "codePathLocal": "one_run_simple_sweep.py",
+  "cpu_count": 4,
+  "cpu_count_logical": 8,
+  "disk": {
+    "/": {
+      "total": "250375106560",
+      "used": "147225366528"
+    }
+  },
+  "memory": {
+    "total": "16569905152"
+  },
+  "cpu": {
+    "count": 4,
+    "countLogical": 8
+  }
+}

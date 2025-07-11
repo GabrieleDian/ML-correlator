@@ -1,0 +1,49 @@
+Loaded config structure: ['data', 'features', 'model', 'training', 'experiment']
+Sweep parameters: {'batch_size': 32, 'config': 'config.yaml', 'dropout': 0.3747734463896548, 'epochs': 100, 'features': ['adjacency_columns'], 'hidden_channels': 32, 'learning_rate': 0.005037301519398693, 'loop': 8, 'num_layers': 2, 'weight_decay': 0.00013516207247204172}
+Training on loop 8 with features: ['adjacency_columns']
+
+Loading pre-computed features...
+Loading features: ['adjacency_columns']
+Loaded adjacency_columns: shape (1432, 12, 12)
+Loading graph structures...
+Building dataset...
+Created dataset with 1432 graphs
+Feature dimension: 12
+Normalizing features...
+
+Dataset Statistics:
+  Number of graphs: 1432
+  Average nodes: 12.0 (min: 12, max: 12)
+  Average edges: 27.5
+  Label distribution: 729 positive, 703 negative
+  Feature dimension: 12
+
+Training configuration:
+  Model: gin
+  Input features: 12
+  Hidden channels: 32
+  Epochs: 100
+
+Starting training...
+Using device: cpu
+Train size: 1145, Val size: 287
+[34m[1mwandb[0m: [33mWARNING[0m Ignoring project 'cluster-7-loop' when running a sweep.
+[34m[1mwandb[0m: wandb.init() called while a run is active and reinit is set to 'default', so returning the previous run.
+
+Starting training...
+Model architecture: gin
+Hidden dim: 32, Layers: 2
+Initial LR: 0.0006044761823278434
+Epoch   0/100: Train Loss=0.7568, Acc=0.5179, Val Loss=0.6766, Acc=0.5679, LR=0.000644
+Epoch  10/100: Train Loss=0.6214, Acc=0.6725, Val Loss=0.6041, Acc=0.6481, LR=0.004915
+Epoch  20/100: Train Loss=0.5648, Acc=0.6969, Val Loss=0.6174, Acc=0.5784, LR=0.012134
+Epoch  30/100: Train Loss=0.5596, Acc=0.7135, Val Loss=0.5738, Acc=0.7038, LR=0.015104
+Epoch  40/100: Train Loss=0.5405, Acc=0.7188, Val Loss=0.5824, Acc=0.7073, LR=0.014205
+Epoch  50/100: Train Loss=0.5127, Acc=0.7214, Val Loss=0.5318, Acc=0.7108, LR=0.011990
+Epoch  60/100: Train Loss=0.4971, Acc=0.7572, Val Loss=0.5608, Acc=0.6969, LR=0.008896
+Epoch  70/100: Train Loss=0.4217, Acc=0.8044, Val Loss=0.5343, Acc=0.7282, LR=0.005537
+Epoch  80/100: Train Loss=0.3346, Acc=0.8524, Val Loss=0.7096, Acc=0.7003, LR=0.002578
+Epoch  90/100: Train Loss=0.2833, Acc=0.8812, Val Loss=0.7092, Acc=0.7108, LR=0.000605
+Epoch  99/100: Train Loss=0.2677, Acc=0.8769, Val Loss=0.7475, Acc=0.7073, LR=0.000001
+
+Best validation accuracy: 0.7561 at epoch 48
