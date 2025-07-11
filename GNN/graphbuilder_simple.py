@@ -89,7 +89,6 @@ class SimpleGraphBuilder:
                         degrees[i] += 1
                 x = degrees.reshape(-1, 1)
             
-            print(f"DEBUG: Final x shape: {x.shape}")
                     # Convert to tensor
             x = torch.FloatTensor(x)
             y = torch.tensor(self.label, dtype=torch.long)

@@ -9,7 +9,7 @@ parameters:
   config:
     value: config.yaml
   loop:
-    value: 7
+    value: 8
   epochs:
     value: 100
   
@@ -18,20 +18,22 @@ parameters:
       - ["adjacency_columns"]
   
   hidden_channels:
-    values: [32, 48, 64]
+    values: [32, 64]
   
   num_layers:
     values: [2, 3]
   
-  
+  dropout:
+    min: 0.2
+    max: 0.5
+
   learning_rate:
-     values: [ 0.00005, 0.0001, 0.0005]
+    min: 0.0001
+    max: 0.01
   
   weight_decay:
-    values: [ 0.001, 0.001, 0.01]
+    min: 0.0001
+    max: 0.001
   
   batch_size:
-    values: [16, 32, 64]
-
-  dropout:
-    values: [ 0.2, 0.3, 0.5]
+    values: [16, 32]

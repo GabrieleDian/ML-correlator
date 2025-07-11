@@ -1,0 +1,16 @@
+{"time":"2025-07-11T14:40:37.379386212+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250711_144037-escharmx/logs/debug-core.log"}
+{"time":"2025-07-11T14:40:37.766299303+02:00","level":"INFO","msg":"stream: created new stream","id":"escharmx"}
+{"time":"2025-07-11T14:40:37.766359975+02:00","level":"INFO","msg":"stream: started","id":"escharmx"}
+{"time":"2025-07-11T14:40:37.766423486+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"escharmx"}
+{"time":"2025-07-11T14:40:37.766458353+02:00","level":"INFO","msg":"sender: started","stream_id":"escharmx"}
+{"time":"2025-07-11T14:40:37.766442735+02:00","level":"INFO","msg":"handler: started","stream_id":"escharmx"}
+{"time":"2025-07-11T14:40:38.002364027+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-07-11T14:41:42.700461162+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-07-11T14:41:42.700520304+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-07-11T14:41:43.395578239+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-07-11T14:41:43.69223159+02:00","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2025-07-11T14:41:43.697330163+02:00","level":"INFO","msg":"stream: closing","id":"escharmx"}
+{"time":"2025-07-11T14:41:43.697350704+02:00","level":"INFO","msg":"handler: closed","stream_id":"escharmx"}
+{"time":"2025-07-11T14:41:43.697361661+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"escharmx"}
+{"time":"2025-07-11T14:41:43.697389402+02:00","level":"INFO","msg":"sender: closed","stream_id":"escharmx"}
+{"time":"2025-07-11T14:41:43.6974481+02:00","level":"INFO","msg":"stream: closed","id":"escharmx"}
