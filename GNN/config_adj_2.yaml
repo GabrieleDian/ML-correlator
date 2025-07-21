@@ -10,6 +10,7 @@ features:
   # Features to compute (when running compute_features.py)
   compute_all: true
   features_to_compute:
+    - identity_columns
     - adjacency_columns
     - eigen_1
     - eigen_2
@@ -23,6 +24,7 @@ features:
   
   # Features to use for training
   selected_features:
+    - identity_columns
     - adjacency_columns
     - eigen_1
     - eigen_2

@@ -102,6 +102,18 @@ def adjacency_column_features(graphs_batch):
         features.append(adj_columns)
     return features
 
+# Compute identity matrix columns for a batch of graphs
+def identity_column_features(graphs_batch):
+    """Compute identity matrix columns for a batch of graphs."""
+    features = []
+    for edges in graphs_batch:
+        G, n_nodes = edges_to_networkx(edges)
+        # Create identity matrix columns
+        identity_matrix = np.eye(n_nodes)
+        identity_columns = [identity_matrix[:, i] for i in range(n_nodes)]
+        features.append(identity_columns)
+    return features
+
 # Compute betweenness, clustering, closeness, pagerank, and face count features
 def compute_betweenness_features(graphs_batch):
     """Compute betweenness centrality for a batch of graphs."""
@@ -194,7 +206,8 @@ def compute_face_count_features(graphs_batch):
 
 # Dictionary mapping feature names to their computation functions
 FEATURE_FUNCTIONS = {
-    **eigenvector_functions,  # Add eigenvector functions
+    **eigenvector_functions,  # Add eigenvector functions 
+    'identity_columns': identity_column_features,
     'adjacency_columns': adjacency_column_features,
     'degree': compute_degree_features,
     'betweenness': compute_betweenness_features,
