@@ -10,7 +10,17 @@ features:
   # Features to compute (when running compute_features.py)
   compute_all: true
   features_to_compute:
-    - identity_columns
+  - identity_columns
+    - adjacency_columns
+    - eigen_1
+    - eigen_2
+    - eigen_3
+    - degree
+    - betweenness
+    - clustering
+    - closeness
+    - pagerank
+    - face_count
   
   # Features to use for training
   selected_features:
