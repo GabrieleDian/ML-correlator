@@ -3,7 +3,7 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  loop_order: 7                    # Which loop to use
+  loop_order: 9                   # Which loop to use
   
 # Feature configuration
 features:
@@ -11,7 +11,6 @@ features:
   compute_all: true
   features_to_compute:
     - identity_columns
-  
   # Features to use for training
   selected_features:
     - identity_columns
@@ -24,21 +23,21 @@ model:
   name: "gin"              # Model architecture: gin, gat, hybrid, planar, simple
   hidden_channels: 32
   num_layers: 2
-  dropout: 0.5
+  dropout: 0.32723750287593667
 
 # Training configuration
 training:
   epochs: 100
   batch_size: 32
-  learning_rate: 0.0005
-  weight_decay: 0.01
+  learning_rate: 0.005945469231707924
+  weight_decay: 0.000402816483040196
   scheduler_type: "onecycle"  # Options: onecycle, plateau, none
   
 # Experiment configuration
 experiment:
   seed: 42
   use_wandb: true
-  wandb_project: "cluster-7-loop"
+  wandb_project: "identity_columns_9"
   wandb_name: "gin_simple"
   save_model: true
   model_dir: "models"
