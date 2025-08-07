@@ -3,14 +3,14 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  loop_order: 7                    # Which loop to use
+  loop_order: 8                   # Which loop to use
   
 # Feature configuration
 features:
   # Features to compute (when running compute_features.py)
   compute_all: true
   features_to_compute:
-  - identity_columns
+    - identity_columns
     - adjacency_columns
     - eigen_1
     - eigen_2
@@ -24,7 +24,17 @@ features:
   
   # Features to use for training
   selected_features:
-    - identity_columns
+    - 
+    - adjacency_columns
+    - eigen_1
+    - eigen_2
+    - eigen_3
+    - degree
+    - betweenness
+    - clustering
+    - closeness
+    - pagerank
+    - face_count
   # Computation settings
   chunk_size: 1000
   n_jobs: 4
@@ -48,7 +58,7 @@ training:
 experiment:
   seed: 42
   use_wandb: true
-  wandb_project: "cluster-7-loop"
+  wandb_project: "all_features_8_loop_opt"
   wandb_name: "gin_simple"
   save_model: true
   model_dir: "models"

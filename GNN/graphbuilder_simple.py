@@ -47,7 +47,7 @@ class SimpleGraphBuilder:
             selected_features = list(self.features_dict.keys())
         
                 # Separate adjacency features from scalar features
-        adjacency_features = []
+        matrix_features = []
         scalar_features = []
         
         for feat_name in selected_features:
@@ -60,27 +60,27 @@ class SimpleGraphBuilder:
             # Only keep features for actual nodes (remove padding)
             feat_array = feat_array[:self.num_nodes]
             
-            if feat_name == 'adjacency_columns':
+            if len(feat_array.shape) == 2 and feat_array.shape[0] == self.num_nodes:
                 # feat_array should be (num_nodes, num_nodes)
                 #print(f"DEBUG: adjacency feat_array shape: {feat_array.shape}")
-                adjacency_features.append(feat_array)
+                matrix_features.append(feat_array)
             else:
                 # Scalar features
                 #print(f"DEBUG: scalar {feat_name} feat_array shape: {feat_array.shape}")
                 scalar_features.append(feat_array.reshape(-1, 1))
     
             # Combine features
-            if adjacency_features and not scalar_features:
+            if matrix_features and not scalar_features:
                 # Only adjacency features
-                x = np.concatenate(adjacency_features, axis=1)
-            elif scalar_features and not adjacency_features:
+                x = np.concatenate(matrix_features, axis=1)
+            elif scalar_features and not matrix_features:
                 # Only scalar features
                 x = np.hstack(scalar_features)
-            elif adjacency_features and scalar_features:
+            elif matrix_features and scalar_features:
                 # Both types - concatenate adjacency first, then scalars
-                adj_features = np.concatenate(adjacency_features, axis=1)
+                mat_features = np.concatenate(matrix_features, axis=1)
                 scal_features = np.hstack(scalar_features)
-                x = np.hstack([adj_features, scal_features])
+                x = np.hstack([mat_features, scal_features])
             else:
                 # Fallback: use degree
                 degrees = np.zeros(self.num_nodes)
