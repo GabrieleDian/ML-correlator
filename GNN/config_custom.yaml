@@ -3,7 +3,7 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  loop_order: 10                    # Which loop to use
+  loop_order:                     # Which loop to use
   
 # Feature configuration
 features:
@@ -44,7 +44,7 @@ model:
 
 # Training configuration
 training:
-  epochs: 300
+  epochs: 100
   batch_size: 32
   learning_rate: 0.001
   weight_decay: 0.0005
@@ -54,7 +54,7 @@ training:
 experiment:
   seed: 42
   use_wandb: true
-  wandb_project: "custom_run_10_300_epochs"
+  wandb_project: "mixed_loop_predict_10"
   wandb_name: "gin_simple"
   save_model: true
   model_dir: "models"

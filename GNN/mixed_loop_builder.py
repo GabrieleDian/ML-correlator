@@ -99,65 +99,70 @@ class SimpleGraphBuilder:
         return data
 
 
-def create_simple_dataset(loop_order, selected_features=None, normalize=True, data_dir='Graph_Edge_Data'):
+def create_simple_dataset(loop_order=[7,8,9], selected_features=None, normalize=True, data_dir='Graph_Edge_Data', scaler=None):
     """
     Create dataset using pre-computed features.
-    
     Args:
-        loop_order: Loop order
+        loop_order: Loop order (int) or list of loop orders (e.g., [7,8,9] for training, 10 for testing)
         selected_features: List of feature names to use
         normalize: Whether to normalize features
-    
+        scaler: Pre-fitted scaler to use (if None, will fit new scaler when normalize=True)
     Returns:
         dataset: List of PyG Data objects
         scaler: StandardScaler object (if normalize=True)
     """
+    # Handle single loop order vs multiple loop orders
+    if isinstance(loop_order, int):
+        loop_orders = [loop_order]
+    else:
+        loop_orders = loop_order
+    
     # Load pre-computed features
     if selected_features is None:
         # Default features
         selected_features = ['degree', 'betweenness', 'clustering']
     
     print(f"Loading features: {selected_features}")
-    features_dict, labels = load_saved_features(loop_order, selected_features, data_dir)
     
-    # Load graph structure
-    print("Loading graph structures...")
-    graph_infos = load_graph_structure(loop_order, data_dir)
-    
-    # Create dataset
-    print("Building dataset...")
     dataset = []
+    idx_counter = 0
     
-    for idx, (graph_info, label) in enumerate(zip(graph_infos, labels)):
-        builder = SimpleGraphBuilder(graph_info, features_dict, label, idx)
-        data = builder.build(selected_features)
-        dataset.append(data)
+    # Process each loop order
+    for lo in loop_orders:
+        features_dict, labels = load_saved_features(lo, selected_features, data_dir)
+        # Load graph structure
+        print(f"Loading graph structures for loop order {lo}...")
+        graph_infos = load_graph_structure(lo, data_dir)
+        
+        # Create dataset for this loop order
+        for local_idx, (graph_info, label) in enumerate(zip(graph_infos, labels)):
+            builder = SimpleGraphBuilder(graph_info, features_dict, label, local_idx)  # Use local_idx
+            data = builder.build(selected_features)
+            dataset.append(data)
+            idx_counter += 1
     
     print(f"Created dataset with {len(dataset)} graphs")
     print(f"Feature dimension: {dataset[0].x.shape[1]}")
     
     # Normalize if requested
-    scaler = None
     if normalize:
         print("Normalizing features...")
+        if scaler is None:
+            # Fit new scaler
+            all_features = []
+            for data in dataset:
+                all_features.append(data.x.numpy())
+            all_features = np.vstack(all_features)
+            scaler = StandardScaler()
+            scaler.fit(all_features)
         
-        # Collect all features
-        all_features = []
-        for data in dataset:
-            all_features.append(data.x.numpy())
-        all_features = np.vstack(all_features)
-        
-        # Fit scaler
-        scaler = StandardScaler()
-        scaler.fit(all_features)
-        
-        # Transform features
+        # Transform features using scaler
         for data in dataset:
             data.x = torch.FloatTensor(scaler.transform(data.x.numpy()))
+    else:
+        scaler = None
     
     return dataset, scaler
-
-
 def quick_dataset_stats(dataset):
     """Print quick statistics about the dataset."""
     num_graphs = len(dataset)

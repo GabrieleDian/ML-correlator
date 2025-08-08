@@ -1,0 +1,27 @@
+{"time":"2025-08-08T12:14:03.83415694+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250808_121403-ze12s0aa/logs/debug-core.log"}
+{"time":"2025-08-08T12:14:04.232279078+02:00","level":"INFO","msg":"stream: created new stream","id":"ze12s0aa"}
+{"time":"2025-08-08T12:14:04.232321885+02:00","level":"INFO","msg":"stream: started","id":"ze12s0aa"}
+{"time":"2025-08-08T12:14:04.23250763+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"ze12s0aa"}
+{"time":"2025-08-08T12:14:04.232639676+02:00","level":"INFO","msg":"handler: started","stream_id":"ze12s0aa"}
+{"time":"2025-08-08T12:14:04.232663249+02:00","level":"INFO","msg":"sender: started","stream_id":"ze12s0aa"}
+{"time":"2025-08-08T12:14:04.522943844+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-08T12:33:50.229034671+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/aliajrigers-desydeutsches-elektronen-synchrotron/mixed_loop_predict_10/ze12s0aa/file_stream\": dial tcp: lookup api.wandb.ai on 127.0.0.53:53: server misbehaving"}
+{"time":"2025-08-08T12:34:35.229263644+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/aliajrigers-desydeutsches-elektronen-synchrotron/mixed_loop_predict_10/ze12s0aa/file_stream\": dial tcp: lookup api.wandb.ai on 127.0.0.53:53: server misbehaving"}
+{"time":"2025-08-08T12:34:37.687873529+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/aliajrigers-desydeutsches-elektronen-synchrotron/mixed_loop_predict_10/ze12s0aa/file_stream\": dial tcp: lookup api.wandb.ai on 127.0.0.53:53: server misbehaving"}
+{"time":"2025-08-08T12:34:42.286552962+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/aliajrigers-desydeutsches-elektronen-synchrotron/mixed_loop_predict_10/ze12s0aa/file_stream\": dial tcp: lookup api.wandb.ai on 127.0.0.53:53: server misbehaving"}
+{"time":"2025-08-08T12:34:50.549928789+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/aliajrigers-desydeutsches-elektronen-synchrotron/mixed_loop_predict_10/ze12s0aa/file_stream\": dial tcp: lookup api.wandb.ai on 127.0.0.53:53: server misbehaving"}
+{"time":"2025-08-08T12:35:19.534665576+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/aliajrigers-desydeutsches-elektronen-synchrotron/mixed_loop_predict_10/ze12s0aa/file_stream\": dial tcp: lookup api.wandb.ai on 127.0.0.53:53: server misbehaving"}
+{"time":"2025-08-08T12:36:19.533682624+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/aliajrigers-desydeutsches-elektronen-synchrotron/mixed_loop_predict_10/ze12s0aa/file_stream\": dial tcp: lookup api.wandb.ai on 127.0.0.53:53: server misbehaving"}
+{"time":"2025-08-08T12:40:04.539998006+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/aliajrigers-desydeutsches-elektronen-synchrotron/mixed_loop_predict_10/ze12s0aa/file_stream\": dial tcp: lookup api.wandb.ai on 127.0.0.53:53: server misbehaving"}
+{"time":"2025-08-08T12:40:06.55731477+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/aliajrigers-desydeutsches-elektronen-synchrotron/mixed_loop_predict_10/ze12s0aa/file_stream\": dial tcp: lookup api.wandb.ai on 127.0.0.53:53: server misbehaving"}
+{"time":"2025-08-08T12:48:05.837498765+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/aliajrigers-desydeutsches-elektronen-synchrotron/mixed_loop_predict_10/ze12s0aa/file_stream\": dial tcp: lookup api.wandb.ai on 127.0.0.53:53: server misbehaving"}
+{"time":"2025-08-08T13:04:50.840180909+02:00","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/aliajrigers-desydeutsches-elektronen-synchrotron/mixed_loop_predict_10/ze12s0aa/file_stream\": dial tcp: lookup api.wandb.ai on 127.0.0.53:53: server misbehaving"}
+{"time":"2025-08-08T13:43:11.989398683+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-08T13:43:11.989455571+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-08T13:43:12.864930441+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-08T13:43:12.993311811+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading history steps 99-99, summary, console lines 15-17","runtime_seconds":0.128128706}],"total_operations":1}}
+{"time":"2025-08-08T13:43:13.239219767+02:00","level":"INFO","msg":"stream: closing","id":"ze12s0aa"}
+{"time":"2025-08-08T13:43:13.239268351+02:00","level":"INFO","msg":"handler: closed","stream_id":"ze12s0aa"}
+{"time":"2025-08-08T13:43:13.23930557+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"ze12s0aa"}
+{"time":"2025-08-08T13:43:13.239332213+02:00","level":"INFO","msg":"sender: closed","stream_id":"ze12s0aa"}
+{"time":"2025-08-08T13:43:13.239523735+02:00","level":"INFO","msg":"stream: closed","id":"ze12s0aa"}

@@ -1,0 +1,9 @@
+
+Starting training...
+Model architecture: gin
+Hidden dim: 64, Layers: 3
+Initial LR: 0.00011999999999999988
+Epoch   0/10: Train Loss=0.6035, Acc=0.6560, Val Loss=0.5454, Acc=0.7071, LR=0.000841
+Epoch   9/10: Train Loss=0.4069, Acc=0.8013, Val Loss=0.3812, Acc=0.8170, LR=0.000000
+
+Best validation accuracy: 0.8170 at epoch 9
