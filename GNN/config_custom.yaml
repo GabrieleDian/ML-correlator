@@ -3,14 +3,13 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  loop_order: 9                    # Which loop to use
+  loop_order: 10                    # Which loop to use
   
 # Feature configuration
 features:
   # Features to compute (when running compute_features.py)
   compute_all: true
   features_to_compute:
-    - adjacency_columns
     - eigen_1
     - eigen_2
     - eigen_3
@@ -23,7 +22,6 @@ features:
   
   # Features to use for training
   selected_features:
-    - adjacency_columns
     - eigen_1
     - eigen_2
     - eigen_3
@@ -46,7 +44,7 @@ model:
 
 # Training configuration
 training:
-  epochs: 100
+  epochs: 300
   batch_size: 32
   learning_rate: 0.001
   weight_decay: 0.0005
@@ -56,7 +54,7 @@ training:
 experiment:
   seed: 42
   use_wandb: true
-  wandb_project: "all_in_9"
+  wandb_project: "custom_run_10_300_epochs"
   wandb_name: "gin_simple"
   save_model: true
   model_dir: "models"
