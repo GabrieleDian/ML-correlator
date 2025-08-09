@@ -1,0 +1,63 @@
+% Loop Analysis – Auto‑generated from notebook results
+\documentclass{article}
+\usepackage{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\title{Impact of Training‑Set Loop Composition on F‑Graph Denoisers}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+Iterative factor–graph (\emph{f‑graph}) denoisers were proposed by Hardin,\textit{et\~al.},\cite{Hardin2024FGraph} as a scalable surrogate for high‑order perturbative calculations.  In this note we probe how the \emph{loop order} represented in the training set affects a decision‑tree (XGBoost) classifier’s ability to predict the "+/–" sign of graph coefficients.
+
+Three curricula are compared:
+\begin{enumerate}
+\item \textbf{10‑only:} Train on 10‑loop graphs alone.
+\item \textbf{9+10 mixed:} Train on the union of 9‑ and 10‑loop graphs.
+\item \textbf{7–9 \$\rightarrow\$ 10:} Train on 7‑, 8‑ and 9‑loop graphs and evaluate transfer to 10‑loop graphs.
+\end{enumerate}
+
+\section{Experimental Details}\label{sec\:setup}
+Each model is an XGBoost classifier with \texttt{max\_depth}=6, learning rate 0.05, up to 500 boosting rounds with early stopping after 20.  Five stratified splits preserve both class balance and (where relevant) the distribution of loop orders.  The dataset sizes are:
+\begin{itemize}
+\item 10‑only: $25\,221$ training samples.
+\item 9+10 mixed: $47\,349$ samples (all 9‑ plus all 10‑loop graphs).
+\item 7–9 set: $40\,012$ samples (all 7‑, 8‑ and 9‑loop graphs).
+\end{itemize}
+Test performance is reported as the mean ROC–AUC over the five validation folds with the corresponding standard deviation.
+
+\section{Results}\label{sec\:results}
+Table\~\ref{tab\:results} collects the aggregated scores extracted directly from the provided notebook \texttt{mixed\_loops\_den\_graphs.ipynb}.
+
+\begin{table}\[ht]
+\centering
+\caption{ROC–AUC on 10‑loop validation graphs.  Values are percentages; $\pm$ gives the across‑fold standard deviation.}
+\label{tab\:results}
+\begin{tabular}{lcc}
+\toprule
+Curriculum & Mean (%) & Std (%) \\
+\midrule
+10‑only & 91.6 & 0.1 \\
+9+10 mixed & 91.4 & 0.1 \\
+7–9 \$\rightarrow\$ 10 & 81.4 & 0.5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Key observations.}
+\begin{itemize}
+\item \textbf{No gain from mixing 9‑loops.}  Adding roughly 90,% extra data from 9‑loop graphs leaves the 10‑loop ROC–AUC statistically unchanged ($\Delta \approx -0.2$\~p.p.).  The 10‑loop manifold already appears well‑covered by 10‑loop data alone.
+\item \textbf{Transfer from 7–9 loops fails.}  Training exclusively on lower orders incurs a $\sim\!10$‑point absolute drop.  Visualising tree splits (not shown) reveals several high‑variance coordinates present only in 10‑loop graphs; the model cannot infer them from lower‑order structure.
+\end{itemize}
+
+\section{Conclusion}
+Effective f‑graph denoisers must be trained at the target loop order.  Mixing in 9‑loops provides negligible benefit once a reasonable 10‑loop corpus is available, while attempting to extrapolate from 7–9 loops is unreliable.
+
+
+\end{document}
