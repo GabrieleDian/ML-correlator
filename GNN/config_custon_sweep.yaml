@@ -1,0 +1,42 @@
+# Simple WandB Sweep Configuration
+# Good starting point for hyperparameter search
+
+program: one_run_simple_mixed_loop.py
+method: random  # Random search is simple and effective
+metric:
+  name: val_accuracy
+  goal: maximize
+
+parameters:
+  # Base config file
+  config:
+    value: config_custom.yaml
+  
+  # Fixed parameters
+  loop:
+  
+  epochs:
+    value: 100
+    
+  # Feature combinations to try
+  features:
+    values:
+     - ["eigen_1"," eigen_2","eigen_3","degree","betweenness","clustering","closeness","pagerank","face_count"]
+  
+  # Model hyperparameters to search
+  hidden_channels: 64
+    
+  
+  num_layers: 3
+  
+  dropout: 0.2
+
+  learning_rate:
+    min: 0.0001
+    max: 0.01
+  
+  weight_decay:
+    min: 0.0005
+    max: 0.001
+  
+  batch_size: 32
