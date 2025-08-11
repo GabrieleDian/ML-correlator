@@ -4,6 +4,7 @@
 \usepackage{hyperref}
 \usepackage{authblk}
 \usepackage{float}
+\usepackage{enumitem}
 
 \title{Predicting Vanishing Coefficients of Denominator Graphs: From $l$-loops to $(l+1)$-loops OR Zero and few shot learning}
 \author{}
@@ -131,6 +132,15 @@ A few notables:
 \item Mixing $l+1$ with $l$ always improves performance on $l$ 
 \item Mixing $l+1$ with $l$ seems to degrade performance on $l+1$
 \end{itemize}
+$$\forall f^{\nu^{(n-1)}}_{j,\alpha} :
+\sum_{f^{\rho^{(n)}}_{i,\mu}}
+\frac{\left| f^{\nu^{(n-1)}}_{j,\alpha} \right|}
+     {\left| f^{\rho^{(n)}}_{i,\mu} \right|}
+\, c^{(n)}_{i}
+= c^{(n-1)}_{j} ;
+\quad \text{in particular,} \quad
+c^{(n-1)}_{0} \equiv 0 
+$$
 
 Cusp rule tells us that pinching on an $l$ loop coefficient is equivalent to the weighted sum of $l+1$ loop coefficients. This would mean that there is information in $l+1$ loops that $l$ loops can use and we indeed observe this in the results. (Note - we should do experiments or study ways to deconstruct this from simply having more data - not sure how much an issue this is).
 
@@ -239,6 +249,10 @@ Really importantly - the training AUC-ROC does not reach 1. This indicates confl
 
 \subsection{Directionality + pieces of loop 10 needed to get intra-loop 10 level performance: Few-shot learning}
 
+In this section we look a the $[7,8,9]  \rightarrow [10]$ problem again but we now cluster the 10 loop graphs and work out which clusters have the mosts value.
+
+This is something akin for Few-shot learning (although we are taking quite a few more 10 loop examples into a training set than we might normally).
+
 \begin{table}[H]
 \centering
 \begin{tabular}{c|rrr|c}
@@ -286,10 +300,34 @@ After 3 Clusters & [5, 8, 19] & 0.917 \\
 \label{tab:multi_cluster_promotion}
 \end{table}
 
-\section{Next steps}
-Questions to ask ourselves:
+The additional clusters bring in 50783 more datapoints which are 10-loop specific. Training with the same amount of 10-loop data on a 10-loop problem alone gives a ROC AUC of about 0.907. Ultimately - its not so clear if this is a useful thing to do until we do further comparisons.
+\section{Uncertainty Quantification}
+TODO
 
-1. 
+\section{Next steps}
+Questions to ask ourselves in this work
+
+
+
+% Optional global tweaks
+\setlist{nosep}                       % tighter lists
+\setlist[itemize]{leftmargin=*}       % full-width bullets
+\setlist[enumerate,1]{label=\arabic*.}
+\setlist[enumerate,2]{label=\alph*)}  % sublevel like a), b), ...
+
+\begin{enumerate}
+\item Try this on higher loops again
+ \item Move to full graph
+  \item Data Augmentation
+    \begin{enumerate}
+      \item In vanilla modelling - we expect there to be a rich generating function - not particularly obvious how invariance we have that is not already encoded in features
+      \item Fix the 9-loop problem.
+    \end{enumerate}
+  \item Confidence scores and how in particular to use for 13-loops
+   \item Are we finding coefficients for graphs that cannot be found through rules like cusp rules?
+\end{enumerate}
+
+On the GNN approach - we should get graph representations that are far richer.
 
 	
 \end{document}
