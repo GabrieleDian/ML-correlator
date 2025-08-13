@@ -1,6 +1,6 @@
 # Simple WandB Sweep Configuration
 # Good starting point for hyperparameter search
-
+project: LR_mixed_loop_predict  # Add this line
 program: one_run_simple_mixed_loop.py
 method: random  # Random search is simple and effective
 metric:
