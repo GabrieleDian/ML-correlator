@@ -1,0 +1,16 @@
+{"time":"2025-08-12T02:40:04.506967684+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250812_024004-gre5t8n4/logs/debug-core.log"}
+{"time":"2025-08-12T02:40:04.799870297+02:00","level":"INFO","msg":"stream: created new stream","id":"gre5t8n4"}
+{"time":"2025-08-12T02:40:04.799896866+02:00","level":"INFO","msg":"stream: started","id":"gre5t8n4"}
+{"time":"2025-08-12T02:40:04.799982895+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"gre5t8n4"}
+{"time":"2025-08-12T02:40:04.800023745+02:00","level":"INFO","msg":"sender: started","stream_id":"gre5t8n4"}
+{"time":"2025-08-12T02:40:04.800064263+02:00","level":"INFO","msg":"handler: started","stream_id":"gre5t8n4"}
+{"time":"2025-08-12T02:40:04.997234613+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-12T03:43:04.905807827+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-12T03:43:04.90593718+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-12T03:43:05.867374283+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading wandb-summary.json","runtime_seconds":0.694410677,"progress":"473B/473B"},{"desc":"uploading config.yaml","runtime_seconds":0.475339333,"progress":"614B/614B"}],"total_operations":2}}
+{"time":"2025-08-12T03:43:05.89348891+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-12T03:43:06.200885929+02:00","level":"INFO","msg":"stream: closing","id":"gre5t8n4"}
+{"time":"2025-08-12T03:43:06.200895983+02:00","level":"INFO","msg":"handler: closed","stream_id":"gre5t8n4"}
+{"time":"2025-08-12T03:43:06.200907675+02:00","level":"INFO","msg":"sender: closed","stream_id":"gre5t8n4"}
+{"time":"2025-08-12T03:43:06.200902335+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"gre5t8n4"}
+{"time":"2025-08-12T03:43:06.200956496+02:00","level":"INFO","msg":"stream: closed","id":"gre5t8n4"}

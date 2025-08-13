@@ -1,0 +1,88 @@
+Loaded config structure: ['data', 'features', 'model', 'training', 'experiment']
+Sweep parameters: {'config': 'config_custom.yaml', 'epochs': 100, 'learning_rate': 0.002462656597998156}
+
+Loading pre-computed features...
+Loading features: ['eigen_1', 'eigen_2', 'eigen_3', 'degree', 'betweenness', 'clustering', 'closeness', 'pagerank', 'face_count']
+Loaded eigen_1: shape (164, 11)
+Loaded eigen_2: shape (164, 11)
+Loaded eigen_3: shape (164, 11)
+Loaded degree: shape (164, 11)
+Loaded betweenness: shape (164, 11)
+Loaded clustering: shape (164, 11)
+Loaded closeness: shape (164, 11)
+Loaded pagerank: shape (164, 11)
+Loaded face_count: shape (164, 11)
+Loading graph structures for loop order 7...
+Loaded eigen_1: shape (1432, 12)
+Loaded eigen_2: shape (1432, 12)
+Loaded eigen_3: shape (1432, 12)
+Loaded degree: shape (1432, 12)
+Loaded betweenness: shape (1432, 12)
+Loaded clustering: shape (1432, 12)
+Loaded closeness: shape (1432, 12)
+Loaded pagerank: shape (1432, 12)
+Loaded face_count: shape (1432, 12)
+Loading graph structures for loop order 8...
+Loaded eigen_1: shape (13972, 13)
+Loaded eigen_2: shape (13972, 13)
+Loaded eigen_3: shape (13972, 13)
+Loaded degree: shape (13972, 13)
+Loaded betweenness: shape (13972, 13)
+Loaded clustering: shape (13972, 13)
+Loaded closeness: shape (13972, 13)
+Loaded pagerank: shape (13972, 13)
+Loaded face_count: shape (13972, 13)
+Loading graph structures for loop order 9...
+Created dataset with 15568 graphs
+Feature dimension: 9
+Normalizing features...
+Loading features: ['eigen_1', 'eigen_2', 'eigen_3', 'degree', 'betweenness', 'clustering', 'closeness', 'pagerank', 'face_count']
+Loaded eigen_1: shape (153252, 14)
+Loaded eigen_2: shape (153252, 14)
+Loaded eigen_3: shape (153252, 14)
+Loaded degree: shape (153252, 14)
+Loaded betweenness: shape (153252, 14)
+Loaded clustering: shape (153252, 14)
+Loaded closeness: shape (153252, 14)
+Loaded pagerank: shape (153252, 14)
+Loaded face_count: shape (153252, 14)
+Loading graph structures for loop order 10...
+Created dataset with 153252 graphs
+Feature dimension: 9
+Normalizing features...
+
+Dataset Statistics:
+  Number of graphs: 15568
+  Average nodes: 12.9 (min: 11, max: 13)
+  Average edges: 29.8
+  Label distribution: 6497 positive, 9071 negative
+  Feature dimension: 9
+
+Training configuration:
+  Model: gin
+  Input features: 9
+  Hidden channels: 64
+  Epochs: 100
+
+Starting training...
+Using device: cpu
+[34m[1mwandb[0m: [33mWARNING[0m Ignoring project 'mixed_loop_predict_10' when running a sweep.
+[34m[1mwandb[0m: wandb.init() called while a run is active and reinit is set to 'default', so returning the previous run.
+
+Starting training...
+Model architecture: gin
+Hidden dim: 64, Layers: 3
+Initial LR: 0.0002955187917597791
+Epoch   0/100: Train Loss=0.5838, Acc=0.6720, Val Loss=0.4812, Acc=0.7476, LR=0.000315
+Epoch  10/100: Train Loss=0.4677, Acc=0.7637, Val Loss=0.4239, Acc=0.7968, LR=0.002400
+Epoch  20/100: Train Loss=0.4320, Acc=0.7898, Val Loss=0.3769, Acc=0.8183, LR=0.005927
+Epoch  30/100: Train Loss=0.4459, Acc=0.7826, Val Loss=0.4216, Acc=0.7934, LR=0.007384
+Epoch  40/100: Train Loss=0.4375, Acc=0.7860, Val Loss=0.4758, Acc=0.7852, LR=0.006947
+Epoch  50/100: Train Loss=0.4134, Acc=0.7972, Val Loss=0.4103, Acc=0.7984, LR=0.005865
+Epoch  60/100: Train Loss=0.3952, Acc=0.8125, Val Loss=0.3731, Acc=0.8242, LR=0.004353
+Epoch  70/100: Train Loss=0.3655, Acc=0.8243, Val Loss=0.3714, Acc=0.8210, LR=0.002711
+Epoch  80/100: Train Loss=0.3337, Acc=0.8434, Val Loss=0.3604, Acc=0.8270, LR=0.001264
+Epoch  90/100: Train Loss=0.3095, Acc=0.8564, Val Loss=0.3455, Acc=0.8377, LR=0.000297
+Epoch  99/100: Train Loss=0.2964, Acc=0.8618, Val Loss=0.3546, Acc=0.8360, LR=0.000000
+
+Best validation accuracy: 0.8384 at epoch 88
