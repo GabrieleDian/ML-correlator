@@ -14,9 +14,9 @@ def compute_metrics(y_true, y_pred):
     cm = confusion_matrix(y_true, y_pred)
     
     return {
-        'precision': precision_score(y_true, y_pred, zero_division=0),
-        'recall': recall_score(y_true, y_pred, zero_division=0),
-        'f1': f1_score(y_true, y_pred, zero_division=0),
+        'precision': precision_score(y_true, y_pred, pos_label=1, zero_division=0),
+        'recall': recall_score(y_true, y_pred, pos_label=1, zero_division=0),
+        'f1': f1_score(y_true, y_pred, pos_label=1, zero_division=0),
         'confusion_matrix': cm
     }
 
@@ -94,11 +94,20 @@ def evaluate(model, val_loader, device):
     
     return avg_loss, accuracy, metrics
 
-def train(config, train_dataset, val_dataset):
+def train(config, dataset):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
 
+    # Split dataset into train/val
+    train_size = int(0.8 * len(dataset))
+    val_size = len(dataset) - train_size
+    train_dataset, val_dataset = torch.utils.data.random_split(
+        dataset, [train_size, val_size],
+        generator=torch.Generator().manual_seed(42)
+    )
     
+    print(f"Train size: {train_size}, Val size: {val_size}")
+
     if getattr(config, 'use_wandb', False):
         wandb.init(
             project=config.project,
