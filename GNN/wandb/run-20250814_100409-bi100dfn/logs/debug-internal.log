@@ -1,0 +1,16 @@
+{"time":"2025-08-14T10:04:10.072057131+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250814_100409-bi100dfn/logs/debug-core.log"}
+{"time":"2025-08-14T10:04:10.474441542+02:00","level":"INFO","msg":"stream: created new stream","id":"bi100dfn"}
+{"time":"2025-08-14T10:04:10.474470204+02:00","level":"INFO","msg":"stream: started","id":"bi100dfn"}
+{"time":"2025-08-14T10:04:10.47448034+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"bi100dfn"}
+{"time":"2025-08-14T10:04:10.474488719+02:00","level":"INFO","msg":"handler: started","stream_id":"bi100dfn"}
+{"time":"2025-08-14T10:04:10.474499447+02:00","level":"INFO","msg":"sender: started","stream_id":"bi100dfn"}
+{"time":"2025-08-14T10:04:10.783646436+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-14T10:04:16.196411577+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-14T10:04:16.196450855+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-14T10:04:17.198216618+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading output.log","runtime_seconds":0.68272974,"progress":"1.1KB/1.1KB"},{"desc":"uploading config.yaml","runtime_seconds":0.494366367,"progress":"989B/989B"}],"total_operations":2}}
+{"time":"2025-08-14T10:04:17.233368043+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-14T10:04:17.53973885+02:00","level":"INFO","msg":"stream: closing","id":"bi100dfn"}
+{"time":"2025-08-14T10:04:17.53974936+02:00","level":"INFO","msg":"handler: closed","stream_id":"bi100dfn"}
+{"time":"2025-08-14T10:04:17.539756247+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"bi100dfn"}
+{"time":"2025-08-14T10:04:17.539762317+02:00","level":"INFO","msg":"sender: closed","stream_id":"bi100dfn"}
+{"time":"2025-08-14T10:04:17.539796072+02:00","level":"INFO","msg":"stream: closed","id":"bi100dfn"}
