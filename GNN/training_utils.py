@@ -14,9 +14,9 @@ def compute_metrics(y_true, y_pred):
     cm = confusion_matrix(y_true, y_pred)
     
     return {
-        'precision': precision_score(y_true, y_pred, pos_label=1, zero_division=0),
-        'recall': recall_score(y_true, y_pred, pos_label=1, zero_division=0),
-        'f1': f1_score(y_true, y_pred, pos_label=1, zero_division=0),
+        'precision': precision_score(y_true, y_pred, zero_division=0),
+        'recall': recall_score(y_true, y_pred, zero_division=0),
+        'f1': f1_score(y_true, y_pred, zero_division=0),
         'confusion_matrix': cm
     }
 
@@ -62,8 +62,8 @@ def train_epoch(model, train_loader, optimizer, device, scheduler=None, schedule
 
     return avg_loss, accuracy, metrics
 
-def evaluate(model, val_loader, device):
-    """Evaluate model on validation set"""
+def evaluate(model, test_loader, device):
+    """Evaluate model on test set"""
     model.eval()
     total_loss = 0
     correct = 0
@@ -72,7 +72,7 @@ def evaluate(model, val_loader, device):
     all_labels = []
     
     with torch.no_grad():
-        for batch in val_loader:
+        for batch in test_loader:
             batch = batch.to(device)
             out = model(batch.x, batch.edge_index, batch.batch)
             loss = F.cross_entropy(out, batch.y)
@@ -94,29 +94,20 @@ def evaluate(model, val_loader, device):
     
     return avg_loss, accuracy, metrics
 
-def train(config, dataset):
+def train(config, train_dataset, test_dataset):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
-
-    # Split dataset into train/val
-    train_size = int(0.8 * len(dataset))
-    val_size = len(dataset) - train_size
-    train_dataset, val_dataset = torch.utils.data.random_split(
-        dataset, [train_size, val_size],
-        generator=torch.Generator().manual_seed(42)
-    )
     
-    print(f"Train size: {train_size}, Val size: {val_size}")
-
+    # Initialize Weights & Biases if configured
     if getattr(config, 'use_wandb', False):
         wandb.init(
             project=config.project,
             name=getattr(config, 'experiment_name', config.model_name),
             config=config.__dict__
         )
-
+    # Train and test loaders
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=False)
 
     model = create_gnn_model(
         config.model_name,
@@ -156,7 +147,7 @@ def train(config, dataset):
     print(f"Hidden dim: {config.hidden_channels}, Layers: {getattr(config, 'num_layers', 3)}")
     print(f"Initial LR: {optimizer.param_groups[0]['lr']}")
     
-    best_val_acc = 0
+    best_test_acc = 0
     best_epoch = 0
     
     for epoch in range(config.epochs):
@@ -167,16 +158,16 @@ def train(config, dataset):
             scheduler_type=scheduler_type
         )
         
-        # Validation
-        val_loss, val_acc, val_metrics = evaluate(model, val_loader, device)
+        # Test
+        test_loss, test_acc, test_metrics = evaluate(model, test_loader, device)
         
         # Step plateau scheduler after epoch
         if scheduler_type == 'plateau' and scheduler is not None:
-            scheduler.step(val_loss)
+            scheduler.step(test_loss)
         
         # Track best model
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
+        if test_acc > best_test_acc:
+            best_test_acc = test_acc
             best_epoch = epoch
             best_model_state = model.state_dict().copy()
         
@@ -191,25 +182,25 @@ def train(config, dataset):
                 'train_precision': train_metrics['precision'],
                 'train_recall': train_metrics['recall'],
                 'train_f1': train_metrics['f1'],
-                'val_loss': val_loss,
-                'val_accuracy': val_acc,
-                'val_precision': val_metrics['precision'],
-                'val_recall': val_metrics['recall'],
-                'val_f1': val_metrics['f1'],
+                'test_loss': test_loss,
+                'test_accuracy': test_acc,
+                'test_precision': test_metrics['precision'],
+                'test_recall': test_metrics['recall'],
+                'test_f1': test_metrics['f1'],
                 'current_lr': current_lr
             })
 
         if epoch % 10 == 0 or epoch == config.epochs - 1:
             print(f"Epoch {epoch:3d}/{config.epochs}: "
                   f"Train Loss={train_loss:.4f}, Acc={train_acc:.4f}, "
-                  f"Val Loss={val_loss:.4f}, Acc={val_acc:.4f}, "
+                  f"Test Loss={test_loss:.4f}, Acc={test_acc:.4f}, "
                   f"LR={current_lr:.6f}")
             
             # Print confusion matrix for debugging
             #print(f"Train Confusion Matrix:\n{train_metrics['confusion_matrix']}")
-            #print(f"Val Confusion Matrix:\n{val_metrics['confusion_matrix']}")
+            #print(f"Test Confusion Matrix:\n{test_metrics['confusion_matrix']}")
 
-    print(f"\nBest validation accuracy: {best_val_acc:.4f} at epoch {best_epoch}")
+    print(f"\nBest testidation accuracy: {best_test_acc:.4f} at epoch {best_epoch}")
 
     if wandb.run is not None:
         wandb.finish()
@@ -217,6 +208,6 @@ def train(config, dataset):
     return {
         'model_state': best_model_state,
         'final_train_acc': train_acc,
-        'best_val_acc': best_val_acc,
+        'best_test_acc': best_test_acc,
         'best_epoch': best_epoch
     }

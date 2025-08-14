@@ -99,7 +99,7 @@ class SimpleGraphBuilder:
         return data
 
 
-def create_simple_dataset(loop_order=[7,8,9], selected_features=None, normalize=True, data_dir='Graph_Edge_Data', scaler=None):
+def create_simple_dataset(loop_order, selected_features=None, normalize=True, data_dir='Graph_Edge_Data', scaler=None):
     """
     Create dataset using pre-computed features.
     Args:
