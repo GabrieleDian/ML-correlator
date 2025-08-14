@@ -3,8 +3,8 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  train_loop_order: 7                  # Which loop to use for training
-  test_loop_order: 7                     # Which loop to use for testing
+  train_loop_order: [7,8]                 # Which loop to use for training
+  test_loop_order: 9                    # Which loop to use for testing
   
 # Feature configuration
 features:
@@ -14,24 +14,12 @@ features:
     - eigen_1
     - eigen_2
     - eigen_3
-    - degree
-    - betweenness
-    - clustering
-    - closeness
-    - pagerank
-    - face_count
   
   # Features to use for training
   selected_features:
     - eigen_1
     - eigen_2
-    - eigen_3
-    - degree
-    - betweenness
-    - clustering
-    - closeness
-    - pagerank
-    - face_count
+    - eigen_3  
   # Computation settings
   chunk_size: 1000
   n_jobs: 4
@@ -55,7 +43,7 @@ training:
 experiment:
   seed: 42
   use_wandb: true
-  wandb_project: "cluster-7-loop"
+  wandb_project: "train_7_8_pred_9_loop_eigenvectors"
   wandb_name: "gin_simple"
-  save_model: true
+  save_model: false
   model_dir: "models"

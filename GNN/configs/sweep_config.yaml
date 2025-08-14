@@ -2,7 +2,7 @@
 # Good starting point for hyperparameter search
 
 program: one_run_simple.py
-method: grid  # Random search is simple and effective
+method: random  # Random search is simple and effective
 metric:
   name: val_accuracy
   goal: maximize
@@ -12,7 +12,8 @@ parameters:
   config:
     value: configs/config.yaml
 
-  # Model hyperparameters to search
   learning_rate:
-    values: [0.0001, 0.0005]
-
+    distribution: uniform
+    min: 0.0001
+    max: 0.001
+run_cap: 5

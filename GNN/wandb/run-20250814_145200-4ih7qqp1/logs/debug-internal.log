@@ -1,0 +1,16 @@
+{"time":"2025-08-14T14:52:00.448112442+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250814_145200-4ih7qqp1/logs/debug-core.log"}
+{"time":"2025-08-14T14:52:00.978631445+02:00","level":"INFO","msg":"stream: created new stream","id":"4ih7qqp1"}
+{"time":"2025-08-14T14:52:00.978659143+02:00","level":"INFO","msg":"stream: started","id":"4ih7qqp1"}
+{"time":"2025-08-14T14:52:00.978672798+02:00","level":"INFO","msg":"handler: started","stream_id":"4ih7qqp1"}
+{"time":"2025-08-14T14:52:00.978672992+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"4ih7qqp1"}
+{"time":"2025-08-14T14:52:00.97868376+02:00","level":"INFO","msg":"sender: started","stream_id":"4ih7qqp1"}
+{"time":"2025-08-14T14:52:01.20188373+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-14T14:52:09.759075837+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-14T14:52:09.759141534+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-14T14:52:10.760767808+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading output.log","runtime_seconds":0.631601623,"progress":"2.2KB/2.2KB"},{"desc":"uploading config.yaml","runtime_seconds":0.47908652,"progress":"593B/593B"}],"total_operations":2}}
+{"time":"2025-08-14T14:52:10.897024894+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-14T14:52:11.37034192+02:00","level":"INFO","msg":"stream: closing","id":"4ih7qqp1"}
+{"time":"2025-08-14T14:52:11.370400449+02:00","level":"INFO","msg":"handler: closed","stream_id":"4ih7qqp1"}
+{"time":"2025-08-14T14:52:11.370422284+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"4ih7qqp1"}
+{"time":"2025-08-14T14:52:11.370451597+02:00","level":"INFO","msg":"sender: closed","stream_id":"4ih7qqp1"}
+{"time":"2025-08-14T14:52:11.370554749+02:00","level":"INFO","msg":"stream: closed","id":"4ih7qqp1"}

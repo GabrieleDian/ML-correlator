@@ -25,7 +25,7 @@ python compute_features.py --config config.yaml --feature degree
 
 ```bash
 # Train using config file, specify train and test loop orders
-python one_run_simple.py --config config.yaml --train_loop [7,8] test_loop 9
+python one_run_simple.py --config config.yaml --train_loop 7,8 test_loop 9
 
 # Override specific parameters
 python one_run_simple.py --config config.yaml --train_loop 8 test_loop 8 --epochs 200
