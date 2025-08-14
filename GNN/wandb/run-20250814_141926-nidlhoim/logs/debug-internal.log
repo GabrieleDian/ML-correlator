@@ -1,0 +1,16 @@
+{"time":"2025-08-14T14:19:26.372171006+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250814_141926-nidlhoim/logs/debug-core.log"}
+{"time":"2025-08-14T14:19:26.636552508+02:00","level":"INFO","msg":"stream: created new stream","id":"nidlhoim"}
+{"time":"2025-08-14T14:19:26.636578792+02:00","level":"INFO","msg":"stream: started","id":"nidlhoim"}
+{"time":"2025-08-14T14:19:26.636597783+02:00","level":"INFO","msg":"sender: started","stream_id":"nidlhoim"}
+{"time":"2025-08-14T14:19:26.636597624+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"nidlhoim"}
+{"time":"2025-08-14T14:19:26.636624308+02:00","level":"INFO","msg":"handler: started","stream_id":"nidlhoim"}
+{"time":"2025-08-14T14:19:26.803677598+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-14T14:19:37.756963519+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-14T14:19:37.757028053+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-14T14:19:38.467369741+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-14T14:19:38.758342161+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading history steps 0-99, summary, console lines 14-47","runtime_seconds":0.29069536}],"total_operations":1}}
+{"time":"2025-08-14T14:19:38.803304347+02:00","level":"INFO","msg":"stream: closing","id":"nidlhoim"}
+{"time":"2025-08-14T14:19:38.803324012+02:00","level":"INFO","msg":"handler: closed","stream_id":"nidlhoim"}
+{"time":"2025-08-14T14:19:38.803343132+02:00","level":"INFO","msg":"sender: closed","stream_id":"nidlhoim"}
+{"time":"2025-08-14T14:19:38.803335263+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"nidlhoim"}
+{"time":"2025-08-14T14:19:38.803388238+02:00","level":"INFO","msg":"stream: closed","id":"nidlhoim"}

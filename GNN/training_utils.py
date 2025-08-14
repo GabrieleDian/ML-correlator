@@ -14,9 +14,9 @@ def compute_metrics(y_true, y_pred):
     cm = confusion_matrix(y_true, y_pred)
     
     return {
-        'precision': precision_score(y_true, y_pred, zero_division=0),
-        'recall': recall_score(y_true, y_pred, zero_division=0),
-        'f1': f1_score(y_true, y_pred, zero_division=0),
+        'precision': precision_score(y_true, y_pred, pos_label=1, zero_division=0),
+        'recall': recall_score(y_true, y_pred, pos_label=1, zero_division=0),
+        'f1': f1_score(y_true, y_pred, pos_label=1, zero_division=0),
         'confusion_matrix': cm
     }
 
@@ -200,7 +200,7 @@ def train(config, train_dataset, test_dataset):
             #print(f"Train Confusion Matrix:\n{train_metrics['confusion_matrix']}")
             #print(f"Test Confusion Matrix:\n{test_metrics['confusion_matrix']}")
 
-    print(f"\nBest testidation accuracy: {best_test_acc:.4f} at epoch {best_epoch}")
+    print(f"\nBest test accuracy: {best_test_acc:.4f} at epoch {best_epoch}")
 
     if wandb.run is not None:
         wandb.finish()
