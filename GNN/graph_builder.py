@@ -99,7 +99,7 @@ class SimpleGraphBuilder:
         return data
 
 
-def create_simple_dataset(loop_order, selected_features=None, normalize=True, data_dir='Graph_Edge_Data', scaler=None):
+def create_simple_dataset(loop_order, selected_features=None, normalize=True, data_dir='Graph_Edge_Data', scaler=None,max_features=None):
     """
     Create dataset using pre-computed features.
     Args:
@@ -116,53 +116,77 @@ def create_simple_dataset(loop_order, selected_features=None, normalize=True, da
         loop_orders = [loop_order]
     else:
         loop_orders = loop_order
-    
+
     # Load pre-computed features
     if selected_features is None:
         # Default features
         selected_features = ['degree', 'betweenness', 'clustering']
-    
+
     print(f"Loading features: {selected_features}")
-    
+
     dataset = []
     idx_counter = 0
-    
+
     # Process each loop order
     for lo in loop_orders:
         features_dict, labels = load_saved_features(lo, selected_features, data_dir)
         # Load graph structure
         print(f"Loading graph structures for loop order {lo}...")
         graph_infos = load_graph_structure(lo, data_dir)
-        
+
         # Create dataset for this loop order
         for local_idx, (graph_info, label) in enumerate(zip(graph_infos, labels)):
             builder = SimpleGraphBuilder(graph_info, features_dict, label, local_idx)  # Use local_idx
             data = builder.build(selected_features)
             dataset.append(data)
             idx_counter += 1
-    
+
     print(f"Created dataset with {len(dataset)} graphs")
     print(f"Feature dimension: {dataset[0].x.shape[1]}")
+
+    # Fix feature dimension mismatch
+    feature_dims = [data.x.shape[1] for data in dataset]
+    current_max_features = max(feature_dims)
+    min_features = min(feature_dims)
+    
+    # Use provided max_features or current max
+    target_features = max_features if max_features is not None else current_max_features
+    
+    if target_features != min_features or any(d != target_features for d in feature_dims):
+        print(f"Standardizing to {target_features} features")
+        
+        for data in dataset:
+            if data.x.shape[1] < target_features:
+                # Pad with zeros
+                padding = torch.zeros(data.x.shape[0], target_features - data.x.shape[1])
+                data.x = torch.cat([data.x, padding], dim=1)
+            elif data.x.shape[1] > target_features:
+                # Truncate 
+                data.x = data.x[:, :target_features]
     
     # Normalize if requested
+    scaler = None
     if normalize:
         print("Normalizing features...")
-        if scaler is None:
-            # Fit new scaler
-            all_features = []
-            for data in dataset:
-                all_features.append(data.x.numpy())
-            all_features = np.vstack(all_features)
-            scaler = StandardScaler()
-            scaler.fit(all_features)
         
-        # Transform features using scaler
+        # Collect all features
+        all_features = []
+        for data in dataset:
+            all_features.append(data.x.numpy())
+        all_features = np.vstack(all_features)
+        
+        # Fit scaler
+        scaler = StandardScaler()
+        scaler.fit(all_features)
+        
+        # Transform features
         for data in dataset:
             data.x = torch.FloatTensor(scaler.transform(data.x.numpy()))
-    else:
-        scaler = None
     
-    return dataset, scaler
+
+    return dataset, scaler, current_max_features
+
+#Statistics function to quickly summarize dataset
 def quick_dataset_stats(dataset):
     """Print quick statistics about the dataset."""
     num_graphs = len(dataset)
@@ -185,7 +209,6 @@ if __name__ == "__main__":
     # Create dataset with specific features
     dataset, scaler = create_simple_dataset(
         loop_order=8,
-        selected_features=['degree', 'betweenness', 'clustering'],
         normalize=True
     )
     

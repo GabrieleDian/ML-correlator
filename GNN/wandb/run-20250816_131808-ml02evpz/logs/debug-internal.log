@@ -1,0 +1,16 @@
+{"time":"2025-08-16T13:18:08.28894463+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_131808-ml02evpz/logs/debug-core.log"}
+{"time":"2025-08-16T13:18:08.576828783+02:00","level":"INFO","msg":"stream: created new stream","id":"ml02evpz"}
+{"time":"2025-08-16T13:18:08.576863579+02:00","level":"INFO","msg":"stream: started","id":"ml02evpz"}
+{"time":"2025-08-16T13:18:08.576874019+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"ml02evpz"}
+{"time":"2025-08-16T13:18:08.5768809+02:00","level":"INFO","msg":"sender: started","stream_id":"ml02evpz"}
+{"time":"2025-08-16T13:18:08.576926656+02:00","level":"INFO","msg":"handler: started","stream_id":"ml02evpz"}
+{"time":"2025-08-16T13:18:09.001327493+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-16T14:09:49.983919796+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-16T14:09:49.983994607+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-16T14:09:50.9468794+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading wandb-summary.json","runtime_seconds":0.750075476,"progress":"484B/484B"},{"desc":"uploading config.yaml","runtime_seconds":0.554973857,"progress":"637B/637B"}],"total_operations":2}}
+{"time":"2025-08-16T14:09:51.015122734+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-16T14:09:51.237370093+02:00","level":"INFO","msg":"stream: closing","id":"ml02evpz"}
+{"time":"2025-08-16T14:09:51.237377939+02:00","level":"INFO","msg":"handler: closed","stream_id":"ml02evpz"}
+{"time":"2025-08-16T14:09:51.237390359+02:00","level":"INFO","msg":"sender: closed","stream_id":"ml02evpz"}
+{"time":"2025-08-16T14:09:51.237384159+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"ml02evpz"}
+{"time":"2025-08-16T14:09:51.237428935+02:00","level":"INFO","msg":"stream: closed","id":"ml02evpz"}

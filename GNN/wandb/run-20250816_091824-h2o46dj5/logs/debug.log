@@ -1,0 +1,11 @@
+2025-08-16 09:18:24,214 INFO    MainThread:295020 [wandb_setup.py:_flush():81] Current SDK version is 0.20.1
+2025-08-16 09:18:24,214 INFO    MainThread:295020 [wandb_setup.py:_flush():81] Configure stats pid to 295020
+2025-08-16 09:18:24,214 INFO    MainThread:295020 [wandb_setup.py:_flush():81] Loading settings from /home/rigers/.config/wandb/settings
+2025-08-16 09:18:24,214 INFO    MainThread:295020 [wandb_setup.py:_flush():81] Loading settings from /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/settings
+2025-08-16 09:18:24,214 INFO    MainThread:295020 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2025-08-16 09:18:24,214 INFO    MainThread:295020 [wandb_init.py:setup_run_log_directory():703] Logging user logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_091824-h2o46dj5/logs/debug.log
+2025-08-16 09:18:24,214 INFO    MainThread:295020 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_091824-h2o46dj5/logs/debug-internal.log
+2025-08-16 09:18:24,214 INFO    MainThread:295020 [wandb_init.py:init():831] calling init triggers
+2025-08-16 09:18:24,214 INFO    MainThread:295020 [wandb_init.py:init():836] wandb.init called with sweep_config: {'config': 'configs/config.yaml', 'dropout': 0.5, 'learning_rate': 0.0006893957422730227, 'weight_decay': 4.778294480987831e-05}
+config: {'_wandb': {}}
+2025-08-16 09:18:24,214 INFO    MainThread:295020 [wandb_init.py:init():872] starting backend

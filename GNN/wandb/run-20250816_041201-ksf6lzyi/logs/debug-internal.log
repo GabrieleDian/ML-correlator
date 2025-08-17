@@ -1,0 +1,16 @@
+{"time":"2025-08-16T04:12:02.104585365+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_041201-ksf6lzyi/logs/debug-core.log"}
+{"time":"2025-08-16T04:12:02.395694433+02:00","level":"INFO","msg":"stream: created new stream","id":"ksf6lzyi"}
+{"time":"2025-08-16T04:12:02.395745745+02:00","level":"INFO","msg":"stream: started","id":"ksf6lzyi"}
+{"time":"2025-08-16T04:12:02.395795087+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"ksf6lzyi"}
+{"time":"2025-08-16T04:12:02.395807921+02:00","level":"INFO","msg":"sender: started","stream_id":"ksf6lzyi"}
+{"time":"2025-08-16T04:12:02.39583501+02:00","level":"INFO","msg":"handler: started","stream_id":"ksf6lzyi"}
+{"time":"2025-08-16T04:12:02.568705817+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-16T04:25:36.11635079+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-16T04:25:36.116402985+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-16T04:25:37.07852748+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading wandb-summary.json","runtime_seconds":0.755390812,"progress":"477B/477B"},{"desc":"uploading config.yaml","runtime_seconds":0.570919573,"progress":"745B/745B"}],"total_operations":2}}
+{"time":"2025-08-16T04:25:37.143267968+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-16T04:25:37.55679569+02:00","level":"INFO","msg":"stream: closing","id":"ksf6lzyi"}
+{"time":"2025-08-16T04:25:37.556806283+02:00","level":"INFO","msg":"handler: closed","stream_id":"ksf6lzyi"}
+{"time":"2025-08-16T04:25:37.556821097+02:00","level":"INFO","msg":"sender: closed","stream_id":"ksf6lzyi"}
+{"time":"2025-08-16T04:25:37.556814532+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"ksf6lzyi"}
+{"time":"2025-08-16T04:25:37.556859674+02:00","level":"INFO","msg":"stream: closed","id":"ksf6lzyi"}

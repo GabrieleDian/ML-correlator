@@ -1,0 +1,103 @@
+Loaded config structure: ['data', 'features', 'model', 'training', 'experiment']
+Sweep parameters: {'config': 'configs/config.yaml', 'learning_rate': 0.00025865447291652217, 'weight_decay': 4.542491730342796e-05}
+Training on loop orders [7, 8, 9], testing on loop orders 10 with features: ['adjacency_columns', 'eigen_1', 'eigen_2', 'eigen_3', 'degree', 'betweenness', 'clustering', 'pagerank', 'closeness', 'face_count']
+Loading features: ['adjacency_columns', 'eigen_1', 'eigen_2', 'eigen_3', 'degree', 'betweenness', 'clustering', 'pagerank', 'closeness', 'face_count']
+Loaded adjacency_columns: shape (164, 11, 11)
+Loaded eigen_1: shape (164, 11)
+Loaded eigen_2: shape (164, 11)
+Loaded eigen_3: shape (164, 11)
+Loaded degree: shape (164, 11)
+Loaded betweenness: shape (164, 11)
+Loaded clustering: shape (164, 11)
+Loaded pagerank: shape (164, 11)
+Loaded closeness: shape (164, 11)
+Loaded face_count: shape (164, 11)
+Loading graph structures for loop order 7...
+Loaded adjacency_columns: shape (1432, 12, 12)
+Loaded eigen_1: shape (1432, 12)
+Loaded eigen_2: shape (1432, 12)
+Loaded eigen_3: shape (1432, 12)
+Loaded degree: shape (1432, 12)
+Loaded betweenness: shape (1432, 12)
+Loaded clustering: shape (1432, 12)
+Loaded pagerank: shape (1432, 12)
+Loaded closeness: shape (1432, 12)
+Loaded face_count: shape (1432, 12)
+Loading graph structures for loop order 8...
+Loaded adjacency_columns: shape (13972, 13, 13)
+Loaded eigen_1: shape (13972, 13)
+Loaded eigen_2: shape (13972, 13)
+Loaded eigen_3: shape (13972, 13)
+Loaded degree: shape (13972, 13)
+Loaded betweenness: shape (13972, 13)
+Loaded clustering: shape (13972, 13)
+Loaded pagerank: shape (13972, 13)
+Loaded closeness: shape (13972, 13)
+Loaded face_count: shape (13972, 13)
+Loading graph structures for loop order 9...
+Created dataset with 15568 graphs
+Feature dimension: 20
+Standardizing to 22 features
+Normalizing features...
+Loading features: ['adjacency_columns', 'eigen_1', 'eigen_2', 'eigen_3', 'degree', 'betweenness', 'clustering', 'pagerank', 'closeness', 'face_count']
+Loaded adjacency_columns: shape (153252, 14, 14)
+Loaded eigen_1: shape (153252, 14)
+Loaded eigen_2: shape (153252, 14)
+Loaded eigen_3: shape (153252, 14)
+Loaded degree: shape (153252, 14)
+Loaded betweenness: shape (153252, 14)
+Loaded clustering: shape (153252, 14)
+Loaded pagerank: shape (153252, 14)
+Loaded closeness: shape (153252, 14)
+Loaded face_count: shape (153252, 14)
+Loading graph structures for loop order 10...
+Created dataset with 153252 graphs
+Feature dimension: 23
+Standardizing to 22 features
+Normalizing features...
+
+Dataset Statistics:
+  Number of graphs: 15568
+  Average nodes: 12.9 (min: 11, max: 13)
+  Average edges: 29.8
+  Label distribution: 6497 positive, 9071 negative
+  Feature dimension: 22
+
+Training configuration:
+  Model: gin
+  Input features: 22
+  Hidden channels: 64
+  Epochs: 200
+
+Starting training...
+Using device: cpu
+[34m[1mwandb[0m: [33mWARNING[0m Ignoring project 'train_7_8_9_test_10_loop_all_adj' when running a sweep.
+[34m[1mwandb[0m: wandb.init() called while a run is active and reinit is set to 'default', so returning the previous run.
+
+Starting training...
+Model architecture: gin
+Hidden dim: 64, Layers: 3
+Initial LR: 3.103853674998262e-05
+Epoch   0/200: Train Loss=0.7347, Acc=0.5591, Test Loss=0.6301, Acc=0.6656, LR=0.000032
+Epoch  10/200: Train Loss=0.5369, Acc=0.7076, Test Loss=1.6547, Acc=0.6637, LR=0.000091
+Epoch  20/200: Train Loss=0.4918, Acc=0.7350, Test Loss=1.7751, Acc=0.6504, LR=0.000234
+Epoch  30/200: Train Loss=0.4573, Acc=0.7643, Test Loss=1.7642, Acc=0.6122, LR=0.000423
+Epoch  40/200: Train Loss=0.4299, Acc=0.7799, Test Loss=1.9858, Acc=0.6022, LR=0.000606
+Epoch  50/200: Train Loss=0.4020, Acc=0.7961, Test Loss=1.9238, Acc=0.6048, LR=0.000735
+Epoch  60/200: Train Loss=0.3800, Acc=0.8126, Test Loss=2.7646, Acc=0.5981, LR=0.000776
+Epoch  70/200: Train Loss=0.3573, Acc=0.8282, Test Loss=2.2439, Acc=0.5809, LR=0.000764
+Epoch  80/200: Train Loss=0.3327, Acc=0.8380, Test Loss=3.5179, Acc=0.5836, LR=0.000734
+Epoch  90/200: Train Loss=0.3125, Acc=0.8554, Test Loss=2.6535, Acc=0.6002, LR=0.000686
+Epoch 100/200: Train Loss=0.2961, Acc=0.8607, Test Loss=2.6567, Acc=0.5750, LR=0.000623
+Epoch 110/200: Train Loss=0.2792, Acc=0.8705, Test Loss=2.7033, Acc=0.5940, LR=0.000548
+Epoch 120/200: Train Loss=0.2577, Acc=0.8832, Test Loss=4.3128, Acc=0.5834, LR=0.000466
+Epoch 130/200: Train Loss=0.2397, Acc=0.8921, Test Loss=3.7152, Acc=0.5729, LR=0.000379
+Epoch 140/200: Train Loss=0.2272, Acc=0.8986, Test Loss=4.4267, Acc=0.5729, LR=0.000293
+Epoch 150/200: Train Loss=0.2144, Acc=0.9061, Test Loss=4.1418, Acc=0.5768, LR=0.000212
+Epoch 160/200: Train Loss=0.2040, Acc=0.9123, Test Loss=4.1311, Acc=0.5746, LR=0.000139
+Epoch 170/200: Train Loss=0.1902, Acc=0.9183, Test Loss=4.5522, Acc=0.5631, LR=0.000079
+Epoch 180/200: Train Loss=0.1889, Acc=0.9194, Test Loss=4.5240, Acc=0.5620, LR=0.000035
+Epoch 190/200: Train Loss=0.1794, Acc=0.9246, Test Loss=4.4743, Acc=0.5682, LR=0.000008
+Epoch 199/200: Train Loss=0.1828, Acc=0.9215, Test Loss=4.5648, Acc=0.5701, LR=0.000000
+
+Best test accuracy: 0.6656 at epoch 0

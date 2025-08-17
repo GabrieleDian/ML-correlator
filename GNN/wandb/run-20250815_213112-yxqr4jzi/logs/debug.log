@@ -1,0 +1,6 @@
+2025-08-15 21:31:12,214 INFO    MainThread:62444 [wandb_init.py:setup_run_log_directory():703] Logging user logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_213112-yxqr4jzi/logs/debug.log
+2025-08-15 21:31:12,215 INFO    MainThread:62444 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_213112-yxqr4jzi/logs/debug-internal.log
+2025-08-15 21:31:12,215 INFO    MainThread:62444 [wandb_init.py:init():831] calling init triggers
+2025-08-15 21:31:12,215 INFO    MainThread:62444 [wandb_init.py:init():836] wandb.init called with sweep_config: {'config': 'configs/config.yaml', 'dropout': 0.2603408150248607, 'hidden_channels': -9223372036854776000, 'learning_rate': 0.003691521054471524, 'num_layers': 9, 'weight_decay': 0.0005303212351956161}
+config: {'model_name': 'gin', 'hidden_channels': -9223372036854776000, 'num_layers': 9, 'dropout': 0.2603408150248607, 'lr': 0.003691521054471524, 'weight_decay': 1e-05, 'epochs': 100, 'batch_size': 32, 'scheduler_type': 'onecycle', 'use_wandb': True, 'project': '7_loop_eigen', 'experiment_name': 'gin_train_loop_7_,test_loop_7_train_eigen_1_eigen_2_eigen_3', 'in_channels': 3, '_wandb': {}}
+2025-08-15 21:31:12,391 INFO    MsgRouterThr:62444 [mailbox.py:close():129] [no run ID] Closing mailbox, abandoning 1 handles.

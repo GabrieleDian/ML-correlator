@@ -1,0 +1,16 @@
+{"time":"2025-08-15T14:01:08.119109576+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_140107-f4i9t5ut/logs/debug-core.log"}
+{"time":"2025-08-15T14:01:08.447799828+02:00","level":"INFO","msg":"stream: created new stream","id":"f4i9t5ut"}
+{"time":"2025-08-15T14:01:08.447827955+02:00","level":"INFO","msg":"stream: started","id":"f4i9t5ut"}
+{"time":"2025-08-15T14:01:08.447902851+02:00","level":"INFO","msg":"handler: started","stream_id":"f4i9t5ut"}
+{"time":"2025-08-15T14:01:08.447892546+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"f4i9t5ut"}
+{"time":"2025-08-15T14:01:08.44791699+02:00","level":"INFO","msg":"sender: started","stream_id":"f4i9t5ut"}
+{"time":"2025-08-15T14:01:08.724681186+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-15T14:01:17.019520279+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-15T14:01:17.019566261+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-15T14:01:18.020642262+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading output.log","runtime_seconds":0.69625126,"progress":"2.2KB/2.2KB"},{"desc":"uploading config.yaml","runtime_seconds":0.483162492,"progress":"761B/761B"}],"total_operations":2}}
+{"time":"2025-08-15T14:01:18.041498291+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-15T14:01:18.288603876+02:00","level":"INFO","msg":"stream: closing","id":"f4i9t5ut"}
+{"time":"2025-08-15T14:01:18.288628441+02:00","level":"INFO","msg":"handler: closed","stream_id":"f4i9t5ut"}
+{"time":"2025-08-15T14:01:18.288650738+02:00","level":"INFO","msg":"sender: closed","stream_id":"f4i9t5ut"}
+{"time":"2025-08-15T14:01:18.288639338+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"f4i9t5ut"}
+{"time":"2025-08-15T14:01:18.288707531+02:00","level":"INFO","msg":"stream: closed","id":"f4i9t5ut"}

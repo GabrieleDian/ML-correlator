@@ -1,0 +1,16 @@
+{"time":"2025-08-16T11:15:14.33771652+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_111514-j9subted/logs/debug-core.log"}
+{"time":"2025-08-16T11:15:14.628537193+02:00","level":"INFO","msg":"stream: created new stream","id":"j9subted"}
+{"time":"2025-08-16T11:15:14.628561055+02:00","level":"INFO","msg":"stream: started","id":"j9subted"}
+{"time":"2025-08-16T11:15:14.628582015+02:00","level":"INFO","msg":"sender: started","stream_id":"j9subted"}
+{"time":"2025-08-16T11:15:14.628579652+02:00","level":"INFO","msg":"handler: started","stream_id":"j9subted"}
+{"time":"2025-08-16T11:15:14.628599121+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"j9subted"}
+{"time":"2025-08-16T11:15:14.939411094+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-16T11:15:16.069474088+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-16T11:15:16.069535945+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-16T11:15:17.076753475+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading artifact wandb-metadata.json","runtime_seconds":1.385724978},{"desc":"uploading artifact config.yaml","runtime_seconds":1.188823501},{"desc":"uploading artifact requirements.txt","runtime_seconds":1.009087078}],"total_operations":3}}
+{"time":"2025-08-16T11:15:17.649490743+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-16T11:15:17.889895157+02:00","level":"INFO","msg":"stream: closing","id":"j9subted"}
+{"time":"2025-08-16T11:15:17.88992745+02:00","level":"INFO","msg":"handler: closed","stream_id":"j9subted"}
+{"time":"2025-08-16T11:15:17.88994816+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"j9subted"}
+{"time":"2025-08-16T11:15:17.890024238+02:00","level":"INFO","msg":"sender: closed","stream_id":"j9subted"}
+{"time":"2025-08-16T11:15:17.890093509+02:00","level":"INFO","msg":"stream: closed","id":"j9subted"}

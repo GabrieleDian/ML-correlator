@@ -1,0 +1,46 @@
+Loaded config structure: ['data', 'features', 'model', 'training', 'experiment']
+Sweep parameters: {'batch_size': 32, 'config': 'configs/config.yaml', 'dropout': 0.3336829506983696, 'hidden_channels': 16, 'learning_rate': 0.0006188229862664385, 'num_layers': 2, 'weight_decay': 7.81857022631477e-05}
+Training on loop orders 8, testing on loop orders 8 with features: ['identity_columns']
+Loading features: ['identity_columns']
+Loaded identity_columns: shape (1432, 12, 12)
+Loading graph structures for loop order 8...
+Created dataset with 1432 graphs
+Feature dimension: 12
+Normalizing features...
+Train size: 1145, Test size: 287
+
+Dataset Statistics:
+  Number of graphs: 1145
+  Average nodes: 12.0 (min: 12, max: 12)
+  Average edges: 27.5
+  Label distribution: 587 positive, 558 negative
+  Feature dimension: 12
+
+Training configuration:
+  Model: gin
+  Input features: 12
+  Hidden channels: 16
+  Epochs: 100
+
+Starting training...
+Using device: cpu
+[34m[1mwandb[0m: [33mWARNING[0m Ignoring project '8_loop_identity' when running a sweep.
+[34m[1mwandb[0m: wandb.init() called while a run is active and reinit is set to 'default', so returning the previous run.
+
+Starting training...
+Model architecture: gin
+Hidden dim: 16, Layers: 2
+Initial LR: 7.425875835197259e-05
+Epoch   0/100: Train Loss=1.5684, Acc=0.4873, Test Loss=1.1751, Acc=0.5052, LR=0.000079
+Epoch  10/100: Train Loss=0.6988, Acc=0.4934, Test Loss=0.6915, Acc=0.5331, LR=0.000604
+Epoch  20/100: Train Loss=0.6920, Acc=0.5039, Test Loss=0.6884, Acc=0.5645, LR=0.001491
+Epoch  30/100: Train Loss=0.6812, Acc=0.5563, Test Loss=0.6732, Acc=0.6063, LR=0.001855
+Epoch  40/100: Train Loss=0.6556, Acc=0.6131, Test Loss=0.6640, Acc=0.6063, LR=0.001745
+Epoch  50/100: Train Loss=0.6306, Acc=0.6384, Test Loss=0.6482, Acc=0.6132, LR=0.001473
+Epoch  60/100: Train Loss=0.6058, Acc=0.6716, Test Loss=0.6407, Acc=0.6307, LR=0.001093
+Epoch  70/100: Train Loss=0.5969, Acc=0.6917, Test Loss=0.6448, Acc=0.6307, LR=0.000680
+Epoch  80/100: Train Loss=0.5725, Acc=0.7066, Test Loss=0.6590, Acc=0.6132, LR=0.000317
+Epoch  90/100: Train Loss=0.5846, Acc=0.7004, Test Loss=0.6624, Acc=0.6237, LR=0.000074
+Epoch  99/100: Train Loss=0.5835, Acc=0.6926, Test Loss=0.6606, Acc=0.6307, LR=0.000000
+
+Best test accuracy: 0.6411 at epoch 75

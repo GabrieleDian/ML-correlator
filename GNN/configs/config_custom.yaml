@@ -28,16 +28,16 @@ features:
 # Model configuration
 model:
   name: "planar"              # Model architecture: gin, gat, hybrid, planar, simple
-  hidden_channels: 64
-  num_layers: 3
-  dropout: 0.2
+  hidden_channels: 32
+  num_layers: 2
+  dropout: 0.3
 
 # Training configuration
 training:
   epochs: 100
   batch_size: 32
-  learning_rate: 0.001
-  weight_decay: 0.0005
+  learning_rate: 0.005
+  weight_decay: 0.0001
   scheduler_type: "onecycle"  # Options: onecycle, plateau, none
   
 # Experiment configuration

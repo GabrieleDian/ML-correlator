@@ -1,0 +1,16 @@
+{"time":"2025-08-15T21:03:51.686692271+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_210351-urehtyge/logs/debug-core.log"}
+{"time":"2025-08-15T21:03:51.981428387+02:00","level":"INFO","msg":"stream: created new stream","id":"urehtyge"}
+{"time":"2025-08-15T21:03:51.981470585+02:00","level":"INFO","msg":"stream: started","id":"urehtyge"}
+{"time":"2025-08-15T21:03:51.981497076+02:00","level":"INFO","msg":"sender: started","stream_id":"urehtyge"}
+{"time":"2025-08-15T21:03:51.981493523+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"urehtyge"}
+{"time":"2025-08-15T21:03:51.981520311+02:00","level":"INFO","msg":"handler: started","stream_id":"urehtyge"}
+{"time":"2025-08-15T21:03:52.148465211+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-15T21:03:57.378704444+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-15T21:03:57.378749999+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-15T21:03:58.136645577+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-15T21:03:58.380109812+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading history steps 0-99, summary, console lines 2-49","runtime_seconds":0.243146457}],"total_operations":1}}
+{"time":"2025-08-15T21:03:58.506889811+02:00","level":"INFO","msg":"stream: closing","id":"urehtyge"}
+{"time":"2025-08-15T21:03:58.506904145+02:00","level":"INFO","msg":"handler: closed","stream_id":"urehtyge"}
+{"time":"2025-08-15T21:03:58.506912169+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"urehtyge"}
+{"time":"2025-08-15T21:03:58.506920116+02:00","level":"INFO","msg":"sender: closed","stream_id":"urehtyge"}
+{"time":"2025-08-15T21:03:58.506968251+02:00","level":"INFO","msg":"stream: closed","id":"urehtyge"}

@@ -149,9 +149,9 @@ def main():
     print(f"Training on loop orders {train_loop_order}, testing on loop orders {test_loop_order} with features: {selected_features}")
     
     # Create training dataset
-    train_dataset, train_scaler = create_simple_dataset(
+    train_dataset, train_scaler, max_features = create_simple_dataset(
         loop_order=train_loop_order,
-        selected_features=['degree', 'betweenness', 'clustering'],
+        selected_features=selected_features,
         normalize=True,
         data_dir=base_dir
     )
@@ -168,11 +168,12 @@ def main():
         print(f"Train size: {train_size}, Test size: {test_size}")
     else:
         # Use separate test data
-        test_dataset, _ = create_simple_dataset(
-            loop_order=test_loop_order,
-            selected_features=['degree', 'betweenness', 'clustering'],
+        test_dataset, _, _ = create_simple_dataset(
+            loop_order=test_loop_order,           
+            selected_features=selected_features,
             normalize=True,
             scaler=train_scaler,  # Use same scaler as training
+            max_features=max_features, # Use the same as training
             data_dir=base_dir
 
         )

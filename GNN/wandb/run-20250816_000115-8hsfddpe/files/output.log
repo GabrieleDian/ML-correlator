@@ -1,0 +1,77 @@
+Loaded config structure: ['data', 'features', 'model', 'training', 'experiment']
+Sweep parameters: {'config': 'configs/config.yaml', 'dropout': 0.3, 'hidden_channels': 526, 'learning_rate': 0.000610550135697296, 'model': 'hybrid', 'num_layers': 3, 'weight_decay': 6.571460049915942e-05}
+Training on loop orders [7, 8], testing on loop orders 9 with features: ['eigen_1', 'eigen_2', 'eigen_3', 'degree', 'betweenness', 'clustering', 'pagerank', 'closeness', 'face_count']
+Loading features: ['eigen_1', 'eigen_2', 'eigen_3', 'degree', 'betweenness', 'clustering', 'pagerank', 'closeness', 'face_count']
+Loaded eigen_1: shape (164, 11)
+Loaded eigen_2: shape (164, 11)
+Loaded eigen_3: shape (164, 11)
+Loaded degree: shape (164, 11)
+Loaded betweenness: shape (164, 11)
+Loaded clustering: shape (164, 11)
+Loaded pagerank: shape (164, 11)
+Loaded closeness: shape (164, 11)
+Loaded face_count: shape (164, 11)
+Loading graph structures for loop order 7...
+Loaded eigen_1: shape (1432, 12)
+Loaded eigen_2: shape (1432, 12)
+Loaded eigen_3: shape (1432, 12)
+Loaded degree: shape (1432, 12)
+Loaded betweenness: shape (1432, 12)
+Loaded clustering: shape (1432, 12)
+Loaded pagerank: shape (1432, 12)
+Loaded closeness: shape (1432, 12)
+Loaded face_count: shape (1432, 12)
+Loading graph structures for loop order 8...
+Created dataset with 1596 graphs
+Feature dimension: 9
+Normalizing features...
+Loading features: ['eigen_1', 'eigen_2', 'eigen_3', 'degree', 'betweenness', 'clustering', 'pagerank', 'closeness', 'face_count']
+Loaded eigen_1: shape (13972, 13)
+Loaded eigen_2: shape (13972, 13)
+Loaded eigen_3: shape (13972, 13)
+Loaded degree: shape (13972, 13)
+Loaded betweenness: shape (13972, 13)
+Loaded clustering: shape (13972, 13)
+Loaded pagerank: shape (13972, 13)
+Loaded closeness: shape (13972, 13)
+Loaded face_count: shape (13972, 13)
+Loading graph structures for loop order 9...
+Created dataset with 13972 graphs
+Feature dimension: 9
+Normalizing features...
+
+Dataset Statistics:
+  Number of graphs: 1596
+  Average nodes: 11.9 (min: 11, max: 12)
+  Average edges: 27.3
+  Label distribution: 836 positive, 760 negative
+  Feature dimension: 9
+
+Training configuration:
+  Model: gin
+  Input features: 9
+  Hidden channels: 526
+  Epochs: 100
+
+Starting training...
+Using device: cpu
+[34m[1mwandb[0m: [33mWARNING[0m Ignoring project 'train_7_8_test_9_loop_all_scalar' when running a sweep.
+[34m[1mwandb[0m: wandb.init() called while a run is active and reinit is set to 'default', so returning the previous run.
+
+Starting training...
+Model architecture: gin
+Hidden dim: 526, Layers: 3
+Initial LR: 7.326601628367558e-05
+Epoch   0/100: Train Loss=0.7180, Acc=0.6140, Test Loss=0.6986, Acc=0.6326, LR=0.000078
+Epoch  10/100: Train Loss=0.5720, Acc=0.6855, Test Loss=0.9450, Acc=0.6550, LR=0.000595
+Epoch  20/100: Train Loss=0.5627, Acc=0.6986, Test Loss=0.7179, Acc=0.6639, LR=0.001470
+Epoch  30/100: Train Loss=0.5279, Acc=0.7406, Test Loss=0.5756, Acc=0.6832, LR=0.001831
+Epoch  40/100: Train Loss=0.4523, Acc=0.7832, Test Loss=1.1487, Acc=0.6240, LR=0.001722
+Epoch  50/100: Train Loss=0.4033, Acc=0.8158, Test Loss=0.9056, Acc=0.6541, LR=0.001453
+Epoch  60/100: Train Loss=0.3542, Acc=0.8296, Test Loss=0.8076, Acc=0.6712, LR=0.001079
+Epoch  70/100: Train Loss=0.2401, Acc=0.8866, Test Loss=1.1422, Acc=0.6828, LR=0.000671
+Epoch  80/100: Train Loss=0.1709, Acc=0.9229, Test Loss=1.3174, Acc=0.6756, LR=0.000313
+Epoch  90/100: Train Loss=0.0983, Acc=0.9593, Test Loss=3.8898, Acc=0.5763, LR=0.000073
+Epoch  99/100: Train Loss=0.0746, Acc=0.9731, Test Loss=4.3598, Acc=0.5828, LR=0.000000
+
+Best test accuracy: 0.7072 at epoch 29

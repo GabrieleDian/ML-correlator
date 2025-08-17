@@ -9,8 +9,8 @@ import wandb
 import os
 
 # Import the simple dataset creator
-from graphbuilder_simple import create_simple_dataset, quick_dataset_stats
-from training_utils import train
+from graphbuilder_simple_old import create_simple_dataset, quick_dataset_stats
+from training_utils_old import train
 from types import SimpleNamespace
 
 

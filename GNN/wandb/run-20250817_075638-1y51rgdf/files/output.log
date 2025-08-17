@@ -1,0 +1,53 @@
+Loaded config structure: ['data', 'features', 'model', 'training', 'experiment']
+Sweep parameters: {'config': 'configs/config.yaml', 'learning_rate': 0.0002400247162032918, 'weight_decay': 1.9761560850374575e-05}
+Training on loop orders [7, 8, 9], testing on loop orders 10 with features: ['identity_columns']
+Loading features: ['identity_columns']
+Loaded identity_columns: shape (164, 11, 11)
+Loading graph structures for loop order 7...
+Loaded identity_columns: shape (1432, 12, 12)
+Loading graph structures for loop order 8...
+Loaded identity_columns: shape (13972, 13, 13)
+Loading graph structures for loop order 9...
+Created dataset with 15568 graphs
+Feature dimension: 11
+Standardizing to 13 features
+Normalizing features...
+Loading features: ['identity_columns']
+Loaded identity_columns: shape (153252, 14, 14)
+Loading graph structures for loop order 10...
+Created dataset with 153252 graphs
+Feature dimension: 14
+Standardizing to 13 features
+Normalizing features...
+
+Dataset Statistics:
+  Number of graphs: 15568
+  Average nodes: 12.9 (min: 11, max: 13)
+  Average edges: 29.8
+  Label distribution: 6497 positive, 9071 negative
+  Feature dimension: 13
+
+Training configuration:
+  Model: gin
+  Input features: 13
+  Hidden channels: 64
+  Epochs: 200
+
+Starting training...
+Using device: cpu
+[34m[1mwandb[0m: [33mWARNING[0m Ignoring project 'train_7_8_9_test_10_loop_all_adj' when running a sweep.
+[34m[1mwandb[0m: wandb.init() called while a run is active and reinit is set to 'default', so returning the previous run.
+
+Starting training...
+Model architecture: gin
+Hidden dim: 64, Layers: 3
+Initial LR: 2.8802965944394973e-05
+Epoch   0/200: Train Loss=0.7027, Acc=0.5565, Test Loss=0.6447, Acc=0.6542, LR=0.000029
+Epoch  10/200: Train Loss=0.6034, Acc=0.6657, Test Loss=0.5755, Acc=0.6829, LR=0.000085
+Epoch  20/200: Train Loss=0.5295, Acc=0.7172, Test Loss=0.5284, Acc=0.7186, LR=0.000218
+Epoch  30/200: Train Loss=0.5002, Acc=0.7438, Test Loss=0.5276, Acc=0.7187, LR=0.000393
+Epoch  40/200: Train Loss=0.4741, Acc=0.7605, Test Loss=0.5124, Acc=0.7322, LR=0.000563
+Epoch  50/200: Train Loss=0.4635, Acc=0.7674, Test Loss=0.5584, Acc=0.7081, LR=0.000682
+Epoch  60/200: Train Loss=0.4446, Acc=0.7784, Test Loss=0.5211, Acc=0.7335, LR=0.000720
+Epoch  70/200: Train Loss=0.4296, Acc=0.7891, Test Loss=0.5703, Acc=0.7289, LR=0.000709
+Epoch  80/200: Train Loss=0.4140, Acc=0.7958, Test Loss=0.5722, Acc=0.7408, LR=0.000681

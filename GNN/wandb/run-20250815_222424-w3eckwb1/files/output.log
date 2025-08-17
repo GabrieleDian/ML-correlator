@@ -1,0 +1,18 @@
+
+Starting training...
+Model architecture: gin
+Hidden dim: 64, Layers: 2
+Initial LR: 0.0007199999999999984
+Epoch   0/100: Train Loss=0.7233, Acc=0.5802, Test Loss=0.5803, Acc=0.6970, LR=0.000768
+Epoch  10/100: Train Loss=0.5183, Acc=0.7099, Test Loss=0.8094, Acc=0.5152, LR=0.005907
+Epoch  20/100: Train Loss=0.5776, Acc=0.6412, Test Loss=1.1281, Acc=0.6970, LR=0.014541
+Epoch  30/100: Train Loss=0.6548, Acc=0.6489, Test Loss=0.6334, Acc=0.6364, LR=0.017987
+Epoch  40/100: Train Loss=0.5620, Acc=0.7557, Test Loss=0.6205, Acc=0.7576, LR=0.016887
+Epoch  50/100: Train Loss=0.6161, Acc=0.6718, Test Loss=0.6264, Acc=0.6667, LR=0.014225
+Epoch  60/100: Train Loss=0.6348, Acc=0.6641, Test Loss=0.6169, Acc=0.6970, LR=0.010528
+Epoch  70/100: Train Loss=0.5979, Acc=0.6947, Test Loss=0.6252, Acc=0.6667, LR=0.006528
+Epoch  80/100: Train Loss=0.5742, Acc=0.7328, Test Loss=0.7515, Acc=0.6970, LR=0.003019
+Epoch  90/100: Train Loss=0.5523, Acc=0.7405, Test Loss=0.7275, Acc=0.6364, LR=0.000694
+Epoch  99/100: Train Loss=0.5114, Acc=0.7786, Test Loss=0.7443, Acc=0.6667, LR=0.000001
+
+Best test accuracy: 0.7576 at epoch 25

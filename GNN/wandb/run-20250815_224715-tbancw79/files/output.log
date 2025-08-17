@@ -1,0 +1,58 @@
+
+Starting training...
+Model architecture: gin
+Hidden dim: 32, Layers: 2
+Initial LR: 0.0007134563078049494
+Epoch   0/100: Train Loss=0.7056, Acc=0.5802, Test Loss=0.5772, Acc=0.6970, LR=0.000761
+Epoch  10/100: Train Loss=0.6060, Acc=0.6565, Test Loss=0.9030, Acc=0.5758, LR=0.005853
+Epoch  20/100: Train Loss=0.5709, Acc=0.7176, Test Loss=0.7889, Acc=0.6061, LR=0.014409
+Epoch  30/100: Train Loss=0.5644, Acc=0.7099, Test Loss=0.9954, Acc=0.4242, LR=0.017823
+Traceback (most recent call last):
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple.py", line 223, in <module>
+    main()
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple.py", line 199, in main
+    results = train(config, train_dataset, test_dataset)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/training_utils.py", line 155, in train
+    train_loss, train_acc, train_metrics = train_epoch(
+                                           ^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/training_utils.py", line 31, in train_epoch
+    for batch in train_loader:
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/utils/data/dataloader.py", line 733, in __next__
+    data = self._next_data()
+           ^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/utils/data/dataloader.py", line 789, in _next_data
+    data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/utils/data/_utils/fetch.py", line 55, in fetch
+    return self.collate_fn(data)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch_geometric/loader/dataloader.py", line 20, in __call__
+    return Batch.from_data_list(batch, self.follow_batch,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch_geometric/data/batch.py", line 76, in from_data_list
+    batch, slice_dict, inc_dict = collate(
+                                  ^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch_geometric/data/collate.py", line 84, in collate
+    value, slices, incs = _collate(attr, values, data_list, stores,
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch_geometric/data/collate.py", line 131, in _collate
+    slices = cumsum([value.size(cat_dim or 0) for value in values])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch_geometric/data/collate.py", line 256, in cumsum
+    torch.cumsum(value, 0, out=out[1:])
+KeyboardInterrupt
+Exception ignored in atexit callback: <function _start_and_connect_service.<locals>.teardown_atexit at 0x7a4910cfbd80>
+Traceback (most recent call last):
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/wandb/sdk/lib/service_connection.py", line 90, in teardown_atexit
+    conn.teardown(hooks.exit_code)
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/wandb/sdk/lib/service_connection.py", line 218, in teardown
+    self._router.join()
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/wandb/sdk/interface/router.py", line 75, in join
+    self._thread.join()
+  File "/usr/lib/python3.12/threading.py", line 1147, in join
+    self._wait_for_tstate_lock()
+  File "/usr/lib/python3.12/threading.py", line 1167, in _wait_for_tstate_lock
+    if lock.acquire(block, timeout):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt:

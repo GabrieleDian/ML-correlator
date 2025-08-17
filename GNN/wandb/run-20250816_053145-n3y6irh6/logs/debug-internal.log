@@ -1,0 +1,16 @@
+{"time":"2025-08-16T05:31:46.071095851+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_053145-n3y6irh6/logs/debug-core.log"}
+{"time":"2025-08-16T05:31:46.366184581+02:00","level":"INFO","msg":"stream: created new stream","id":"n3y6irh6"}
+{"time":"2025-08-16T05:31:46.36622981+02:00","level":"INFO","msg":"stream: started","id":"n3y6irh6"}
+{"time":"2025-08-16T05:31:46.366276201+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"n3y6irh6"}
+{"time":"2025-08-16T05:31:46.366368949+02:00","level":"INFO","msg":"sender: started","stream_id":"n3y6irh6"}
+{"time":"2025-08-16T05:31:46.366362316+02:00","level":"INFO","msg":"handler: started","stream_id":"n3y6irh6"}
+{"time":"2025-08-16T05:31:46.613165181+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-16T05:51:15.611005836+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-16T05:51:15.611093298+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-16T05:51:16.573234305+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading wandb-summary.json","runtime_seconds":0.752235028,"progress":"477B/477B"},{"desc":"uploading config.yaml","runtime_seconds":0.549170522,"progress":"742B/742B"}],"total_operations":2}}
+{"time":"2025-08-16T05:51:16.638906844+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-16T05:51:17.052309228+02:00","level":"INFO","msg":"stream: closing","id":"n3y6irh6"}
+{"time":"2025-08-16T05:51:17.052321976+02:00","level":"INFO","msg":"handler: closed","stream_id":"n3y6irh6"}
+{"time":"2025-08-16T05:51:17.052335404+02:00","level":"INFO","msg":"sender: closed","stream_id":"n3y6irh6"}
+{"time":"2025-08-16T05:51:17.052331708+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"n3y6irh6"}
+{"time":"2025-08-16T05:51:17.052383715+02:00","level":"INFO","msg":"stream: closed","id":"n3y6irh6"}

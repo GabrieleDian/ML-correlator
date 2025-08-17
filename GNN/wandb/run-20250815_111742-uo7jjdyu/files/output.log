@@ -1,0 +1,37 @@
+
+Starting training...
+Model architecture: gin
+Hidden dim: 64, Layers: 3
+Initial LR: 5.999999999999994e-05
+Epoch   0/100: Train Loss=0.7273, Acc=0.5551, Test Loss=0.7215, Acc=0.5510, LR=0.000064
+Epoch  10/100: Train Loss=0.5246, Acc=0.7180, Test Loss=0.5636, Acc=0.6873, LR=0.000488
+Epoch  20/100: Train Loss=0.5039, Acc=0.7419, Test Loss=0.8119, Acc=0.6705, LR=0.001204
+Epoch  30/100: Train Loss=0.4686, Acc=0.7569, Test Loss=1.1260, Acc=0.6160, LR=0.001499
+Epoch  40/100: Train Loss=0.4353, Acc=0.7650, Test Loss=1.0515, Acc=0.6422, LR=0.001410
+Epoch  50/100: Train Loss=0.4390, Acc=0.7625, Test Loss=1.0160, Acc=0.6531, LR=0.001190
+Epoch  60/100: Train Loss=0.4125, Acc=0.7807, Test Loss=1.3878, Acc=0.6456, LR=0.000883
+Traceback (most recent call last):
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple.py", line 222, in <module>
+    main()
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple.py", line 198, in main
+    results = train(config, train_dataset, test_dataset)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/training_utils.py", line 155, in train
+    train_loss, train_acc, train_metrics = train_epoch(
+                                           ^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/training_utils.py", line 34, in train_epoch
+    out = model(batch.x, batch.edge_index, batch.batch)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/GNN_architectures.py", line 69, in forward
+    x = F.dropout(x, p=self.dropout, training=self.training)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/nn/functional.py", line 1425, in dropout
+    _VF.dropout_(input, p, training) if inplace else _VF.dropout(input, p, training)
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
