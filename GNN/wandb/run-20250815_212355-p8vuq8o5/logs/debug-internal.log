@@ -1,0 +1,16 @@
+{"time":"2025-08-15T21:23:55.487933954+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_212355-p8vuq8o5/logs/debug-core.log"}
+{"time":"2025-08-15T21:23:55.791866593+02:00","level":"INFO","msg":"stream: created new stream","id":"p8vuq8o5"}
+{"time":"2025-08-15T21:23:55.79189939+02:00","level":"INFO","msg":"stream: started","id":"p8vuq8o5"}
+{"time":"2025-08-15T21:23:55.791971937+02:00","level":"INFO","msg":"handler: started","stream_id":"p8vuq8o5"}
+{"time":"2025-08-15T21:23:55.791961478+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"p8vuq8o5"}
+{"time":"2025-08-15T21:23:55.791998112+02:00","level":"INFO","msg":"sender: started","stream_id":"p8vuq8o5"}
+{"time":"2025-08-15T21:23:56.099161875+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-15T21:24:01.911945986+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-15T21:24:01.91199731+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-15T21:24:02.914499101+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading wandb-summary.json","runtime_seconds":0.677061086,"progress":"438B/438B"},{"desc":"uploading config.yaml","runtime_seconds":0.368904238,"progress":"677B/677B"}],"total_operations":2}}
+{"time":"2025-08-15T21:24:02.954649706+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-15T21:24:03.472269228+02:00","level":"INFO","msg":"stream: closing","id":"p8vuq8o5"}
+{"time":"2025-08-15T21:24:03.472281721+02:00","level":"INFO","msg":"handler: closed","stream_id":"p8vuq8o5"}
+{"time":"2025-08-15T21:24:03.472289436+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"p8vuq8o5"}
+{"time":"2025-08-15T21:24:03.472301215+02:00","level":"INFO","msg":"sender: closed","stream_id":"p8vuq8o5"}
+{"time":"2025-08-15T21:24:03.472369009+02:00","level":"INFO","msg":"stream: closed","id":"p8vuq8o5"}

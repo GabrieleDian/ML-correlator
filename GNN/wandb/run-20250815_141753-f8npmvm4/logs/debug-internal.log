@@ -1,0 +1,16 @@
+{"time":"2025-08-15T14:17:53.351743607+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_141753-f8npmvm4/logs/debug-core.log"}
+{"time":"2025-08-15T14:17:53.665223766+02:00","level":"INFO","msg":"stream: created new stream","id":"f8npmvm4"}
+{"time":"2025-08-15T14:17:53.665257875+02:00","level":"INFO","msg":"stream: started","id":"f8npmvm4"}
+{"time":"2025-08-15T14:17:53.665336823+02:00","level":"INFO","msg":"sender: started","stream_id":"f8npmvm4"}
+{"time":"2025-08-15T14:17:53.665358502+02:00","level":"INFO","msg":"handler: started","stream_id":"f8npmvm4"}
+{"time":"2025-08-15T14:17:53.665332028+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"f8npmvm4"}
+{"time":"2025-08-15T14:17:53.887414696+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-15T14:17:59.497047727+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-15T14:17:59.497153248+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-15T14:18:00.498551686+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading wandb-summary.json","runtime_seconds":0.673835253,"progress":"472B/472B"},{"desc":"uploading config.yaml","runtime_seconds":0.364980268,"progress":"761B/761B"}],"total_operations":2}}
+{"time":"2025-08-15T14:18:00.543652961+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-15T14:18:00.880500137+02:00","level":"INFO","msg":"stream: closing","id":"f8npmvm4"}
+{"time":"2025-08-15T14:18:00.880519532+02:00","level":"INFO","msg":"handler: closed","stream_id":"f8npmvm4"}
+{"time":"2025-08-15T14:18:00.880533031+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"f8npmvm4"}
+{"time":"2025-08-15T14:18:00.88054385+02:00","level":"INFO","msg":"sender: closed","stream_id":"f8npmvm4"}
+{"time":"2025-08-15T14:18:00.880643253+02:00","level":"INFO","msg":"stream: closed","id":"f8npmvm4"}

@@ -1,0 +1,68 @@
+Loaded config structure: ['data', 'features', 'model', 'training', 'experiment']
+Sweep parameters: {'config': 'configs/config.yaml', 'dropout': 0.2, 'hidden_channels': 64, 'learning_rate': 0.00031321242053304675, 'model': 'simple', 'num_layers': 2, 'weight_decay': 2.479621060053755e-05}
+Training on loop orders [7, 8], testing on loop orders 9 with features: ['degree', 'betweenness', 'clustering', 'pagerank', 'closeness', 'face_count']
+Loading features: ['degree', 'betweenness', 'clustering', 'pagerank', 'closeness', 'face_count']
+Loaded degree: shape (164, 11)
+Loaded betweenness: shape (164, 11)
+Loaded clustering: shape (164, 11)
+Loaded pagerank: shape (164, 11)
+Loaded closeness: shape (164, 11)
+Loaded face_count: shape (164, 11)
+Loading graph structures for loop order 7...
+Loaded degree: shape (1432, 12)
+Loaded betweenness: shape (1432, 12)
+Loaded clustering: shape (1432, 12)
+Loaded pagerank: shape (1432, 12)
+Loaded closeness: shape (1432, 12)
+Loaded face_count: shape (1432, 12)
+Loading graph structures for loop order 8...
+Created dataset with 1596 graphs
+Feature dimension: 6
+Normalizing features...
+Loading features: ['degree', 'betweenness', 'clustering', 'pagerank', 'closeness', 'face_count']
+Loaded degree: shape (13972, 13)
+Loaded betweenness: shape (13972, 13)
+Loaded clustering: shape (13972, 13)
+Loaded pagerank: shape (13972, 13)
+Loaded closeness: shape (13972, 13)
+Loaded face_count: shape (13972, 13)
+Loading graph structures for loop order 9...
+Created dataset with 13972 graphs
+Feature dimension: 6
+Normalizing features...
+
+Dataset Statistics:
+  Number of graphs: 1596
+  Average nodes: 11.9 (min: 11, max: 12)
+  Average edges: 27.3
+  Label distribution: 836 positive, 760 negative
+  Feature dimension: 6
+
+Training configuration:
+  Model: gin
+  Input features: 6
+  Hidden channels: 64
+  Epochs: 100
+
+Starting training...
+Using device: cpu
+[34m[1mwandb[0m: [33mWARNING[0m Ignoring project 'train_7_8_test_9_loop_only_scalar' when running a sweep.
+[34m[1mwandb[0m: wandb.init() called while a run is active and reinit is set to 'default', so returning the previous run.
+
+Starting training...
+Model architecture: gin
+Hidden dim: 64, Layers: 2
+Initial LR: 3.7585490463965584e-05
+Epoch   0/100: Train Loss=1.0383, Acc=0.5169, Test Loss=1.7409, Acc=0.4052, LR=0.000040
+Epoch  10/100: Train Loss=0.5631, Acc=0.6917, Test Loss=0.6277, Acc=0.6656, LR=0.000306
+Epoch  20/100: Train Loss=0.5123, Acc=0.7343, Test Loss=0.6926, Acc=0.6751, LR=0.000755
+Epoch  30/100: Train Loss=0.4679, Acc=0.7600, Test Loss=3.3885, Acc=0.5412, LR=0.000939
+Epoch  40/100: Train Loss=0.4283, Acc=0.7901, Test Loss=3.6012, Acc=0.4680, LR=0.000883
+Epoch  50/100: Train Loss=0.3777, Acc=0.8051, Test Loss=3.9803, Acc=0.5719, LR=0.000745
+Epoch  60/100: Train Loss=0.3391, Acc=0.8452, Test Loss=7.0118, Acc=0.4649, LR=0.000553
+Epoch  70/100: Train Loss=0.3068, Acc=0.8565, Test Loss=6.4489, Acc=0.5167, LR=0.000344
+Epoch  80/100: Train Loss=0.2832, Acc=0.8753, Test Loss=7.2633, Acc=0.5054, LR=0.000160
+Epoch  90/100: Train Loss=0.2606, Acc=0.8753, Test Loss=7.4891, Acc=0.5042, LR=0.000038
+Epoch  99/100: Train Loss=0.2530, Acc=0.8910, Test Loss=7.5585, Acc=0.5030, LR=0.000000
+
+Best test accuracy: 0.6798 at epoch 17

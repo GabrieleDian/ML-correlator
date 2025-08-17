@@ -1,0 +1,8 @@
+wandb_version: 1
+
+config:
+  value: configs/config.yaml
+learning_rate:
+  value: 0.0003585016360394003
+weight_decay:
+  value: 1.7907353278552662e-05

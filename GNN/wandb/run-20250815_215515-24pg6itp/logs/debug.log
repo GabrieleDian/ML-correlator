@@ -1,0 +1,23 @@
+2025-08-15 21:55:15,989 INFO    MainThread:80052 [wandb_setup.py:_flush():81] Current SDK version is 0.20.1
+2025-08-15 21:55:15,989 INFO    MainThread:80052 [wandb_setup.py:_flush():81] Configure stats pid to 80052
+2025-08-15 21:55:15,989 INFO    MainThread:80052 [wandb_setup.py:_flush():81] Loading settings from /home/rigers/.config/wandb/settings
+2025-08-15 21:55:15,989 INFO    MainThread:80052 [wandb_setup.py:_flush():81] Loading settings from /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/settings
+2025-08-15 21:55:15,989 INFO    MainThread:80052 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2025-08-15 21:55:15,989 INFO    MainThread:80052 [wandb_init.py:setup_run_log_directory():703] Logging user logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_215515-24pg6itp/logs/debug.log
+2025-08-15 21:55:15,990 INFO    MainThread:80052 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_215515-24pg6itp/logs/debug-internal.log
+2025-08-15 21:55:15,990 INFO    MainThread:80052 [wandb_init.py:init():831] calling init triggers
+2025-08-15 21:55:15,990 INFO    MainThread:80052 [wandb_init.py:init():836] wandb.init called with sweep_config: {'config': 'configs/config.yaml', 'dropout': 0.24582512970428444, 'learning_rate': 0.0028180047620416436, 'num_layers': 5, 'weight_decay': 0.0006275147355325958}
+config: {'_wandb': {}}
+2025-08-15 21:55:15,990 INFO    MainThread:80052 [wandb_init.py:init():872] starting backend
+2025-08-15 21:55:16,195 INFO    MainThread:80052 [wandb_init.py:init():875] sending inform_init request
+2025-08-15 21:55:16,197 INFO    MainThread:80052 [wandb_init.py:init():883] backend started and connected
+2025-08-15 21:55:16,198 INFO    MainThread:80052 [wandb_run.py:_config_callback():1358] config_cb None None {'config': 'configs/config.yaml', 'dropout': 0.24582512970428444, 'learning_rate': 0.0028180047620416436, 'num_layers': 5, 'weight_decay': 0.0006275147355325958}
+2025-08-15 21:55:16,199 INFO    MainThread:80052 [wandb_init.py:init():956] updated telemetry
+2025-08-15 21:55:16,206 INFO    MainThread:80052 [wandb_init.py:init():980] communicating run to backend with 90.0 second timeout
+2025-08-15 21:55:16,711 INFO    MainThread:80052 [wandb_init.py:init():1032] starting run threads in backend
+2025-08-15 21:55:16,793 INFO    MainThread:80052 [wandb_run.py:_console_start():2453] atexit reg
+2025-08-15 21:55:16,793 INFO    MainThread:80052 [wandb_run.py:_redirect():2301] redirect: wrap_raw
+2025-08-15 21:55:16,793 INFO    MainThread:80052 [wandb_run.py:_redirect():2370] Wrapping output streams.
+2025-08-15 21:55:16,793 INFO    MainThread:80052 [wandb_run.py:_redirect():2393] Redirects installed.
+2025-08-15 21:55:16,795 INFO    MainThread:80052 [wandb_init.py:init():1078] run started, returning control to user process
+2025-08-15 21:55:16,834 INFO    MsgRouterThr:80052 [mailbox.py:close():129] [no run ID] Closing mailbox, abandoning 2 handles.

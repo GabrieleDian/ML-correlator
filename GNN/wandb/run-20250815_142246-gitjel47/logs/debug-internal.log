@@ -1,0 +1,16 @@
+{"time":"2025-08-15T14:22:46.347134233+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_142246-gitjel47/logs/debug-core.log"}
+{"time":"2025-08-15T14:22:46.750065037+02:00","level":"INFO","msg":"stream: created new stream","id":"gitjel47"}
+{"time":"2025-08-15T14:22:46.750106931+02:00","level":"INFO","msg":"stream: started","id":"gitjel47"}
+{"time":"2025-08-15T14:22:46.750193726+02:00","level":"INFO","msg":"handler: started","stream_id":"gitjel47"}
+{"time":"2025-08-15T14:22:46.750206916+02:00","level":"INFO","msg":"sender: started","stream_id":"gitjel47"}
+{"time":"2025-08-15T14:22:46.750184724+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"gitjel47"}
+{"time":"2025-08-15T14:22:47.059196597+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-15T14:22:53.357794192+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-15T14:22:53.357842446+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-15T14:22:54.024313095+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-15T14:22:54.332970275+02:00","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2025-08-15T14:22:54.335950368+02:00","level":"INFO","msg":"stream: closing","id":"gitjel47"}
+{"time":"2025-08-15T14:22:54.335961495+02:00","level":"INFO","msg":"handler: closed","stream_id":"gitjel47"}
+{"time":"2025-08-15T14:22:54.33597516+02:00","level":"INFO","msg":"sender: closed","stream_id":"gitjel47"}
+{"time":"2025-08-15T14:22:54.335968628+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"gitjel47"}
+{"time":"2025-08-15T14:22:54.336011934+02:00","level":"INFO","msg":"stream: closed","id":"gitjel47"}

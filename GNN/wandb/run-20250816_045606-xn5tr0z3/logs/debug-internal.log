@@ -1,0 +1,16 @@
+{"time":"2025-08-16T04:56:06.642602692+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_045606-xn5tr0z3/logs/debug-core.log"}
+{"time":"2025-08-16T04:56:06.927972154+02:00","level":"INFO","msg":"stream: created new stream","id":"xn5tr0z3"}
+{"time":"2025-08-16T04:56:06.928000336+02:00","level":"INFO","msg":"stream: started","id":"xn5tr0z3"}
+{"time":"2025-08-16T04:56:06.928008445+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"xn5tr0z3"}
+{"time":"2025-08-16T04:56:06.92802701+02:00","level":"INFO","msg":"handler: started","stream_id":"xn5tr0z3"}
+{"time":"2025-08-16T04:56:06.928058807+02:00","level":"INFO","msg":"sender: started","stream_id":"xn5tr0z3"}
+{"time":"2025-08-16T04:56:07.090145034+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-16T05:21:59.634068565+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-16T05:21:59.634124602+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-16T05:22:00.595519787+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading output.log","runtime_seconds":0.709987661,"progress":"3.5KB/3.5KB"},{"desc":"uploading config.yaml","runtime_seconds":0.520867261,"progress":"746B/746B"}],"total_operations":2}}
+{"time":"2025-08-16T05:22:00.609553843+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-16T05:22:00.911361055+02:00","level":"INFO","msg":"stream: closing","id":"xn5tr0z3"}
+{"time":"2025-08-16T05:22:00.911373133+02:00","level":"INFO","msg":"handler: closed","stream_id":"xn5tr0z3"}
+{"time":"2025-08-16T05:22:00.911387869+02:00","level":"INFO","msg":"sender: closed","stream_id":"xn5tr0z3"}
+{"time":"2025-08-16T05:22:00.911382266+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"xn5tr0z3"}
+{"time":"2025-08-16T05:22:00.91143705+02:00","level":"INFO","msg":"stream: closed","id":"xn5tr0z3"}

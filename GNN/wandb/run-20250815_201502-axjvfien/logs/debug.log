@@ -1,0 +1,13 @@
+2025-08-15 20:15:02,693 INFO    MainThread:13431 [wandb_init.py:setup_run_log_directory():703] Logging user logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_201502-axjvfien/logs/debug.log
+2025-08-15 20:15:02,694 INFO    MainThread:13431 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_201502-axjvfien/logs/debug-internal.log
+2025-08-15 20:15:02,694 INFO    MainThread:13431 [wandb_init.py:init():831] calling init triggers
+2025-08-15 20:15:02,694 INFO    MainThread:13431 [wandb_init.py:init():836] wandb.init called with sweep_config: {'batch_size': 16, 'config': 'configs/config.yaml', 'dropout': 0.3097381935243879, 'learning_rate': 0.000507715693050441, 'num_layers': 2, 'weight_decay': 9.394472253343236e-05}
+config: {'model_name': 'gin', 'hidden_channels': 32, 'num_layers': 2, 'dropout': 0.3097381935243879, 'lr': 0.000507715693050441, 'weight_decay': 5e-05, 'epochs': 100, 'batch_size': 16, 'scheduler_type': 'onecycle', 'use_wandb': True, 'project': '8_loop_eigen', 'experiment_name': 'gin_train_loop_8_,test_loop_8_train_eigen_1_eigen_2_eigen_3', 'in_channels': 3, '_wandb': {}}
+2025-08-15 20:15:45,578 INFO    MainThread:13431 [wandb_run.py:_finish():2219] finishing run aliajrigers-desydeutsches-elektronen-synchrotron/8_loop_eigen/axjvfien
+2025-08-15 20:15:45,578 INFO    MainThread:13431 [wandb_run.py:_atexit_cleanup():2418] got exitcode: 0
+2025-08-15 20:15:45,579 INFO    MainThread:13431 [wandb_run.py:_restore():2400] restore
+2025-08-15 20:15:45,579 INFO    MainThread:13431 [wandb_run.py:_restore():2406] restore done
+2025-08-15 20:15:46,826 INFO    MainThread:13431 [wandb_run.py:_footer_history_summary_info():4000] rendering history
+2025-08-15 20:15:46,827 INFO    MainThread:13431 [wandb_run.py:_footer_history_summary_info():4032] rendering summary
+2025-08-15 20:15:46,828 INFO    MainThread:13431 [wandb_run.py:_footer_sync_info():3961] logging synced files
+2025-08-15 20:15:47,829 INFO    MsgRouterThr:13431 [mailbox.py:close():129] [no run ID] Closing mailbox, abandoning 1 handles.

@@ -1,0 +1,39 @@
+_wandb:
+    value:
+        cli_version: 0.20.1
+        m: []
+        python_version: 3.12.3
+        t:
+            "1":
+                - 1
+                - 5
+                - 53
+                - 77
+            "2":
+                - 1
+                - 5
+                - 53
+                - 77
+            "3":
+                - 2
+                - 14
+                - 24
+                - 55
+            "4": 3.12.3
+            "5": 0.20.1
+            "12": 0.20.1
+            "13": linux-x86_64
+batch_size:
+    value: 48
+config:
+    value: configs/config.yaml
+dropout:
+    value: 0.2705936663596003
+hidden_channels:
+    value: 16
+learning_rate:
+    value: 0.0006511824914243844
+num_layers:
+    value: 2
+weight_decay:
+    value: 0.008401353855535955

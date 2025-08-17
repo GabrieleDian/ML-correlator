@@ -1,0 +1,19 @@
+Loaded config structure: ['data', 'features', 'model', 'training', 'experiment']
+Sweep parameters: {'config': 'configs/config.yaml', 'dropout': 0.20727818293402664, 'learning_rate': 0.001210717199841958, 'num_layers': 9, 'weight_decay': 0.0005057119470079099}
+Training on loop orders 7, testing on loop orders 7 with features: ['eigen_1', 'eigen_2', 'eigen_3', 'degree - betweenness - clustering - page_rank - closeness']
+Loading features: ['eigen_1', 'eigen_2', 'eigen_3', 'degree - betweenness - clustering - page_rank - closeness']
+Loaded eigen_1: shape (164, 11)
+Loaded eigen_2: shape (164, 11)
+Loaded eigen_3: shape (164, 11)
+Traceback (most recent call last):
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple.py", line 223, in <module>
+    main()
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple.py", line 152, in main
+    train_dataset, train_scaler = create_simple_dataset(
+                                  ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/graph_builder.py", line 132, in create_simple_dataset
+    features_dict, labels = load_saved_features(lo, selected_features, data_dir)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/load_features.py", line 38, in load_saved_features
+    raise FileNotFoundError(f"Feature {feature_name} not found for loop {loop_order}. "
+FileNotFoundError: Feature degree - betweenness - clustering - page_rank - closeness not found for loop 7. Run compute_features.py first.

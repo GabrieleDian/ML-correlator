@@ -1,0 +1,16 @@
+{"time":"2025-08-15T12:09:53.449845663+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_120953-1resjvq6/logs/debug-core.log"}
+{"time":"2025-08-15T12:09:53.752985104+02:00","level":"INFO","msg":"stream: created new stream","id":"1resjvq6"}
+{"time":"2025-08-15T12:09:53.75306836+02:00","level":"INFO","msg":"stream: started","id":"1resjvq6"}
+{"time":"2025-08-15T12:09:53.753105703+02:00","level":"INFO","msg":"handler: started","stream_id":"1resjvq6"}
+{"time":"2025-08-15T12:09:53.753123255+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"1resjvq6"}
+{"time":"2025-08-15T12:09:53.75312905+02:00","level":"INFO","msg":"sender: started","stream_id":"1resjvq6"}
+{"time":"2025-08-15T12:09:54.063722177+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-15T12:10:25.64775351+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-15T12:10:25.647819899+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-15T12:10:26.341956056+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-15T12:10:26.568345147+02:00","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2025-08-15T12:10:26.572040126+02:00","level":"INFO","msg":"stream: closing","id":"1resjvq6"}
+{"time":"2025-08-15T12:10:26.572061375+02:00","level":"INFO","msg":"handler: closed","stream_id":"1resjvq6"}
+{"time":"2025-08-15T12:10:26.572077265+02:00","level":"INFO","msg":"sender: closed","stream_id":"1resjvq6"}
+{"time":"2025-08-15T12:10:26.57207179+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"1resjvq6"}
+{"time":"2025-08-15T12:10:26.572183341+02:00","level":"INFO","msg":"stream: closed","id":"1resjvq6"}

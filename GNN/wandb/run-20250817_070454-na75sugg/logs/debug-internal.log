@@ -1,0 +1,16 @@
+{"time":"2025-08-17T07:04:55.196765599+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250817_070454-na75sugg/logs/debug-core.log"}
+{"time":"2025-08-17T07:04:55.488351116+02:00","level":"INFO","msg":"stream: created new stream","id":"na75sugg"}
+{"time":"2025-08-17T07:04:55.488392096+02:00","level":"INFO","msg":"stream: started","id":"na75sugg"}
+{"time":"2025-08-17T07:04:55.488440752+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"na75sugg"}
+{"time":"2025-08-17T07:04:55.48847788+02:00","level":"INFO","msg":"sender: started","stream_id":"na75sugg"}
+{"time":"2025-08-17T07:04:55.488504104+02:00","level":"INFO","msg":"handler: started","stream_id":"na75sugg"}
+{"time":"2025-08-17T07:04:55.807455852+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-17T07:56:31.442965231+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-17T07:56:31.443043799+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-17T07:56:32.405136047+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading output.log","runtime_seconds":0.772810607,"progress":"3.4KB/3.4KB"},{"desc":"uploading config.yaml","runtime_seconds":0.614771749,"progress":"639B/639B"}],"total_operations":2}}
+{"time":"2025-08-17T07:56:32.434433071+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-17T07:56:32.746562289+02:00","level":"INFO","msg":"stream: closing","id":"na75sugg"}
+{"time":"2025-08-17T07:56:32.746581019+02:00","level":"INFO","msg":"handler: closed","stream_id":"na75sugg"}
+{"time":"2025-08-17T07:56:32.746587943+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"na75sugg"}
+{"time":"2025-08-17T07:56:32.746592872+02:00","level":"INFO","msg":"sender: closed","stream_id":"na75sugg"}
+{"time":"2025-08-17T07:56:32.746627322+02:00","level":"INFO","msg":"stream: closed","id":"na75sugg"}
