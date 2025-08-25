@@ -1,0 +1,22 @@
+# Simple WandB Sweep Configuration
+# Good starting point for hyperparameter search
+project: LR_mixed_loop_predict  # Add this line
+program: one_run_simple_mixed_loop.py
+method: random  # Random search is simple and effective
+metric:
+  name: val_accuracy
+  goal: maximize
+
+parameters:
+  # Base config file
+  config:
+    value: config_custom.yaml
+  
+  # Fixed parameters
+  epochs:
+    value: 100
+  
+  # Model hyperparameters to search
+  learning_rate:
+    min: 0.001
+    max: 0.01

@@ -1,0 +1,6 @@
+wandb_version: 1
+
+config:
+  value: configs/config.yaml
+learning_rate:
+  value: 0.0009258058052277937

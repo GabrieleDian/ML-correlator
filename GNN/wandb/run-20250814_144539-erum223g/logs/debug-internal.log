@@ -1,0 +1,16 @@
+{"time":"2025-08-14T14:45:39.872324516+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250814_144539-erum223g/logs/debug-core.log"}
+{"time":"2025-08-14T14:45:40.405847068+02:00","level":"INFO","msg":"stream: created new stream","id":"erum223g"}
+{"time":"2025-08-14T14:45:40.405882124+02:00","level":"INFO","msg":"stream: started","id":"erum223g"}
+{"time":"2025-08-14T14:45:40.405932715+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"erum223g"}
+{"time":"2025-08-14T14:45:40.405947049+02:00","level":"INFO","msg":"sender: started","stream_id":"erum223g"}
+{"time":"2025-08-14T14:45:40.405976544+02:00","level":"INFO","msg":"handler: started","stream_id":"erum223g"}
+{"time":"2025-08-14T14:45:40.717418483+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-14T14:46:29.704893684+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-14T14:46:29.704940713+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-14T14:46:30.450480105+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-14T14:46:30.706052754+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading history steps 92-99, summary, console lines 45-47","runtime_seconds":0.255460432}],"total_operations":1}}
+{"time":"2025-08-14T14:46:30.719921129+02:00","level":"INFO","msg":"stream: closing","id":"erum223g"}
+{"time":"2025-08-14T14:46:30.719942+02:00","level":"INFO","msg":"handler: closed","stream_id":"erum223g"}
+{"time":"2025-08-14T14:46:30.719952292+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"erum223g"}
+{"time":"2025-08-14T14:46:30.719964913+02:00","level":"INFO","msg":"sender: closed","stream_id":"erum223g"}
+{"time":"2025-08-14T14:46:30.720035974+02:00","level":"INFO","msg":"stream: closed","id":"erum223g"}

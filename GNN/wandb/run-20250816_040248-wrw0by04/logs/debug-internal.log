@@ -1,0 +1,16 @@
+{"time":"2025-08-16T04:02:48.379876171+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_040248-wrw0by04/logs/debug-core.log"}
+{"time":"2025-08-16T04:02:48.668489496+02:00","level":"INFO","msg":"stream: created new stream","id":"wrw0by04"}
+{"time":"2025-08-16T04:02:48.668517162+02:00","level":"INFO","msg":"stream: started","id":"wrw0by04"}
+{"time":"2025-08-16T04:02:48.668537956+02:00","level":"INFO","msg":"sender: started","stream_id":"wrw0by04"}
+{"time":"2025-08-16T04:02:48.668529474+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"wrw0by04"}
+{"time":"2025-08-16T04:02:48.66859067+02:00","level":"INFO","msg":"handler: started","stream_id":"wrw0by04"}
+{"time":"2025-08-16T04:02:48.877163602+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-16T04:07:20.504971661+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-16T04:07:20.505034246+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-16T04:07:21.466456434+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading wandb-summary.json","runtime_seconds":0.682241338,"progress":"475B/475B"},{"desc":"uploading config.yaml","runtime_seconds":0.490911129,"progress":"745B/745B"}],"total_operations":2}}
+{"time":"2025-08-16T04:07:21.602086137+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-16T04:07:22.015866652+02:00","level":"INFO","msg":"stream: closing","id":"wrw0by04"}
+{"time":"2025-08-16T04:07:22.015876986+02:00","level":"INFO","msg":"handler: closed","stream_id":"wrw0by04"}
+{"time":"2025-08-16T04:07:22.015883658+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"wrw0by04"}
+{"time":"2025-08-16T04:07:22.015893359+02:00","level":"INFO","msg":"sender: closed","stream_id":"wrw0by04"}
+{"time":"2025-08-16T04:07:22.015928822+02:00","level":"INFO","msg":"stream: closed","id":"wrw0by04"}

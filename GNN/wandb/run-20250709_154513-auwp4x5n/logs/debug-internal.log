@@ -1,0 +1,16 @@
+{"time":"2025-07-09T15:45:13.757174233+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250709_154513-auwp4x5n/logs/debug-core.log"}
+{"time":"2025-07-09T15:45:14.160694377+02:00","level":"INFO","msg":"stream: created new stream","id":"auwp4x5n"}
+{"time":"2025-07-09T15:45:14.16071983+02:00","level":"INFO","msg":"stream: started","id":"auwp4x5n"}
+{"time":"2025-07-09T15:45:14.16073147+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"auwp4x5n"}
+{"time":"2025-07-09T15:45:14.160752266+02:00","level":"INFO","msg":"handler: started","stream_id":"auwp4x5n"}
+{"time":"2025-07-09T15:45:14.160758075+02:00","level":"INFO","msg":"sender: started","stream_id":"auwp4x5n"}
+{"time":"2025-07-09T15:45:14.371649748+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-07-09T15:45:27.08448857+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-07-09T15:45:27.084711478+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-07-09T15:45:27.800928733+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-07-09T15:45:28.085668868+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading history steps 0-99, summary, console lines 0-212","runtime_seconds":0.2843712}],"total_operations":1}}
+{"time":"2025-07-09T15:45:28.190282306+02:00","level":"INFO","msg":"stream: closing","id":"auwp4x5n"}
+{"time":"2025-07-09T15:45:28.190294197+02:00","level":"INFO","msg":"handler: closed","stream_id":"auwp4x5n"}
+{"time":"2025-07-09T15:45:28.190307145+02:00","level":"INFO","msg":"sender: closed","stream_id":"auwp4x5n"}
+{"time":"2025-07-09T15:45:28.190303344+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"auwp4x5n"}
+{"time":"2025-07-09T15:45:28.190346525+02:00","level":"INFO","msg":"stream: closed","id":"auwp4x5n"}

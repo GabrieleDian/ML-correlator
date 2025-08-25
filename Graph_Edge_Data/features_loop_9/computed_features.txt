@@ -4,8 +4,8 @@ clustering
 closeness
 pagerank
 face_count
-
 eigen_1
 eigen_2
 eigen_3
 adjacency_columns
+identity_columns

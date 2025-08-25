@@ -1,0 +1,5 @@
+2025-08-14 14:05:25,363 INFO    MainThread:104948 [wandb_init.py:setup_run_log_directory():703] Logging user logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250814_140525-hb07sz2d/logs/debug.log
+2025-08-14 14:05:25,363 INFO    MainThread:104948 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250814_140525-hb07sz2d/logs/debug-internal.log
+2025-08-14 14:05:25,363 INFO    MainThread:104948 [wandb_init.py:init():831] calling init triggers
+2025-08-14 14:05:25,363 INFO    MainThread:104948 [wandb_init.py:init():836] wandb.init called with sweep_config: {'config': 'configs/config.yaml', 'learning_rate': 0.00017759256930952215}
+config: {'model_name': 'gin', 'hidden_channels': 64, 'num_layers': 3, 'dropout': 0.2, 'lr': 0.00017759256930952215, 'weight_decay': 0.001, 'epochs': 100, 'batch_size': 32, 'scheduler_type': 'onecycle', 'use_wandb': True, 'project': '7_loop_identity', 'experiment_name': 'gin_train_loop_7_,test_loop_7_train_identity_columns', 'in_channels': 3, '_wandb': {}}

@@ -1,0 +1,16 @@
+{"time":"2025-08-15T22:03:47.708211618+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_220347-rumuoh4d/logs/debug-core.log"}
+{"time":"2025-08-15T22:03:47.987377768+02:00","level":"INFO","msg":"stream: created new stream","id":"rumuoh4d"}
+{"time":"2025-08-15T22:03:47.987420524+02:00","level":"INFO","msg":"stream: started","id":"rumuoh4d"}
+{"time":"2025-08-15T22:03:47.987441394+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"rumuoh4d"}
+{"time":"2025-08-15T22:03:47.98745907+02:00","level":"INFO","msg":"handler: started","stream_id":"rumuoh4d"}
+{"time":"2025-08-15T22:03:47.987486994+02:00","level":"INFO","msg":"sender: started","stream_id":"rumuoh4d"}
+{"time":"2025-08-15T22:03:48.215017764+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-15T22:04:00.69165147+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-15T22:04:00.691701525+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-15T22:04:01.588865491+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-15T22:04:01.69341958+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading history steps 0-99, summary, console lines 1-53","runtime_seconds":0.104298823}],"total_operations":1}}
+{"time":"2025-08-15T22:04:01.936402252+02:00","level":"INFO","msg":"stream: closing","id":"rumuoh4d"}
+{"time":"2025-08-15T22:04:01.936415759+02:00","level":"INFO","msg":"handler: closed","stream_id":"rumuoh4d"}
+{"time":"2025-08-15T22:04:01.936431761+02:00","level":"INFO","msg":"sender: closed","stream_id":"rumuoh4d"}
+{"time":"2025-08-15T22:04:01.936423624+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"rumuoh4d"}
+{"time":"2025-08-15T22:04:01.936468461+02:00","level":"INFO","msg":"stream: closed","id":"rumuoh4d"}

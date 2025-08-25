@@ -1,0 +1,13 @@
+2025-08-15 14:09:36,081 INFO    MainThread:144322 [wandb_init.py:setup_run_log_directory():703] Logging user logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_140936-urakjc04/logs/debug.log
+2025-08-15 14:09:36,081 INFO    MainThread:144322 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_140936-urakjc04/logs/debug-internal.log
+2025-08-15 14:09:36,081 INFO    MainThread:144322 [wandb_init.py:init():831] calling init triggers
+2025-08-15 14:09:36,081 INFO    MainThread:144322 [wandb_init.py:init():836] wandb.init called with sweep_config: {'batch_size': 32, 'config': 'configs/config.yaml', 'dropout': 0.28391944693509186, 'hidden_channels': 32, 'learning_rate': 0.0006347291151226086, 'num_layers': 2, 'weight_decay': 5.176548834873489e-05}
+config: {'model_name': 'gin', 'hidden_channels': 32, 'num_layers': 2, 'dropout': 0.28391944693509186, 'lr': 0.0006347291151226086, 'weight_decay': 0.0001, 'epochs': 100, 'batch_size': 32, 'scheduler_type': 'onecycle', 'use_wandb': True, 'project': '8_loop_identity', 'experiment_name': 'gin_train_loop_8_,test_loop_8_train_identity_columns', 'in_channels': 12, '_wandb': {}}
+2025-08-15 14:10:10,201 INFO    MainThread:144322 [wandb_run.py:_finish():2219] finishing run aliajrigers-desydeutsches-elektronen-synchrotron/8_loop_identity/urakjc04
+2025-08-15 14:10:10,202 INFO    MainThread:144322 [wandb_run.py:_atexit_cleanup():2418] got exitcode: 0
+2025-08-15 14:10:10,202 INFO    MainThread:144322 [wandb_run.py:_restore():2400] restore
+2025-08-15 14:10:10,202 INFO    MainThread:144322 [wandb_run.py:_restore():2406] restore done
+2025-08-15 14:10:11,686 INFO    MainThread:144322 [wandb_run.py:_footer_history_summary_info():4000] rendering history
+2025-08-15 14:10:11,686 INFO    MainThread:144322 [wandb_run.py:_footer_history_summary_info():4032] rendering summary
+2025-08-15 14:10:11,687 INFO    MainThread:144322 [wandb_run.py:_footer_sync_info():3961] logging synced files
+2025-08-15 14:10:12,687 INFO    MsgRouterThr:144322 [mailbox.py:close():129] [no run ID] Closing mailbox, abandoning 1 handles.

@@ -1,0 +1,13 @@
+2025-08-14 13:29:09,381 INFO    MainThread:88686 [wandb_init.py:setup_run_log_directory():703] Logging user logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250814_132909-3ekduskh/logs/debug.log
+2025-08-14 13:29:09,381 INFO    MainThread:88686 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250814_132909-3ekduskh/logs/debug-internal.log
+2025-08-14 13:29:09,381 INFO    MainThread:88686 [wandb_init.py:init():831] calling init triggers
+2025-08-14 13:29:09,381 INFO    MainThread:88686 [wandb_init.py:init():836] wandb.init called with sweep_config: {'config': 'configs/config.yaml', 'dropout': 0.2, 'learning_rate': 0.007644170496546256, 'weight_decay': 0.0005761014850713562}
+config: {'model_name': 'gin', 'hidden_channels': 64, 'num_layers': 3, 'dropout': 0.2, 'lr': 0.007644170496546256, 'weight_decay': 0.001, 'epochs': 100, 'batch_size': 32, 'scheduler_type': 'onecycle', 'use_wandb': True, 'project': '7,8_to_9_eigen_3_features', 'experiment_name': 'gin_train_loop_[7, 8]_,test_loop_9_train_eigen_1_eigen_2_eigen_3', 'in_channels': 3, '_wandb': {}}
+2025-08-14 13:33:27,577 INFO    MainThread:88686 [wandb_run.py:_finish():2219] finishing run aliajrigers-desydeutsches-elektronen-synchrotron/ML-correlator-GNN/3ekduskh
+2025-08-14 13:33:27,577 INFO    MainThread:88686 [wandb_run.py:_atexit_cleanup():2418] got exitcode: 0
+2025-08-14 13:33:27,578 INFO    MainThread:88686 [wandb_run.py:_restore():2400] restore
+2025-08-14 13:33:27,578 INFO    MainThread:88686 [wandb_run.py:_restore():2406] restore done
+2025-08-14 13:33:28,433 INFO    MainThread:88686 [wandb_run.py:_footer_history_summary_info():4000] rendering history
+2025-08-14 13:33:28,434 INFO    MainThread:88686 [wandb_run.py:_footer_history_summary_info():4032] rendering summary
+2025-08-14 13:33:28,434 INFO    MainThread:88686 [wandb_run.py:_footer_sync_info():3961] logging synced files
+2025-08-14 13:33:29,434 INFO    MsgRouterThr:88686 [mailbox.py:close():129] [no run ID] Closing mailbox, abandoning 1 handles.

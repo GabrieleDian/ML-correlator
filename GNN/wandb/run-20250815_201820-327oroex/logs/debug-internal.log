@@ -1,0 +1,16 @@
+{"time":"2025-08-15T20:18:20.21919234+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_201820-327oroex/logs/debug-core.log"}
+{"time":"2025-08-15T20:18:20.619640208+02:00","level":"INFO","msg":"stream: created new stream","id":"327oroex"}
+{"time":"2025-08-15T20:18:20.619686402+02:00","level":"INFO","msg":"stream: started","id":"327oroex"}
+{"time":"2025-08-15T20:18:20.619764965+02:00","level":"INFO","msg":"sender: started","stream_id":"327oroex"}
+{"time":"2025-08-15T20:18:20.619758999+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"327oroex"}
+{"time":"2025-08-15T20:18:20.619827178+02:00","level":"INFO","msg":"handler: started","stream_id":"327oroex"}
+{"time":"2025-08-15T20:18:20.796768875+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-15T20:18:46.483041909+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-15T20:18:46.483090266+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-15T20:18:47.344805204+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-15T20:18:47.48519063+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading history steps 56-99, summary, console lines 41-47","runtime_seconds":0.140169855}],"total_operations":1}}
+{"time":"2025-08-15T20:18:47.646369475+02:00","level":"INFO","msg":"stream: closing","id":"327oroex"}
+{"time":"2025-08-15T20:18:47.646379664+02:00","level":"INFO","msg":"handler: closed","stream_id":"327oroex"}
+{"time":"2025-08-15T20:18:47.646405416+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"327oroex"}
+{"time":"2025-08-15T20:18:47.646423343+02:00","level":"INFO","msg":"sender: closed","stream_id":"327oroex"}
+{"time":"2025-08-15T20:18:47.646450499+02:00","level":"INFO","msg":"stream: closed","id":"327oroex"}

@@ -1,0 +1,13 @@
+2025-08-15 20:54:47,389 INFO    MainThread:36481 [wandb_init.py:setup_run_log_directory():703] Logging user logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_205447-g28fa6iq/logs/debug.log
+2025-08-15 20:54:47,389 INFO    MainThread:36481 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_205447-g28fa6iq/logs/debug-internal.log
+2025-08-15 20:54:47,389 INFO    MainThread:36481 [wandb_init.py:init():831] calling init triggers
+2025-08-15 20:54:47,389 INFO    MainThread:36481 [wandb_init.py:init():836] wandb.init called with sweep_config: {'config': 'configs/config.yaml', 'dropout': 0.35714950121111994, 'learning_rate': 0.0033443084135549414}
+config: {'model_name': 'gin', 'hidden_channels': 32, 'num_layers': 2, 'dropout': 0.35714950121111994, 'lr': 0.0033443084135549414, 'weight_decay': 0.0001, 'epochs': 100, 'batch_size': 32, 'scheduler_type': 'onecycle', 'use_wandb': True, 'project': '8_loop_only_scalar', 'experiment_name': 'gin_train_loop_8_,test_loop_8_train_degree_betweenness_clustering_pagerank_closeness', 'in_channels': 5, '_wandb': {}}
+2025-08-15 20:55:12,980 INFO    MainThread:36481 [wandb_run.py:_finish():2219] finishing run aliajrigers-desydeutsches-elektronen-synchrotron/8_loop_only_scalar/g28fa6iq
+2025-08-15 20:55:12,980 INFO    MainThread:36481 [wandb_run.py:_atexit_cleanup():2418] got exitcode: 0
+2025-08-15 20:55:12,980 INFO    MainThread:36481 [wandb_run.py:_restore():2400] restore
+2025-08-15 20:55:12,980 INFO    MainThread:36481 [wandb_run.py:_restore():2406] restore done
+2025-08-15 20:55:14,204 INFO    MainThread:36481 [wandb_run.py:_footer_history_summary_info():4000] rendering history
+2025-08-15 20:55:14,204 INFO    MainThread:36481 [wandb_run.py:_footer_history_summary_info():4032] rendering summary
+2025-08-15 20:55:14,205 INFO    MainThread:36481 [wandb_run.py:_footer_sync_info():3961] logging synced files
+2025-08-15 20:55:15,206 INFO    MsgRouterThr:36481 [mailbox.py:close():129] [no run ID] Closing mailbox, abandoning 1 handles.

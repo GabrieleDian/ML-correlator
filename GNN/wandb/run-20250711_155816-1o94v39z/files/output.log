@@ -1,0 +1,39 @@
+Loaded config structure: ['data', 'features', 'model', 'training', 'experiment']
+Sweep parameters: {'batch_size': 16, 'config': 'config.yaml', 'dropout': 0.23113566195531035, 'epochs': 100, 'features': ['adjacency_columns'], 'hidden_channels': 64, 'learning_rate': 0.00396456504394175, 'loop': 8, 'num_layers': 2, 'weight_decay': 0.000733108532971588}
+Training on loop 8 with features: ['adjacency_columns']
+
+Loading pre-computed features...
+Loading features: ['adjacency_columns']
+Loaded adjacency_columns: shape (1432, 12, 12)
+Loading graph structures...
+Building dataset...
+Created dataset with 1432 graphs
+Feature dimension: 12
+Normalizing features...
+
+Dataset Statistics:
+  Number of graphs: 1432
+  Average nodes: 12.0 (min: 12, max: 12)
+  Average edges: 27.5
+  Label distribution: 729 positive, 703 negative
+  Feature dimension: 12
+
+Training configuration:
+  Model: gin
+  Input features: 12
+  Hidden channels: 64
+  Epochs: 100
+
+Starting training...
+Using device: cpu
+Train size: 1145, Val size: 287
+[34m[1mwandb[0m: [33mWARNING[0m Ignoring project 'cluster-7-loop' when running a sweep.
+[34m[1mwandb[0m: wandb.init() called while a run is active and reinit is set to 'default', so returning the previous run.
+
+Starting training...
+Model architecture: gin
+Hidden dim: 64, Layers: 2
+Initial LR: 0.00047574780527301005
+Epoch   0/100: Train Loss=0.7093, Acc=0.5738, Val Loss=0.6724, Acc=0.5889, LR=0.000507
+Epoch  10/100: Train Loss=0.5749, Acc=0.6952, Val Loss=0.6171, Acc=0.6446, LR=0.003865
+Epoch  20/100: Train Loss=0.6635, Acc=0.6157, Val Loss=0.6900, Acc=0.5366, LR=0.009545

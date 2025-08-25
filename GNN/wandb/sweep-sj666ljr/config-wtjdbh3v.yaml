@@ -1,0 +1,16 @@
+wandb_version: 1
+
+config:
+  value: configs/config.yaml
+dropout:
+  value: 0.3
+hidden_channels:
+  value: 526
+learning_rate:
+  value: 0.0001032160719950361
+model:
+  value: planar
+num_layers:
+  value: 2
+weight_decay:
+  value: 1.6021654575165358e-06

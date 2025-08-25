@@ -1,0 +1,60 @@
+
+Starting training...
+Model architecture: planar
+Hidden dim: 64, Layers: 3
+Initial LR: 0.00011999999999999988
+Epoch   0/100: Train Loss=0.6310, Acc=0.6488, Val Loss=0.5407, Acc=0.7314, LR=0.000128
+Epoch  10/100: Train Loss=0.4946, Acc=0.7481, Val Loss=0.4658, Acc=0.7663, LR=0.000974
+Epoch  20/100: Train Loss=0.4776, Acc=0.7558, Val Loss=0.4662, Acc=0.7605, LR=0.002407
+Epoch  30/100: Train Loss=0.4467, Acc=0.7768, Val Loss=0.4660, Acc=0.7757, LR=0.002998
+Epoch  40/100: Train Loss=0.4169, Acc=0.7962, Val Loss=0.4214, Acc=0.7874, LR=0.002821
+Epoch  50/100: Train Loss=0.3946, Acc=0.8056, Val Loss=0.4846, Acc=0.7777, LR=0.002382
+Traceback (most recent call last):
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple_mixed_loop.py", line 345, in <module>
+    main()
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple_mixed_loop.py", line 321, in main
+    results = train(config, train_dataset,val_dataset)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/training_utils_mixed.py", line 162, in train
+    val_loss, val_acc, val_metrics = evaluate(model, val_loader, device)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/training_utils_mixed.py", line 77, in evaluate
+    out = model(batch.x, batch.edge_index, batch.batch)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/GNN_architectures.py", line 291, in forward
+    x2 = self.conv2(x1, edge_index)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch_geometric/nn/conv/gin_conv.py", line 86, in forward
+    return self.nn(out)
+           ^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/nn/modules/container.py", line 240, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

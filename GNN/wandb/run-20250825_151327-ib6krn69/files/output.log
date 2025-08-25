@@ -1,0 +1,15 @@
+
+Starting training...
+Model architecture: gin
+Hidden dim: 64, Layers: 3
+Initial LR: 6.0323560078929346e-05
+Traceback (most recent call last):
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple.py", line 223, in <module>
+    main()
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple.py", line 199, in main
+    results = train(config, train_dataset, test_dataset)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/training_utils.py", line 199, in train
+    f"ROC AUC Train={train_metrics['roc_auc']:.4f}, ROC AUC Test={test_metrics['roc_auc']:.4f}")
+                                                                  ~~~~~~~~~~~~^^^^^^^^^^^
+KeyError: 'roc_auc'

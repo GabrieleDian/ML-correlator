@@ -1,0 +1,7 @@
+{"time":"2025-08-16T09:05:50.550203578+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_090550-4qrj9z3r/logs/debug-core.log"}
+{"time":"2025-08-16T09:05:50.847517658+02:00","level":"INFO","msg":"stream: created new stream","id":"4qrj9z3r"}
+{"time":"2025-08-16T09:05:50.84755726+02:00","level":"INFO","msg":"stream: started","id":"4qrj9z3r"}
+{"time":"2025-08-16T09:05:50.847620371+02:00","level":"INFO","msg":"handler: started","stream_id":"4qrj9z3r"}
+{"time":"2025-08-16T09:05:50.847580644+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"4qrj9z3r"}
+{"time":"2025-08-16T09:05:50.847639052+02:00","level":"INFO","msg":"sender: started","stream_id":"4qrj9z3r"}
+{"time":"2025-08-16T09:05:51.033688268+02:00","level":"INFO","msg":"Starting system monitor"}

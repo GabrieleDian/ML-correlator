@@ -1,0 +1,13 @@
+2025-08-16 00:24:50,218 INFO    MainThread:138069 [wandb_init.py:setup_run_log_directory():703] Logging user logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_002450-fe6x0p5p/logs/debug.log
+2025-08-16 00:24:50,218 INFO    MainThread:138069 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_002450-fe6x0p5p/logs/debug-internal.log
+2025-08-16 00:24:50,219 INFO    MainThread:138069 [wandb_init.py:init():831] calling init triggers
+2025-08-16 00:24:50,219 INFO    MainThread:138069 [wandb_init.py:init():836] wandb.init called with sweep_config: {'config': 'configs/config.yaml', 'dropout': 0.5, 'hidden_channels': 64, 'learning_rate': 0.0009318743537257425, 'model': 'gat', 'num_layers': 4, 'weight_decay': 9.93778973333428e-06}
+config: {'model_name': 'gin', 'hidden_channels': 64, 'num_layers': 4, 'dropout': 0.5, 'lr': 0.0009318743537257425, 'weight_decay': 0.000402816483040196, 'epochs': 100, 'batch_size': 32, 'scheduler_type': 'onecycle', 'use_wandb': True, 'project': 'train_7_8_test_9_loop_all_scalar', 'experiment_name': 'gin_train_loop_[7, 8]_,test_loop_9_train_eigen_1_eigen_2_eigen_3_degree_betweenness_clustering_pagerank_closeness_face_count', 'in_channels': 9, '_wandb': {}}
+2025-08-16 00:28:35,641 INFO    MainThread:138069 [wandb_run.py:_finish():2219] finishing run aliajrigers-desydeutsches-elektronen-synchrotron/train_7_8_test_9_loop_all_scalar/fe6x0p5p
+2025-08-16 00:28:35,641 INFO    MainThread:138069 [wandb_run.py:_atexit_cleanup():2418] got exitcode: 0
+2025-08-16 00:28:35,642 INFO    MainThread:138069 [wandb_run.py:_restore():2400] restore
+2025-08-16 00:28:35,642 INFO    MainThread:138069 [wandb_run.py:_restore():2406] restore done
+2025-08-16 00:28:36,804 INFO    MainThread:138069 [wandb_run.py:_footer_history_summary_info():4000] rendering history
+2025-08-16 00:28:36,804 INFO    MainThread:138069 [wandb_run.py:_footer_history_summary_info():4032] rendering summary
+2025-08-16 00:28:36,804 INFO    MainThread:138069 [wandb_run.py:_footer_sync_info():3961] logging synced files
+2025-08-16 00:28:37,804 INFO    MsgRouterThr:138069 [mailbox.py:close():129] [no run ID] Closing mailbox, abandoning 1 handles.

@@ -1,0 +1,16 @@
+{"time":"2025-08-15T21:23:39.515382484+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_212339-xjcs1or7/logs/debug-core.log"}
+{"time":"2025-08-15T21:23:39.80932216+02:00","level":"INFO","msg":"stream: created new stream","id":"xjcs1or7"}
+{"time":"2025-08-15T21:23:39.809370053+02:00","level":"INFO","msg":"stream: started","id":"xjcs1or7"}
+{"time":"2025-08-15T21:23:39.809380332+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"xjcs1or7"}
+{"time":"2025-08-15T21:23:39.809433029+02:00","level":"INFO","msg":"handler: started","stream_id":"xjcs1or7"}
+{"time":"2025-08-15T21:23:39.809461359+02:00","level":"INFO","msg":"sender: started","stream_id":"xjcs1or7"}
+{"time":"2025-08-15T21:23:40.12245944+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-15T21:23:45.86421323+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-15T21:23:45.864263157+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-15T21:23:46.866752176+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading wandb-summary.json","runtime_seconds":0.705376489,"progress":"438B/438B"},{"desc":"uploading config.yaml","runtime_seconds":0.500818864,"progress":"675B/675B"}],"total_operations":2}}
+{"time":"2025-08-15T21:23:46.878109844+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-15T21:23:47.294447803+02:00","level":"INFO","msg":"stream: closing","id":"xjcs1or7"}
+{"time":"2025-08-15T21:23:47.29446246+02:00","level":"INFO","msg":"handler: closed","stream_id":"xjcs1or7"}
+{"time":"2025-08-15T21:23:47.294481868+02:00","level":"INFO","msg":"sender: closed","stream_id":"xjcs1or7"}
+{"time":"2025-08-15T21:23:47.294472778+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"xjcs1or7"}
+{"time":"2025-08-15T21:23:47.294529602+02:00","level":"INFO","msg":"stream: closed","id":"xjcs1or7"}

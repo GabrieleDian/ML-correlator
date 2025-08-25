@@ -1,0 +1,16 @@
+{"time":"2025-07-09T16:50:20.932666799+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250709_165020-ga62ivli/logs/debug-core.log"}
+{"time":"2025-07-09T16:50:21.261441361+02:00","level":"INFO","msg":"stream: created new stream","id":"ga62ivli"}
+{"time":"2025-07-09T16:50:21.261474722+02:00","level":"INFO","msg":"stream: started","id":"ga62ivli"}
+{"time":"2025-07-09T16:50:21.26148266+02:00","level":"INFO","msg":"handler: started","stream_id":"ga62ivli"}
+{"time":"2025-07-09T16:50:21.26152544+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"ga62ivli"}
+{"time":"2025-07-09T16:50:21.261523583+02:00","level":"INFO","msg":"sender: started","stream_id":"ga62ivli"}
+{"time":"2025-07-09T16:50:21.535694472+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-07-09T16:50:35.86632433+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-07-09T16:50:35.866408503+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-07-09T16:50:36.523544632+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-07-09T16:50:36.764407129+02:00","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2025-07-09T16:50:36.768704432+02:00","level":"INFO","msg":"stream: closing","id":"ga62ivli"}
+{"time":"2025-07-09T16:50:36.76871918+02:00","level":"INFO","msg":"handler: closed","stream_id":"ga62ivli"}
+{"time":"2025-07-09T16:50:36.768741411+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"ga62ivli"}
+{"time":"2025-07-09T16:50:36.768761496+02:00","level":"INFO","msg":"sender: closed","stream_id":"ga62ivli"}
+{"time":"2025-07-09T16:50:36.768793382+02:00","level":"INFO","msg":"stream: closed","id":"ga62ivli"}

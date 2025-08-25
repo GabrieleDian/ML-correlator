@@ -1,0 +1,16 @@
+{"time":"2025-08-14T16:11:10.991512148+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250814_161110-cbsaaqtv/logs/debug-core.log"}
+{"time":"2025-08-14T16:11:11.292094274+02:00","level":"INFO","msg":"stream: created new stream","id":"cbsaaqtv"}
+{"time":"2025-08-14T16:11:11.292132836+02:00","level":"INFO","msg":"stream: started","id":"cbsaaqtv"}
+{"time":"2025-08-14T16:11:11.292158206+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"cbsaaqtv"}
+{"time":"2025-08-14T16:11:11.292199923+02:00","level":"INFO","msg":"sender: started","stream_id":"cbsaaqtv"}
+{"time":"2025-08-14T16:11:11.292269263+02:00","level":"INFO","msg":"handler: started","stream_id":"cbsaaqtv"}
+{"time":"2025-08-14T16:11:11.49551627+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-14T16:25:19.321592429+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-14T16:25:19.321671629+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-14T16:25:20.188055125+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-14T16:25:20.282955974+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading history steps 99-99, summary, console lines 45-47","runtime_seconds":0.094737639}],"total_operations":1}}
+{"time":"2025-08-14T16:25:36.824911446+02:00","level":"INFO","msg":"stream: closing","id":"cbsaaqtv"}
+{"time":"2025-08-14T16:25:36.824940063+02:00","level":"INFO","msg":"handler: closed","stream_id":"cbsaaqtv"}
+{"time":"2025-08-14T16:25:36.824956575+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"cbsaaqtv"}
+{"time":"2025-08-14T16:25:36.824977264+02:00","level":"INFO","msg":"sender: closed","stream_id":"cbsaaqtv"}
+{"time":"2025-08-14T16:25:36.825051434+02:00","level":"INFO","msg":"stream: closed","id":"cbsaaqtv"}

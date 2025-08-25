@@ -1,0 +1,7 @@
+{"time":"2025-07-11T14:04:45.993911884+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250711_140445-e5lmdvth/logs/debug-core.log"}
+{"time":"2025-07-11T14:04:46.400388254+02:00","level":"INFO","msg":"stream: created new stream","id":"e5lmdvth"}
+{"time":"2025-07-11T14:04:46.400472279+02:00","level":"INFO","msg":"stream: started","id":"e5lmdvth"}
+{"time":"2025-07-11T14:04:46.400521809+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"e5lmdvth"}
+{"time":"2025-07-11T14:04:46.400572547+02:00","level":"INFO","msg":"sender: started","stream_id":"e5lmdvth"}
+{"time":"2025-07-11T14:04:46.400599954+02:00","level":"INFO","msg":"handler: started","stream_id":"e5lmdvth"}
+{"time":"2025-07-11T14:04:46.76486868+02:00","level":"INFO","msg":"Starting system monitor"}
