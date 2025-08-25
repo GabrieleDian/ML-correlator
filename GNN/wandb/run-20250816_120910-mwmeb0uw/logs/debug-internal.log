@@ -1,0 +1,16 @@
+{"time":"2025-08-16T12:09:11.0610063+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_120910-mwmeb0uw/logs/debug-core.log"}
+{"time":"2025-08-16T12:09:11.346241695+02:00","level":"INFO","msg":"stream: created new stream","id":"mwmeb0uw"}
+{"time":"2025-08-16T12:09:11.346266014+02:00","level":"INFO","msg":"stream: started","id":"mwmeb0uw"}
+{"time":"2025-08-16T12:09:11.346334261+02:00","level":"INFO","msg":"sender: started","stream_id":"mwmeb0uw"}
+{"time":"2025-08-16T12:09:11.346334263+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"mwmeb0uw"}
+{"time":"2025-08-16T12:09:11.346362452+02:00","level":"INFO","msg":"handler: started","stream_id":"mwmeb0uw"}
+{"time":"2025-08-16T12:09:11.527547418+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-16T12:35:04.631241332+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-16T12:35:04.631297117+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-16T12:35:05.59299215+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading wandb-summary.json","runtime_seconds":0.763447665,"progress":"481B/481B"},{"desc":"uploading config.yaml","runtime_seconds":0.611363074,"progress":"640B/640B"}],"total_operations":2}}
+{"time":"2025-08-16T12:35:05.631397422+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-16T12:35:05.876211521+02:00","level":"INFO","msg":"stream: closing","id":"mwmeb0uw"}
+{"time":"2025-08-16T12:35:05.87622715+02:00","level":"INFO","msg":"handler: closed","stream_id":"mwmeb0uw"}
+{"time":"2025-08-16T12:35:05.876249506+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"mwmeb0uw"}
+{"time":"2025-08-16T12:35:05.876290226+02:00","level":"INFO","msg":"sender: closed","stream_id":"mwmeb0uw"}
+{"time":"2025-08-16T12:35:05.876332079+02:00","level":"INFO","msg":"stream: closed","id":"mwmeb0uw"}

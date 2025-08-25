@@ -1,0 +1,61 @@
+# Configuration file for GNN experiments
+
+# Data configuration
+data:
+  base_dir: '../Graph_Edge_Data'  # Path to data directory
+  train_loop_order: [7,8,9]             # Which loop to use for training
+  test_loop_order: 10                  # Which loop to use for testing
+  
+# Feature configuration
+features:
+  # Features to compute (when running compute_features.py)
+  compute_all: true
+  features_to_compute:
+    - adjacency_columns
+    - eigen_1
+    - eigen_2
+    - eigen_3
+    - degree
+    - betweenness
+    - clustering
+    - pagerank
+    - closeness
+    - face_count
+
+  # Features to use for training
+  selected_features:
+   - degree
+   - betweenness
+   - clustering
+   - pagerank
+   - closeness
+   - face_count
+
+    
+  # Computation settings
+  chunk_size: 1000
+  n_jobs: 4
+
+# Model configuration
+model:
+  name: "gin"              # Model architecture: gin, gat, hybrid, planar, simple
+  hidden_channels: 64
+  num_layers: 3
+  dropout: 0.2
+
+# Training configuration
+training:
+  epochs: 50
+  batch_size: 64
+  learning_rate:   0.0005026963339910785
+  weight_decay:   2.7148197332317223e-05
+  scheduler_type: "onecycle"  # Options: onecycle, plateau, none
+  
+# Experiment configuration
+experiment:
+  seed: 42
+  use_wandb: true
+  wandb_project: "train_7_8_9_test_10_loop_scalar"
+  wandb_name: "gin_simple"
+  save_model: false
+  model_dir: "models"

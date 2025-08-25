@@ -24,11 +24,11 @@ python compute_features.py --config config.yaml --feature degree
 ### 3. Train Model
 
 ```bash
-# Train using config file
-python one_run_simple.py --config config.yaml
+# Train using config file, specify train and test loop orders
+python one_run_simple.py --config config.yaml --train_loop 7,8 test_loop 9
 
 # Override specific parameters
-python one_run_simple.py --config config.yaml --loop 8 --epochs 200
+python one_run_simple.py --config config.yaml --train_loop 8 test_loop 8 --epochs 200
 python one_run_simple.py --config config.yaml --features degree betweenness
 ```
 
@@ -57,7 +57,11 @@ your_project/
 ```
 
 ## Available Features
-
+- `identity_columns` : Columns of the identity matrix
+- `adjacency_columns` : Columns of the adjacency matrix
+- `eigen_1` : Eigenvector of the highest eigenvalue
+- `eigen_2` : Eigenvector of the second highest eigenvalue
+- `eigen_3` : Eigenvector of the third highest eigenvalue
 - `degree`: Node degree
 - `betweenness`: Betweenness centrality
 - `clustering`: Clustering coefficient

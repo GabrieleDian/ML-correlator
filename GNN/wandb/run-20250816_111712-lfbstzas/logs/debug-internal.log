@@ -1,0 +1,16 @@
+{"time":"2025-08-16T11:17:12.189057533+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_111712-lfbstzas/logs/debug-core.log"}
+{"time":"2025-08-16T11:17:12.46566971+02:00","level":"INFO","msg":"stream: created new stream","id":"lfbstzas"}
+{"time":"2025-08-16T11:17:12.465704986+02:00","level":"INFO","msg":"stream: started","id":"lfbstzas"}
+{"time":"2025-08-16T11:17:12.46574846+02:00","level":"INFO","msg":"handler: started","stream_id":"lfbstzas"}
+{"time":"2025-08-16T11:17:12.465740031+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"lfbstzas"}
+{"time":"2025-08-16T11:17:12.465760341+02:00","level":"INFO","msg":"sender: started","stream_id":"lfbstzas"}
+{"time":"2025-08-16T11:17:12.69944137+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-16T11:17:13.805403084+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-16T11:17:13.805426606+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-16T11:17:14.481317653+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-16T11:17:14.671534963+02:00","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2025-08-16T11:17:14.673164662+02:00","level":"INFO","msg":"stream: closing","id":"lfbstzas"}
+{"time":"2025-08-16T11:17:14.673175706+02:00","level":"INFO","msg":"handler: closed","stream_id":"lfbstzas"}
+{"time":"2025-08-16T11:17:14.673182361+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"lfbstzas"}
+{"time":"2025-08-16T11:17:14.673187359+02:00","level":"INFO","msg":"sender: closed","stream_id":"lfbstzas"}
+{"time":"2025-08-16T11:17:14.673213252+02:00","level":"INFO","msg":"stream: closed","id":"lfbstzas"}

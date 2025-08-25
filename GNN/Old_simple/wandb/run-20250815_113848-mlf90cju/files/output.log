@@ -1,0 +1,18 @@
+
+Starting training...
+Model architecture: planar
+Hidden dim: 64, Layers: 3
+Initial LR: 0.00011999999999999988
+Epoch   0/100: Train Loss=0.7556, Acc=0.3664, Val Loss=0.7613, Acc=0.3030, LR=0.000128
+Epoch  10/100: Train Loss=0.5044, Acc=0.7786, Val Loss=0.5832, Acc=0.6364, LR=0.000984
+Epoch  20/100: Train Loss=0.2362, Acc=0.9160, Val Loss=1.0825, Acc=0.6970, LR=0.002424
+Epoch  30/100: Train Loss=0.3518, Acc=0.8702, Val Loss=1.0279, Acc=0.5152, LR=0.002998
+Epoch  40/100: Train Loss=0.3650, Acc=0.8702, Val Loss=0.7660, Acc=0.6667, LR=0.002814
+Epoch  50/100: Train Loss=0.2141, Acc=0.9313, Val Loss=0.5542, Acc=0.6667, LR=0.002371
+Epoch  60/100: Train Loss=0.3055, Acc=0.8550, Val Loss=0.7511, Acc=0.6364, LR=0.001755
+Epoch  70/100: Train Loss=0.1518, Acc=0.9618, Val Loss=0.5596, Acc=0.6364, LR=0.001088
+Epoch  80/100: Train Loss=0.1351, Acc=0.9542, Val Loss=0.6547, Acc=0.6364, LR=0.000503
+Epoch  90/100: Train Loss=0.0814, Acc=0.9847, Val Loss=0.5468, Acc=0.6970, LR=0.000116
+Epoch  99/100: Train Loss=0.1072, Acc=0.9771, Val Loss=0.5631, Acc=0.6970, LR=0.000000
+
+Best validation accuracy: 0.7879 at epoch 18

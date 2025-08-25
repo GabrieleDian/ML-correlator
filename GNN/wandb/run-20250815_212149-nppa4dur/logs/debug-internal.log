@@ -1,0 +1,16 @@
+{"time":"2025-08-15T21:21:49.330946102+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_212149-nppa4dur/logs/debug-core.log"}
+{"time":"2025-08-15T21:21:49.62591986+02:00","level":"INFO","msg":"stream: created new stream","id":"nppa4dur"}
+{"time":"2025-08-15T21:21:49.625986966+02:00","level":"INFO","msg":"stream: started","id":"nppa4dur"}
+{"time":"2025-08-15T21:21:49.62601659+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"nppa4dur"}
+{"time":"2025-08-15T21:21:49.626133574+02:00","level":"INFO","msg":"handler: started","stream_id":"nppa4dur"}
+{"time":"2025-08-15T21:21:49.626163093+02:00","level":"INFO","msg":"sender: started","stream_id":"nppa4dur"}
+{"time":"2025-08-15T21:21:49.804376918+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-15T21:21:55.388106691+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-15T21:21:55.388153113+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-15T21:21:56.179353834+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-15T21:21:56.390694832+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading history steps 0-99, summary, console lines 1-47","runtime_seconds":0.210865832}],"total_operations":1}}
+{"time":"2025-08-15T21:21:56.491272694+02:00","level":"INFO","msg":"stream: closing","id":"nppa4dur"}
+{"time":"2025-08-15T21:21:56.491289109+02:00","level":"INFO","msg":"handler: closed","stream_id":"nppa4dur"}
+{"time":"2025-08-15T21:21:56.491307952+02:00","level":"INFO","msg":"sender: closed","stream_id":"nppa4dur"}
+{"time":"2025-08-15T21:21:56.491299418+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"nppa4dur"}
+{"time":"2025-08-15T21:21:56.491371273+02:00","level":"INFO","msg":"stream: closed","id":"nppa4dur"}

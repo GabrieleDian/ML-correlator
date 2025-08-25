@@ -1,0 +1,16 @@
+wandb_version: 1
+
+batch_size:
+  value: 64
+config:
+  value: configs/config.yaml
+dropout:
+  value: 0.12617862724446086
+hidden_channels:
+  value: 32
+learning_rate:
+  value: 0.0008974854605498025
+num_layers:
+  value: 2
+weight_decay:
+  value: 0.00957528676802762

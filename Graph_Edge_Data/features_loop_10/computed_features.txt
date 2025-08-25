@@ -5,3 +5,13 @@ clustering
 closeness
 pagerank
 face_count
+eigen_1
+eigen_2
+eigen_3
+identity_columns
+adjacency_columns
+eigen_1
+eigen_2
+eigen_3
+identity_columns
+adjacency_columns

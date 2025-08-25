@@ -1,0 +1,23 @@
+wandb_version: 1
+
+config:
+  value: config.yaml
+epochs:
+  value: 100
+features:
+  value:
+  - eigen_1
+  - eigen_2
+  - eigen_3
+  - degree
+  - betweenness
+  - clustering
+  - closeness
+  - pagerank
+  - face_count
+hidden_channels:
+  value:
+  - 32
+  - 64
+loop_order:
+  value: 7

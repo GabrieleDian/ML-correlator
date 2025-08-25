@@ -1,0 +1,16 @@
+{"time":"2025-07-11T15:11:38.394439451+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250711_151138-poryhcjl/logs/debug-core.log"}
+{"time":"2025-07-11T15:11:38.759123431+02:00","level":"INFO","msg":"stream: created new stream","id":"poryhcjl"}
+{"time":"2025-07-11T15:11:38.759153457+02:00","level":"INFO","msg":"stream: started","id":"poryhcjl"}
+{"time":"2025-07-11T15:11:38.759164874+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"poryhcjl"}
+{"time":"2025-07-11T15:11:38.759176671+02:00","level":"INFO","msg":"handler: started","stream_id":"poryhcjl"}
+{"time":"2025-07-11T15:11:38.759201396+02:00","level":"INFO","msg":"sender: started","stream_id":"poryhcjl"}
+{"time":"2025-07-11T15:11:38.991691387+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-07-11T15:12:13.880943188+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-07-11T15:12:13.880995965+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-07-11T15:12:14.795633095+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-07-11T15:12:14.882327456+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading history steps 85-99, summary, console lines 45-48","runtime_seconds":0.086529651}],"total_operations":1}}
+{"time":"2025-07-11T15:12:15.264931808+02:00","level":"INFO","msg":"stream: closing","id":"poryhcjl"}
+{"time":"2025-07-11T15:12:15.264957339+02:00","level":"INFO","msg":"handler: closed","stream_id":"poryhcjl"}
+{"time":"2025-07-11T15:12:15.264969578+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"poryhcjl"}
+{"time":"2025-07-11T15:12:15.265022001+02:00","level":"INFO","msg":"sender: closed","stream_id":"poryhcjl"}
+{"time":"2025-07-11T15:12:15.265038858+02:00","level":"INFO","msg":"stream: closed","id":"poryhcjl"}

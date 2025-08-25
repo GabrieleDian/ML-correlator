@@ -1,0 +1,18 @@
+
+Starting training...
+Model architecture: gin
+Hidden dim: 32, Layers: 2
+Initial LR: 0.0007134563078049494
+Epoch   0/100: Train Loss=0.8421, Acc=0.5038, Val Loss=0.6320, Acc=0.6970, LR=0.000761
+Epoch  10/100: Train Loss=0.5222, Acc=0.7405, Val Loss=0.7448, Acc=0.6667, LR=0.005853
+Epoch  20/100: Train Loss=0.5912, Acc=0.7252, Val Loss=1.1381, Acc=0.5152, LR=0.014409
+Epoch  30/100: Train Loss=0.5874, Acc=0.7252, Val Loss=0.7383, Acc=0.6667, LR=0.017823
+Epoch  40/100: Train Loss=0.6416, Acc=0.6412, Val Loss=0.6561, Acc=0.6970, LR=0.016733
+Epoch  50/100: Train Loss=0.7190, Acc=0.3588, Val Loss=0.7168, Acc=0.3030, LR=0.014095
+Epoch  60/100: Train Loss=0.6525, Acc=0.6412, Val Loss=0.6194, Acc=0.6970, LR=0.010432
+Epoch  70/100: Train Loss=0.6529, Acc=0.6412, Val Loss=0.6225, Acc=0.6970, LR=0.006469
+Epoch  80/100: Train Loss=0.6529, Acc=0.6412, Val Loss=0.6230, Acc=0.6970, LR=0.002991
+Epoch  90/100: Train Loss=0.6529, Acc=0.6412, Val Loss=0.6223, Acc=0.6970, LR=0.000687
+Epoch  99/100: Train Loss=0.6528, Acc=0.6412, Val Loss=0.6222, Acc=0.6970, LR=0.000001
+
+Best validation accuracy: 0.7576 at epoch 4

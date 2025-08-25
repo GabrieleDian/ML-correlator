@@ -1,0 +1,16 @@
+{"time":"2025-08-16T11:18:54.425136076+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_111854-3jhusehl/logs/debug-core.log"}
+{"time":"2025-08-16T11:18:54.706229207+02:00","level":"INFO","msg":"stream: created new stream","id":"3jhusehl"}
+{"time":"2025-08-16T11:18:54.7062531+02:00","level":"INFO","msg":"stream: started","id":"3jhusehl"}
+{"time":"2025-08-16T11:18:54.706264441+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"3jhusehl"}
+{"time":"2025-08-16T11:18:54.706268225+02:00","level":"INFO","msg":"handler: started","stream_id":"3jhusehl"}
+{"time":"2025-08-16T11:18:54.7062903+02:00","level":"INFO","msg":"sender: started","stream_id":"3jhusehl"}
+{"time":"2025-08-16T11:18:54.971993848+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-16T11:18:56.060310382+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-16T11:18:56.0603718+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-16T11:18:57.061238219+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading artifact config.yaml","runtime_seconds":1.178016124},{"desc":"uploading artifact requirements.txt","runtime_seconds":1.002633232}],"total_operations":2}}
+{"time":"2025-08-16T11:18:57.375405609+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-16T11:18:57.5824468+02:00","level":"INFO","msg":"stream: closing","id":"3jhusehl"}
+{"time":"2025-08-16T11:18:57.58250019+02:00","level":"INFO","msg":"handler: closed","stream_id":"3jhusehl"}
+{"time":"2025-08-16T11:18:57.582516096+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"3jhusehl"}
+{"time":"2025-08-16T11:18:57.582627973+02:00","level":"INFO","msg":"sender: closed","stream_id":"3jhusehl"}
+{"time":"2025-08-16T11:18:57.582650938+02:00","level":"INFO","msg":"stream: closed","id":"3jhusehl"}

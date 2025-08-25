@@ -1,0 +1,28 @@
+
+Starting training...
+Model architecture: gin
+Hidden dim: 64, Layers: 3
+Initial LR: 6.0323560078929346e-05
+Epoch   0/200: Train Loss=0.7223, Acc=0.5450, Test Loss=0.6568, Acc=0.5889, LR=0.000061
+Epoch  10/200: Train Loss=0.5632, Acc=0.6847, Test Loss=0.5771, Acc=0.6899, LR=0.000177
+Epoch  20/200: Train Loss=0.5206, Acc=0.7214, Test Loss=0.5708, Acc=0.7073, LR=0.000456
+Epoch  30/200: Train Loss=0.5097, Acc=0.7275, Test Loss=0.5114, Acc=0.7317, LR=0.000823
+Epoch  40/200: Train Loss=0.4474, Acc=0.7747, Test Loss=0.5258, Acc=0.7352, LR=0.001180
+Epoch  50/200: Train Loss=0.4344, Acc=0.7921, Test Loss=0.5280, Acc=0.7491, LR=0.001430
+Epoch  60/200: Train Loss=0.3634, Acc=0.8236, Test Loss=0.5031, Acc=0.7491, LR=0.001508
+Epoch  70/200: Train Loss=0.3479, Acc=0.8402, Test Loss=0.4944, Acc=0.7456, LR=0.001485
+Epoch  80/200: Train Loss=0.3092, Acc=0.8620, Test Loss=0.5509, Acc=0.7491, LR=0.001425
+Epoch  90/200: Train Loss=0.2801, Acc=0.8760, Test Loss=0.5252, Acc=0.7561, LR=0.001332
+Epoch 100/200: Train Loss=0.2586, Acc=0.8882, Test Loss=0.5238, Acc=0.7735, LR=0.001210
+Epoch 110/200: Train Loss=0.2112, Acc=0.9066, Test Loss=0.5872, Acc=0.8014, LR=0.001065
+Epoch 120/200: Train Loss=0.2158, Acc=0.9144, Test Loss=0.6476, Acc=0.7631, LR=0.000904
+Epoch 130/200: Train Loss=0.1624, Acc=0.9345, Test Loss=0.5402, Acc=0.8049, LR=0.000736
+Epoch 140/200: Train Loss=0.1676, Acc=0.9406, Test Loss=0.6135, Acc=0.7805, LR=0.000569
+Epoch 150/200: Train Loss=0.0972, Acc=0.9598, Test Loss=0.6314, Acc=0.8014, LR=0.000411
+Epoch 160/200: Train Loss=0.0853, Acc=0.9694, Test Loss=0.7373, Acc=0.7944, LR=0.000270
+Epoch 170/200: Train Loss=0.0612, Acc=0.9755, Test Loss=0.7493, Acc=0.8014, LR=0.000154
+Epoch 180/200: Train Loss=0.0807, Acc=0.9677, Test Loss=0.7555, Acc=0.7979, LR=0.000067
+Epoch 190/200: Train Loss=0.0608, Acc=0.9764, Test Loss=0.7426, Acc=0.7979, LR=0.000015
+Epoch 199/200: Train Loss=0.0656, Acc=0.9755, Test Loss=0.7460, Acc=0.8049, LR=0.000000
+
+Best test accuracy: 0.8258 at epoch 135

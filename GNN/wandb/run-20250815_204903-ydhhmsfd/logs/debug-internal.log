@@ -1,0 +1,16 @@
+{"time":"2025-08-15T20:49:03.915246502+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_204903-ydhhmsfd/logs/debug-core.log"}
+{"time":"2025-08-15T20:49:04.235902359+02:00","level":"INFO","msg":"stream: created new stream","id":"ydhhmsfd"}
+{"time":"2025-08-15T20:49:04.235932381+02:00","level":"INFO","msg":"stream: started","id":"ydhhmsfd"}
+{"time":"2025-08-15T20:49:04.235942562+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"ydhhmsfd"}
+{"time":"2025-08-15T20:49:04.235973545+02:00","level":"INFO","msg":"handler: started","stream_id":"ydhhmsfd"}
+{"time":"2025-08-15T20:49:04.236030086+02:00","level":"INFO","msg":"sender: started","stream_id":"ydhhmsfd"}
+{"time":"2025-08-15T20:49:04.437892442+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-15T20:49:28.893504072+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-15T20:49:28.893555775+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-15T20:49:29.896259593+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading output.log","runtime_seconds":0.692995417,"progress":"2.3KB/2.3KB"},{"desc":"uploading config.yaml","runtime_seconds":0.491076816,"progress":"631B/631B"}],"total_operations":2}}
+{"time":"2025-08-15T20:49:29.918129013+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-15T20:49:30.228453425+02:00","level":"INFO","msg":"stream: closing","id":"ydhhmsfd"}
+{"time":"2025-08-15T20:49:30.228462664+02:00","level":"INFO","msg":"handler: closed","stream_id":"ydhhmsfd"}
+{"time":"2025-08-15T20:49:30.228468333+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"ydhhmsfd"}
+{"time":"2025-08-15T20:49:30.228502131+02:00","level":"INFO","msg":"sender: closed","stream_id":"ydhhmsfd"}
+{"time":"2025-08-15T20:49:30.228539324+02:00","level":"INFO","msg":"stream: closed","id":"ydhhmsfd"}

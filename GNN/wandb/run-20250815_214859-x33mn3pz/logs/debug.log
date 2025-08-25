@@ -1,0 +1,13 @@
+2025-08-15 21:48:59,522 INFO    MainThread:75757 [wandb_init.py:setup_run_log_directory():703] Logging user logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_214859-x33mn3pz/logs/debug.log
+2025-08-15 21:48:59,522 INFO    MainThread:75757 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_214859-x33mn3pz/logs/debug-internal.log
+2025-08-15 21:48:59,522 INFO    MainThread:75757 [wandb_init.py:init():831] calling init triggers
+2025-08-15 21:48:59,522 INFO    MainThread:75757 [wandb_init.py:init():836] wandb.init called with sweep_config: {'config': 'configs/config.yaml', 'dropout': 0.3219837693374508, 'learning_rate': 0.002780708773793073, 'num_layers': 8, 'weight_decay': 0.0006851511489405562}
+config: {'model_name': 'gin', 'hidden_channels': 64, 'num_layers': 8, 'dropout': 0.3219837693374508, 'lr': 0.002780708773793073, 'weight_decay': 1e-05, 'epochs': 100, 'batch_size': 32, 'scheduler_type': 'onecycle', 'use_wandb': True, 'project': '7_loop_eigen', 'experiment_name': 'gin_train_loop_7_,test_loop_7_train_eigen_1_eigen_2_eigen_3', 'in_channels': 3, '_wandb': {}}
+2025-08-15 21:49:12,576 INFO    MainThread:75757 [wandb_run.py:_finish():2219] finishing run aliajrigers-desydeutsches-elektronen-synchrotron/7_loop_eigen/x33mn3pz
+2025-08-15 21:49:12,577 INFO    MainThread:75757 [wandb_run.py:_atexit_cleanup():2418] got exitcode: 0
+2025-08-15 21:49:12,577 INFO    MainThread:75757 [wandb_run.py:_restore():2400] restore
+2025-08-15 21:49:12,577 INFO    MainThread:75757 [wandb_run.py:_restore():2406] restore done
+2025-08-15 21:49:13,588 INFO    MainThread:75757 [wandb_run.py:_footer_history_summary_info():4000] rendering history
+2025-08-15 21:49:13,588 INFO    MainThread:75757 [wandb_run.py:_footer_history_summary_info():4032] rendering summary
+2025-08-15 21:49:13,588 INFO    MainThread:75757 [wandb_run.py:_footer_sync_info():3961] logging synced files
+2025-08-15 21:49:14,590 INFO    MsgRouterThr:75757 [mailbox.py:close():129] [no run ID] Closing mailbox, abandoning 1 handles.

@@ -1,0 +1,15 @@
+{"time":"2025-08-25T14:49:43.146206505+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250825_144942-odnoeani/logs/debug-core.log"}
+{"time":"2025-08-25T14:49:43.449478102+02:00","level":"INFO","msg":"stream: created new stream","id":"odnoeani"}
+{"time":"2025-08-25T14:49:43.449520993+02:00","level":"INFO","msg":"stream: started","id":"odnoeani"}
+{"time":"2025-08-25T14:49:43.449532572+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"odnoeani"}
+{"time":"2025-08-25T14:49:43.449587884+02:00","level":"INFO","msg":"sender: started","stream_id":"odnoeani"}
+{"time":"2025-08-25T14:49:43.449662446+02:00","level":"INFO","msg":"handler: started","stream_id":"odnoeani"}
+{"time":"2025-08-25T14:49:43.757650033+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-25T14:49:45.100719437+02:00","level":"INFO","msg":"stream: closing","id":"odnoeani"}
+{"time":"2025-08-25T14:49:45.10075357+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-25T14:49:45.100847109+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-25T14:49:45.802432647+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-25T14:49:46.00690403+02:00","level":"INFO","msg":"handler: closed","stream_id":"odnoeani"}
+{"time":"2025-08-25T14:49:46.006943343+02:00","level":"INFO","msg":"sender: closed","stream_id":"odnoeani"}
+{"time":"2025-08-25T14:49:46.006932109+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"odnoeani"}
+{"time":"2025-08-25T14:49:46.006985448+02:00","level":"INFO","msg":"stream: closed","id":"odnoeani"}

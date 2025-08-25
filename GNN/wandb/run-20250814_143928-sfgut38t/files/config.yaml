@@ -1,0 +1,30 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    python_version: 3.12.3
+    cli_version: 0.20.1
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1755175168
+    t:
+      1:
+      - 1
+      - 5
+      - 53
+      - 77
+      3:
+      - 14
+      - 42
+      - 55
+      4: 3.12.3
+      5: 0.20.1
+      13: linux-x86_64
+config:
+  desc: null
+  value: configs/config.yaml
+learning_rate:
+  desc: null
+  value: 0.0009251807183279122

@@ -1,0 +1,16 @@
+{"time":"2025-08-16T07:32:19.234048964+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_073219-2v8rpitc/logs/debug-core.log"}
+{"time":"2025-08-16T07:32:19.528463385+02:00","level":"INFO","msg":"stream: created new stream","id":"2v8rpitc"}
+{"time":"2025-08-16T07:32:19.528495564+02:00","level":"INFO","msg":"stream: started","id":"2v8rpitc"}
+{"time":"2025-08-16T07:32:19.528538363+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"2v8rpitc"}
+{"time":"2025-08-16T07:32:19.528553242+02:00","level":"INFO","msg":"sender: started","stream_id":"2v8rpitc"}
+{"time":"2025-08-16T07:32:19.528590093+02:00","level":"INFO","msg":"handler: started","stream_id":"2v8rpitc"}
+{"time":"2025-08-16T07:32:19.724664649+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-16T07:36:45.645462259+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-16T07:36:45.645512235+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-16T07:36:46.646721196+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading output.log","runtime_seconds":0.768435016,"progress":"3.5KB/3.5KB"},{"desc":"uploading config.yaml","runtime_seconds":0.588824819,"progress":"746B/746B"}],"total_operations":2}}
+{"time":"2025-08-16T07:36:46.792836299+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-16T07:36:47.001752825+02:00","level":"INFO","msg":"stream: closing","id":"2v8rpitc"}
+{"time":"2025-08-16T07:36:47.001767609+02:00","level":"INFO","msg":"handler: closed","stream_id":"2v8rpitc"}
+{"time":"2025-08-16T07:36:47.001779445+02:00","level":"INFO","msg":"sender: closed","stream_id":"2v8rpitc"}
+{"time":"2025-08-16T07:36:47.001776005+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"2v8rpitc"}
+{"time":"2025-08-16T07:36:47.001848416+02:00","level":"INFO","msg":"stream: closed","id":"2v8rpitc"}

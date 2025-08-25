@@ -1,0 +1,10 @@
+wandb_version: 1
+
+config:
+  value: configs/config.yaml
+dropout:
+  value: 0.2328044746974848
+learning_rate:
+  value: 0.010012297646465836
+weight_decay:
+  value: 0.017772593617944688

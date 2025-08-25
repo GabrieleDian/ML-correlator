@@ -1,0 +1,16 @@
+{"time":"2025-08-15T13:09:36.265444867+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250815_130936-x3ds4ooc/logs/debug-core.log"}
+{"time":"2025-08-15T13:09:36.658978009+02:00","level":"INFO","msg":"stream: created new stream","id":"x3ds4ooc"}
+{"time":"2025-08-15T13:09:36.659006475+02:00","level":"INFO","msg":"stream: started","id":"x3ds4ooc"}
+{"time":"2025-08-15T13:09:36.659042796+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"x3ds4ooc"}
+{"time":"2025-08-15T13:09:36.659046986+02:00","level":"INFO","msg":"handler: started","stream_id":"x3ds4ooc"}
+{"time":"2025-08-15T13:09:36.659052168+02:00","level":"INFO","msg":"sender: started","stream_id":"x3ds4ooc"}
+{"time":"2025-08-15T13:09:36.955550117+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-15T13:15:55.371837398+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-15T13:15:55.371889828+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-15T13:15:56.372970146+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading output.log","runtime_seconds":0.638085976,"progress":"2.8KB/2.8KB"},{"desc":"uploading wandb-summary.json","runtime_seconds":0.638073161,"progress":"475B/475B"},{"desc":"uploading config.yaml","runtime_seconds":0.206313808,"progress":"761B/761B"}],"total_operations":3}}
+{"time":"2025-08-15T13:15:56.588961378+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-15T13:15:57.053345345+02:00","level":"INFO","msg":"stream: closing","id":"x3ds4ooc"}
+{"time":"2025-08-15T13:15:57.053365151+02:00","level":"INFO","msg":"handler: closed","stream_id":"x3ds4ooc"}
+{"time":"2025-08-15T13:15:57.053380854+02:00","level":"INFO","msg":"sender: closed","stream_id":"x3ds4ooc"}
+{"time":"2025-08-15T13:15:57.05337565+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"x3ds4ooc"}
+{"time":"2025-08-15T13:15:57.053459417+02:00","level":"INFO","msg":"stream: closed","id":"x3ds4ooc"}
