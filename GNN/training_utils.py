@@ -1,8 +1,9 @@
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 import wandb
-from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
+from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix, roc_auc_score
 from GNN_architectures import create_gnn_model
 import numpy as np
 
@@ -17,22 +18,24 @@ def compute_metrics(y_true, y_pred):
         'precision': precision_score(y_true, y_pred, pos_label=1, zero_division=0),
         'recall': recall_score(y_true, y_pred, pos_label=1,zero_division=0),
         'f1': f1_score(y_true, y_pred, pos_label=1, zero_division=0),
-        'confusion_matrix': cm
+        'confusion_matrix': cm  
     }
 
-def train_epoch(model, train_loader, optimizer, device, scheduler=None, scheduler_type=None):
+def train_epoch(model, train_loader, optimizer, device, scheduler=None, pos_weight= None, scheduler_type=None):
     model.train()
     total_loss = 0
     correct = 0
     total = 0
+    all_probs = []
     all_preds = []
     all_labels = []
-
+    loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     for batch in train_loader:
         batch = batch.to(device)
         optimizer.zero_grad()
         out = model(batch.x, batch.edge_index, batch.batch)
-        loss = F.cross_entropy(out, batch.y)
+        loss = loss_fn(out.view(-1), batch.y.float())
+
         
         # Gradient clipping to prevent exploding gradients
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
@@ -40,11 +43,13 @@ def train_epoch(model, train_loader, optimizer, device, scheduler=None, schedule
         loss.backward()
         optimizer.step()
 
-        pred = out.argmax(dim=1)
+        probs = torch.sigmoid(out.view(-1))
+        pred = (probs > 0.5).long()
+        all_probs.append(probs.detach().cpu())
         all_preds.append(pred)
-        all_labels.append(batch.y)
+        all_labels.append(batch.y.float())
 
-        correct += pred.eq(batch.y).sum().item()
+        correct += pred.eq(batch.y.float()).sum().item()
         total += batch.y.size(0)
         total_loss += loss.item() * batch.y.size(0)  # Weight by batch size
 
@@ -58,11 +63,14 @@ def train_epoch(model, train_loader, optimizer, device, scheduler=None, schedule
     # Concatenate all predictions and labels
     all_preds = torch.cat(all_preds)
     all_labels = torch.cat(all_labels)
+    all_probs = torch.cat(all_probs)
     metrics = compute_metrics(all_labels, all_preds)
+    metrics['roc_auc'] = roc_auc_score(all_labels.numpy(), all_probs.numpy())
+
 
     return avg_loss, accuracy, metrics
 
-def evaluate(model, test_loader, device):
+def evaluate(model, test_loader, device,pos_weight=None):
     """Evaluate model on test set"""
     model.eval()
     total_loss = 0
@@ -70,27 +78,32 @@ def evaluate(model, test_loader, device):
     total = 0
     all_preds = []
     all_labels = []
-    
+    all_probs = []
+    loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     with torch.no_grad():
         for batch in test_loader:
             batch = batch.to(device)
             out = model(batch.x, batch.edge_index, batch.batch)
-            loss = F.cross_entropy(out, batch.y)
+            loss = loss_fn(out.view(-1), batch.y.float())
             
-            pred = out.argmax(dim=1)
+            probs = torch.sigmoid(out.view(-1))
+            pred = (probs > 0.5).long()
+            all_probs.append(probs.detach().cpu())
             all_preds.append(pred)
             all_labels.append(batch.y)
             
-            correct += pred.eq(batch.y).sum().item()
+            correct += pred.eq(batch.y.float()).sum().item()
             total += batch.y.size(0)
             total_loss += loss.item() * batch.y.size(0)
     
     avg_loss = total_loss / total
     accuracy = correct / total
     
+    all_probs = torch.cat(all_probs)
     all_preds = torch.cat(all_preds)
     all_labels = torch.cat(all_labels)
     metrics = compute_metrics(all_labels, all_preds)
+    metrics['roc_auc'] = roc_auc_score(all_labels.numpy(), all_probs.numpy())
     
     return avg_loss, accuracy, metrics
 
@@ -113,7 +126,7 @@ def train(config, train_dataset, test_dataset):
         config.model_name,
         num_features=config.in_channels,
         hidden_dim=config.hidden_channels,
-        num_classes=2,
+        num_classes=1,  # Binary classification
         dropout=config.dropout,
         num_layers=getattr(config, 'num_layers', 3)
     ).to(device)
@@ -164,13 +177,14 @@ def train(config, train_dataset, test_dataset):
         # Step plateau scheduler after epoch
         if scheduler_type == 'plateau' and scheduler is not None:
             scheduler.step(test_loss)
-        
+
         # Track best model
         if test_acc > best_test_acc:
             best_test_acc = test_acc
             best_epoch = epoch
             best_model_state = model.state_dict().copy()
         
+    
         # Get current learning rate
         current_lr = optimizer.param_groups[0]['lr']
 
@@ -181,21 +195,20 @@ def train(config, train_dataset, test_dataset):
                 'train_accuracy': train_acc,
                 'train_precision': train_metrics['precision'],
                 'train_recall': train_metrics['recall'],
-                'train_f1': train_metrics['f1'],
+                'train_roc_auc': train_metrics['roc_auc'],
                 'test_loss': test_loss,
                 'test_accuracy': test_acc,
                 'test_precision': test_metrics['precision'],
                 'test_recall': test_metrics['recall'],
-                'test_f1': test_metrics['f1'],
-                'current_lr': current_lr
+                'test_roc_auc': test_metrics['roc_auc'],
+
             })
 
         if epoch % 10 == 0 or epoch == config.epochs - 1:
             print(f"Epoch {epoch:3d}/{config.epochs}: "
                   f"Train Loss={train_loss:.4f}, Acc={train_acc:.4f}, "
                   f"Test Loss={test_loss:.4f}, Acc={test_acc:.4f}, "
-                  f"LR={current_lr:.6f}")
-            
+                  f"LR={current_lr:.6f}")            
             # Print confusion matrix for debugging
             #print(f"Train Confusion Matrix:\n{train_metrics['confusion_matrix']}")
             #print(f"Test Confusion Matrix:\n{test_metrics['confusion_matrix']}")
