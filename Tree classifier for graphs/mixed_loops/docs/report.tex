@@ -1,0 +1,351 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{authblk}
+\usepackage{float}
+\usepackage{enumitem}
+
+\title{Predicting Vanishing Coefficients of Denominator Graphs: From $l$-loops to $(l+1)$-loops OR Zero and few shot learning}
+\author{}
+\date{}
+
+\begin{document}
+	
+	\maketitle
+	\tableofcontents
+	\section{Introduction}
+	
+	We consider the denominator graphs. It is understood that if the denominator has zero coefficient then any full graph that uses it will also have a coefficient of zero. The denominator graph is likely to represent the easiest task we can solve.
+	
+	In this short document we will investigate predicting higher-loop coefficients from lower-loop coefficients. This goes towards the overall ambition of predicting coefficients of currently unseen or unknown loops.
+	
+
+\section{Tabular Features}
+
+The notebook produces a diverse set of graph-based features, each reflecting a specific structural property of the graph. Below we describe each feature group and its potential usefulness.
+
+\subsection*{Core-related Features}
+\begin{itemize}
+    \item \texttt{Core\_core\_index\_mean} --- The average \emph{core index} across all nodes. A node’s core index measures its position in the $k$-core decomposition, indicating how deeply embedded it is in the network. Useful for quantifying overall network cohesion.
+    \item \texttt{Core\_max\_core\_index} --- The maximum core index found in the graph. High values suggest a highly interconnected core, indicating robustness or a central structure.
+\end{itemize}
+
+\subsection*{Cycle-based Features}
+\begin{itemize}
+    \item \texttt{Cycle\_num\_cycles\_len\_5}, \texttt{Cycle\_num\_cycles\_len\_6} --- Counts of cycles of length 5 and 6. Cycle counts can reveal repeating motifs in networks, important in chemistry (ring structures in molecules) or in network motif analysis.
+\end{itemize}
+
+\subsection*{Basic Connectivity Metrics}
+\begin{itemize}
+    \item \texttt{EDGES}, \texttt{NUM\_EDGES} --- Number of edges in the graph. A fundamental density measure.
+    \item \texttt{DEN\_EDGES} --- Likely edge density (ratio of actual edges to possible edges). High density means more connections between nodes.
+\end{itemize}
+
+\subsection*{Spectral Graph Theory Features}
+\begin{itemize}
+    \item \texttt{Spectral\_algebraic\_connectivity} --- The second-smallest eigenvalue of the Laplacian; higher values mean the graph is harder to disconnect, useful for robustness analysis.
+    \item \texttt{Spectral\_laplacian\_mean}, \texttt{Spectral\_laplacian\_std}, \texttt{Spectral\_laplacian\_skew} --- Statistical moments of the Laplacian spectrum, capturing the shape of the spectrum which reflects graph connectivity patterns.
+    \item \texttt{Spectral\_spectral\_gap} --- The difference between the first two eigenvalues of the adjacency or Laplacian matrix; often relates to community structure detectability.
+\end{itemize}
+
+\subsection*{Planarity-based Features}
+\begin{itemize}
+    \item \texttt{Planarity\_num\_faces} --- Number of faces in a planar embedding (if planar). More faces can suggest more complex local structures.
+    \item \texttt{Planarity\_face\_size\_max}, \texttt{Planarity\_face\_size\_mean} --- Maximum and average number of edges per face; reflects how ``spread out'' cycles are in a planar representation.
+\end{itemize}
+
+\subsection*{Symmetry Features}
+\begin{itemize}
+    \item \texttt{Symmetry\_automorphism\_group\_order} --- Size of the automorphism group (number of graph symmetries). Higher values indicate more structural regularity.
+    \item \texttt{Symmetry\_num\_orbits} --- Number of distinct node equivalence classes under symmetries. Fewer orbits mean more symmetry.
+    \item \texttt{Symmetry\_orbit\_size\_max} --- Largest equivalence class of nodes under symmetries; can highlight repeated patterns.
+\end{itemize}
+
+\subsection*{Robustness Features}
+\begin{itemize}
+    \item \texttt{Robust\_articulation\_points} --- Number of articulation points (nodes whose removal increases the number of connected components). Fewer points means more robust connectivity.
+    \item \texttt{Robust\_bridge\_count} --- Number of bridges (edges whose removal disconnects the graph). Fewer bridges imply greater robustness.
+\end{itemize}
+
+\subsection*{Global Network Descriptors}
+\begin{itemize}
+    \item \texttt{Kirchhoff\_index} --- A resistance-based distance measure, summing effective resistances over all pairs of nodes. Useful for characterising transport efficiency or redundancy.
+\end{itemize}
+
+
+	
+	\section{Methodology}
+	In this work, our objective is to predict the properties of \emph{unseen loops} by leveraging the currently known lower-loop coefficients. We frame this task as a supervised learning problem using the \texttt{XGBoost} algorithm, which is widely recognized as one of the most competitive approaches for tabular data, often outperforming or matching the performance of deep neural networks in such settings. Importantly, this setup naturally corresponds to a \emph{zero-shot learning} scenario: at inference time, the model is required to make predictions for $(l+1)$-loop quantities without having observed any corresponding training data for that loop order. While the primary focus is on the zero-shot setting, we will also explore the impact of incorporating a small amount of $(l+1)$-loop data into training to assess potential performance gains.
+	
+	This setup corresponds to a zero-shot learning scenario in the strict case where no $(l+1)$-loop data are included during training (with the model generalizing solely from patterns learned at lower loops), whereas the inclusion of even a small fraction of $(l+1)$-loop examples would instead place it in a few-shot learning regime.
+
+
+We will use cross validation in all our experiments with target stratification - with the average cross validated score over folds being our main result. We will use ROC-AUC to measure performance. In general - the interpretation of the ROC-AUC score is if I randomly choose a graph with coefficient non-zero and a graph with coefficient zero, what is the probability that the model output score of first graph is larger than the second.
+
+Finally, our analysis covers loops 7,8,9 and 10 - mostly because other edge data was not available.
+
+\section{Results and conclusions}
+
+\subsection{Intra-loop and mixed loops}
+
+
+
+
+\begin{table}[h]
+\centering
+\begin{tabular}{c|c|ccccc|cc}
+\hline
+Pair & Loop & Fold 1 & Fold 2 & Fold 3 & Fold 4 & Fold 5 & Avg ROC AUC & Std Dev \\
+\hline
+\multicolumn{9}{c}{\textbf{Single Loops}} \\
+\hline
+-- & 7  & 0.789 & 0.847 & 0.817 & 0.845 & 0.662 & 0.792 & 0.068 \\
+-- & 8  & 0.859 & 0.865 & 0.882 & 0.879 & 0.869 & 0.871 & 0.009 \\
+-- & 9  & 0.904 & 0.893 & 0.900 & 0.904 & 0.904 & 0.901 & 0.004 \\
+-- & 10 & 0.914 & 0.916 & 0.914 & 0.916 & 0.918 & 0.916 & 0.001 \\
+-- & 11 & 0.919 & 0.920 & 0.920 & 0.918 & 0.919 & 0.919 & 0.000 \\
+\hline
+\multicolumn{9}{c}{\textbf{Mixed Loops}} \\
+\hline
+7 \& 8  & 7  & 0.884 & 0.888 & 0.810 & 0.873 & 0.814 & 0.854 & 0.035 \\
+        & 8  & 0.847 & 0.884 & 0.864 & 0.874 & 0.839 & 0.862 & 0.017 \\
+8 \& 9  & 8  & 0.868 & 0.887 & 0.883 & 0.882 & 0.876 & 0.879 & 0.007 \\
+        & 9  & 0.899 & 0.894 & 0.906 & 0.898 & 0.909 & 0.901 & 0.006 \\
+9 \& 10 & 9  & 0.902 & 0.895 & 0.896 & 0.912 & 0.905 & 0.902 & 0.006 \\
+        & 10 & 0.916 & 0.914 & 0.913 & 0.914 & 0.916 & 0.914 & 0.001 \\
+10 \& 11 & 10  & 0.906 & 0.905 & 0.905 & 0.907 & 0.909 & 0.906 & 0.002 \\
+        & 11 & 0.919 & 0.919 & 0.918 & 0.918 & 0.918 & 0.919 & 0.000 \\
+8 \& 10 & 8  & 0.850 & 0.856 & 0.864 & 0.872 & 0.845 & 0.858 & 0.010 \\
+        & 10 & 0.917 & 0.915 & 0.914 & 0.917 & 0.914 & 0.915 & 0.001 \\
+7 \& 9  & 7  & 0.744 & 0.847 & 0.782 & 0.877 & 0.714 & 0.793 & 0.061 \\
+        & 9  & 0.910 & 0.888 & 0.905 & 0.896 & 0.902 & 0.900 & 0.008 \\
+7 \& 10 & 7  & 0.756 & 0.736 & 0.774 & 0.810 & 0.662 & 0.747 & 0.049 \\
+        & 10 & 0.918 & 0.917 & 0.915 & 0.916 & 0.915 & 0.916 & 0.001 \\
+\hline
+\end{tabular}
+\caption{ROC AUC scores for single loops and mixed loop combinations across 5 folds, with mean and standard deviation.}
+\label{tab:roc_auc_all}
+\end{table}
+
+A few notables:
+
+\begin{itemize}
+
+\item Mixing $l+1$ with $l$ always improves performance on $l$ 
+\item Mixing $l+1$ with $l$ seems to degrade performance on $l+1$
+\end{itemize}
+$$\forall f^{\nu^{(n-1)}}_{j,\alpha} :
+\sum_{f^{\rho^{(n)}}_{i,\mu}}
+\frac{\left| f^{\nu^{(n-1)}}_{j,\alpha} \right|}
+     {\left| f^{\rho^{(n)}}_{i,\mu} \right|}
+\, c^{(n)}_{i}
+= c^{(n-1)}_{j} ;
+\quad \text{in particular,} \quad
+c^{(n-1)}_{0} \equiv 0 
+$$
+
+Cusp rule tells us that pinching on an $l$ loop coefficient is equivalent to the weighted sum of $l+1$ loop coefficients. This would mean that there is information in $l+1$ loops that $l$ loops can use and we indeed observe this in the results. (Note - we should do experiments or study ways to deconstruct this from simply having more data - not sure how much an issue this is).
+
+
+\subsection{Directionality: Zero-shot learning}
+
+In this section - we are modelling upwards - what we can call directionality. We train a model on lower loops in order to predict on higher loops. If we want to make use of a model to predict loops currently unseen we would want to do this.
+
+This is an example of zero-shot learning. We will not show the model any information about higher loops - instead we want it to learn enough structure in lower loops and make good inferences of high loops based on information available.
+
+As an exercise we will show the precision recall curves - recall that high precision means fewer false positives whilst higher recall means fewer false negatives.
+
+
+\subsubsection{$[7]\rightarrow [8,9,10]$}
+\begin{table}[H]
+\centering
+\begin{tabular}{l|c}
+\hline
+Dataset & ROC AUC \\
+\hline
+Train [7]  & 1.000 \\
+Test [8]   & 0.760 \\
+Test [9]   & 0.754 \\
+Test [10]  & 0.699 \\
+\hline
+\end{tabular}
+\caption{Directionality summary: trained on loop 7, evaluated on loops 8–10.}
+\label{tab:directionality_summary_7}
+\end{table}
+
+
+\begin{figure}[H] % h = here
+\centering
+\includegraphics[width=1.0\textwidth]{assets/7_8910.png}
+\caption{Threshold plots}
+\label{fig:my_image}
+\end{figure}
+
+Clearly - these are expectantly poor results.
+
+\begin{itemize}
+\item Recall drops off quickly indicating large amount false negatives comes in when we increase the threshold - i.e. bringing up the threshold makes the model think there are zero coefficients when there aren't (we expect this - but its happening quickly).
+\item Precision never reaches 1. If we push the threshold to near 1, a well calibrated model will reveal the high confidence coefficients - we do not get that here.
+\end{itemize}
+
+\subsubsection{$[7,8]\rightarrow [9,10]$}
+\begin{table}[H]
+\centering
+\begin{tabular}{l|c}
+\hline
+Dataset & ROC AUC \\
+\hline
+Train [7, 8]  & 1.000 \\
+Test [9]      & 0.790 \\
+Test [10]     & 0.799 \\
+\hline
+\end{tabular}
+\caption{Directionality summary: trained on loops 7 and 8, evaluated on loops 9 and 10.}
+\label{tab:directionality_summary_78}
+\end{table}
+
+\begin{figure}[h] % h = here
+\centering
+\includegraphics[width=1.0\textwidth]{assets/78_910.png}
+\caption{Threshold plots}
+\label{fig:my_image}
+\end{figure}
+
+
+\begin{itemize}
+\item Recall drops off much slower than before - bringing the threshold up does not quickly drop coefficients - it is likely that the model is not well calibrated.
+\item Precision never reaches 1. If we push the threshold to near 1, a well calibrated model will reveal the high confidence coefficients - we do not get that here.
+\end{itemize}
+
+
+\subsubsection{$[7,8,9 ]\rightarrow [10]$}
+\begin{table}[H]
+\centering
+\begin{tabular}{l|c}
+\hline
+Dataset & ROC AUC \\
+\hline
+Train [7, 8, 9] & 0.997 \\
+Test [10]       & 0.817 \\
+\hline
+\end{tabular}
+\caption{Directionality summary: trained on loops 7, 8, and 9, evaluated on loop 10.}
+\label{tab:directionality_summary_789}
+\end{table}
+
+\begin{figure}[h] % h = here
+\centering
+\includegraphics[width=1.0\textwidth]{assets/789_10.png}
+\caption{Threshold plots}
+\label{fig:my_image}
+\end{figure}
+
+This is the case that is of interest to us in this current study.
+
+Really importantly - the training AUC-ROC does not reach 1. This indicates conflicting datapoints in loop 9 and data in loops 7 and 8. We need to enhance the feature space further to remove this conflict.
+
+\begin{itemize}
+\item Recall drops off quite linearly indicating the best calibrated we have had so far.
+\item Again precision never reaches 1. If we push the threshold to near 1, a well calibrated model will reveal the high confidence coefficients - we do not get that here.
+\end{itemize}
+
+\subsubsection{$[7,8,9,10 ]\rightarrow [11]$}
+\begin{table}[H]
+\centering
+\begin{tabular}{l|c}
+\hline
+Dataset & ROC AUC \\
+\hline
+Train [7, 8, 9,10] & 0.943 \\
+Test [11]       & 0.857 \\
+\hline
+\end{tabular}
+\caption{Directionality summary: trained on loops 7, 8, 9, adn 10 evaluated on loop 11.}
+\label{tab:directionality_summary_78910}
+\end{table}
+\subsection{Directionality + pieces of loop 10 needed to get intra-loop 10 level performance: Few-shot learning}
+
+In this section we look a the $[7,8,9]  \rightarrow [10]$ problem again but we now cluster the 10 loop graphs and work out which clusters have the mosts value.
+
+This is something akin for Few-shot learning (although we are taking quite a few more 10 loop examples into a training set than we might normally).
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c|rrr|c}
+\hline
+Cluster & Rows $\rightarrow$ Train & Remaining Test Rows & AUC \\
+\hline
+0  & 21310 & 147510 & 0.889 \\
+1  &  4927 & 163893 & 0.831 \\
+2  & 12960 & 155860 & 0.864 \\
+3  &  2294 & 166526 & 0.850 \\
+4  &  1424 & 167396 & 0.852 \\
+5  & 15156 & 153664 & \textbf{0.890} \\
+6  &  2467 & 166353 & 0.849 \\
+7  & 16574 & 152246 & 0.878 \\
+8  & 21277 & 147543 & \textbf{0.890} \\
+9  &   143 & 168677 & 0.834 \\
+10 &  6077 & 162743 & 0.838 \\
+11 &   654 & 168166 & 0.828 \\
+12 &  2600 & 166220 & 0.871 \\
+13 &  6539 & 162281 & 0.830 \\
+14 &  2476 & 166344 & 0.867 \\
+15 &  8740 & 160080 & 0.851 \\
+16 & 16018 & 152802 & 0.872 \\
+17 & 12670 & 156150 & 0.862 \\
+18 &   164 & 168656 & 0.835 \\
+19 & 14350 & 154470 & 0.867 \\
+\hline
+\end{tabular}
+\caption{Per-cluster AUC results when promoting one cluster from loop 10 into training. Highest values in bold.}
+\label{tab:promote_one_cluster}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l|l|c}
+\hline
+Promotion Step & Clusters Promoted & Overall AUC \\
+\hline
+Best 1st Cluster & [5] & 0.890 \\
+After 2 Clusters & [5, 8] & 0.908 \\
+After 3 Clusters & [5, 8, 19] & 0.917 \\
+\hline
+\end{tabular}
+\caption{Progressive improvement in AUC as additional clusters are promoted into the training set.}
+\label{tab:multi_cluster_promotion}
+\end{table}
+
+The additional clusters bring in 50783 more datapoints which are 10-loop specific. Training with the same amount of 10-loop data on a 10-loop problem alone gives a ROC AUC of about 0.907. Ultimately - its not so clear if this is a useful thing to do until we do further comparisons.
+\section{Uncertainty Quantification}
+TODO
+
+\section{Next steps}
+Questions to ask ourselves in this work
+
+
+
+% Optional global tweaks
+\setlist{nosep}                       % tighter lists
+\setlist[itemize]{leftmargin=*}       % full-width bullets
+\setlist[enumerate,1]{label=\arabic*.}
+\setlist[enumerate,2]{label=\alph*)}  % sublevel like a), b), ...
+
+\begin{enumerate}
+\item Try this on higher loops again
+ \item Move to full graph
+  \item Data Augmentation
+    \begin{enumerate}
+      \item In vanilla modelling - we expect there to be a rich generating function - not particularly obvious how invariance we have that is not already encoded in features
+      \item Fix the 9-loop problem.
+    \end{enumerate}
+  \item Confidence scores and how in particular to use for 13-loops
+   \item Are we finding coefficients for graphs that cannot be found through rules like cusp rules?
+\end{enumerate}
+
+On the GNN approach - we should get graph representations that are far richer.
+
+	
+\end{document}
+	
