@@ -1,0 +1,16 @@
+{"time":"2025-08-25T15:47:11.497253815+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250825_154711-qplip5na/logs/debug-core.log"}
+{"time":"2025-08-25T15:47:11.803209197+02:00","level":"INFO","msg":"stream: created new stream","id":"qplip5na"}
+{"time":"2025-08-25T15:47:11.803237827+02:00","level":"INFO","msg":"stream: started","id":"qplip5na"}
+{"time":"2025-08-25T15:47:11.803249271+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"qplip5na"}
+{"time":"2025-08-25T15:47:11.803263209+02:00","level":"INFO","msg":"handler: started","stream_id":"qplip5na"}
+{"time":"2025-08-25T15:47:11.803285903+02:00","level":"INFO","msg":"sender: started","stream_id":"qplip5na"}
+{"time":"2025-08-25T15:47:12.173703655+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-08-25T15:51:43.771819334+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-08-25T15:51:43.771887166+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-08-25T15:51:44.73403304+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading config.yaml","runtime_seconds":0.431044174,"progress":"993B/993B"}],"total_operations":1}}
+{"time":"2025-08-25T15:51:44.798816542+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-08-25T15:51:45.109153473+02:00","level":"INFO","msg":"stream: closing","id":"qplip5na"}
+{"time":"2025-08-25T15:51:45.109163391+02:00","level":"INFO","msg":"handler: closed","stream_id":"qplip5na"}
+{"time":"2025-08-25T15:51:45.109169545+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"qplip5na"}
+{"time":"2025-08-25T15:51:45.109177236+02:00","level":"INFO","msg":"sender: closed","stream_id":"qplip5na"}
+{"time":"2025-08-25T15:51:45.109208735+02:00","level":"INFO","msg":"stream: closed","id":"qplip5na"}
