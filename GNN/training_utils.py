@@ -21,7 +21,7 @@ def compute_metrics(y_true, y_pred):
         'confusion_matrix': cm  
     }
 
-def train_epoch(model, train_loader, optimizer, device, scheduler=None, pos_weight= None, scheduler_type=None):
+def train_epoch(model, train_loader, optimizer, device, scheduler=None, pos_weight= None, scheduler_type=None, threshold=0.5):
     model.train()
     total_loss = 0
     correct = 0
@@ -44,7 +44,7 @@ def train_epoch(model, train_loader, optimizer, device, scheduler=None, pos_weig
         optimizer.step()
 
         probs = torch.sigmoid(out.view(-1))
-        pred = (probs > 0.5).long()
+        pred = (probs > threshold).long()
         all_probs.append(probs.detach().cpu())
         all_preds.append(pred)
         all_labels.append(batch.y.float())
@@ -70,7 +70,7 @@ def train_epoch(model, train_loader, optimizer, device, scheduler=None, pos_weig
 
     return avg_loss, accuracy, metrics
 
-def evaluate(model, test_loader, device,pos_weight=None):
+def evaluate(model, test_loader, device,pos_weight=None, threshold=0.5):
     """Evaluate model on test set"""
     model.eval()
     total_loss = 0
@@ -87,7 +87,7 @@ def evaluate(model, test_loader, device,pos_weight=None):
             loss = loss_fn(out.view(-1), batch.y.float())
             
             probs = torch.sigmoid(out.view(-1))
-            pred = (probs > 0.5).long()
+            pred = (probs > threshold).long()
             all_probs.append(probs.detach().cpu())
             all_preds.append(pred)
             all_labels.append(batch.y)
@@ -168,11 +168,12 @@ def train(config, train_dataset, test_dataset):
         train_loss, train_acc, train_metrics = train_epoch(
             model, train_loader, optimizer, device,
             scheduler=scheduler,
-            scheduler_type=scheduler_type
+            scheduler_type=scheduler_type,
+            threshold = config.threshold
         )
         
         # Test
-        test_loss, test_acc, test_metrics = evaluate(model, test_loader, device)
+        test_loss, test_acc, test_metrics = evaluate(model, test_loader, device, threshold=config.threshold)
         
         # Step plateau scheduler after epoch
         if scheduler_type == 'plateau' and scheduler is not None:

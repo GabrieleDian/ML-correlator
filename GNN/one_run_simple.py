@@ -37,6 +37,7 @@ def config_to_namespace(config_dict):
         epochs=config_dict.get('training', {}).get('epochs', 100),
         batch_size=config_dict.get('training', {}).get('batch_size', 32),
         scheduler_type=config_dict.get('training', {}).get('scheduler_type', 'onecycle'),
+        threshold=config_dict.get('training', {}).get('threshold', 0.5),
         
         # WandB configuration
         use_wandb=config_dict.get('experiment', {}).get('use_wandb', True),
@@ -82,6 +83,8 @@ def main():
             config_dict['data']['test_loop_order'] = sweep_config.test_loop
         if hasattr(sweep_config, 'epochs') and 'training' in config_dict:
             config_dict['training']['epochs'] = sweep_config.epochs
+        if hasattr(sweep_config, 'threshold') and 'training' in config_dict:
+            config_dict['training']['threshold'] = sweep_config.threshold
             
         print(f"Sweep parameters: {dict(sweep_config)}")
         
