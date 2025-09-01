@@ -1,0 +1,16 @@
+{"time":"2025-09-01T10:54:14.150136775+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250901_105413-b75lyzw2/logs/debug-core.log"}
+{"time":"2025-09-01T10:54:14.401958386+02:00","level":"INFO","msg":"stream: created new stream","id":"b75lyzw2"}
+{"time":"2025-09-01T10:54:14.401988979+02:00","level":"INFO","msg":"stream: started","id":"b75lyzw2"}
+{"time":"2025-09-01T10:54:14.402061386+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"b75lyzw2"}
+{"time":"2025-09-01T10:54:14.402081913+02:00","level":"INFO","msg":"handler: started","stream_id":"b75lyzw2"}
+{"time":"2025-09-01T10:54:14.402104096+02:00","level":"INFO","msg":"sender: started","stream_id":"b75lyzw2"}
+{"time":"2025-09-01T10:54:14.582431444+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-09-01T10:54:30.643338189+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-09-01T10:54:30.643393937+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-09-01T10:54:31.644384541+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading output.log","runtime_seconds":0.195673946,"progress":"1.9KB/1.9KB"},{"desc":"uploading wandb-summary.json","runtime_seconds":0.195667469,"progress":"450B/450B"}],"total_operations":2}}
+{"time":"2025-09-01T10:54:32.060896875+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-09-01T10:54:32.475318478+02:00","level":"INFO","msg":"stream: closing","id":"b75lyzw2"}
+{"time":"2025-09-01T10:54:32.475330117+02:00","level":"INFO","msg":"handler: closed","stream_id":"b75lyzw2"}
+{"time":"2025-09-01T10:54:32.475351925+02:00","level":"INFO","msg":"sender: closed","stream_id":"b75lyzw2"}
+{"time":"2025-09-01T10:54:32.4753371+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"b75lyzw2"}
+{"time":"2025-09-01T10:54:32.475408941+02:00","level":"INFO","msg":"stream: closed","id":"b75lyzw2"}

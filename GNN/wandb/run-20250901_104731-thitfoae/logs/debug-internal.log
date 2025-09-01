@@ -1,0 +1,16 @@
+{"time":"2025-09-01T10:47:31.477443389+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250901_104731-thitfoae/logs/debug-core.log"}
+{"time":"2025-09-01T10:47:31.77834769+02:00","level":"INFO","msg":"stream: created new stream","id":"thitfoae"}
+{"time":"2025-09-01T10:47:31.778368428+02:00","level":"INFO","msg":"stream: started","id":"thitfoae"}
+{"time":"2025-09-01T10:47:31.778378384+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"thitfoae"}
+{"time":"2025-09-01T10:47:31.778422975+02:00","level":"INFO","msg":"sender: started","stream_id":"thitfoae"}
+{"time":"2025-09-01T10:47:31.778449628+02:00","level":"INFO","msg":"handler: started","stream_id":"thitfoae"}
+{"time":"2025-09-01T10:47:32.09064143+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-09-01T10:47:48.099812208+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-09-01T10:47:48.099855586+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-09-01T10:47:48.877674655+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-09-01T10:47:49.098117619+02:00","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2025-09-01T10:47:49.100823554+02:00","level":"INFO","msg":"stream: closing","id":"thitfoae"}
+{"time":"2025-09-01T10:47:49.100836628+02:00","level":"INFO","msg":"handler: closed","stream_id":"thitfoae"}
+{"time":"2025-09-01T10:47:49.100847249+02:00","level":"INFO","msg":"sender: closed","stream_id":"thitfoae"}
+{"time":"2025-09-01T10:47:49.100843727+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"thitfoae"}
+{"time":"2025-09-01T10:47:49.100902414+02:00","level":"INFO","msg":"stream: closed","id":"thitfoae"}

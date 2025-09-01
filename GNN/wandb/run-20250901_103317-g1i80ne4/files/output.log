@@ -1,0 +1,46 @@
+Loaded config structure: ['data', 'features', 'model', 'training', 'experiment']
+Sweep parameters: {'config': 'configs/config.yaml', 'threshold': 0.2}
+Training on loop orders 8, testing on loop orders 8 with features: ['degree', 'betweenness', 'clustering', 'pagerank', 'closeness', 'face_count']
+Loading features: ['degree', 'betweenness', 'clustering', 'pagerank', 'closeness', 'face_count']
+Loaded degree: shape (1432, 12)
+Loaded betweenness: shape (1432, 12)
+Loaded clustering: shape (1432, 12)
+Loaded pagerank: shape (1432, 12)
+Loaded closeness: shape (1432, 12)
+Loaded face_count: shape (1432, 12)
+Loading graph structures for loop order 8...
+Created dataset with 1432 graphs
+Feature dimension: 6
+Normalizing features...
+Train size: 1145, Test size: 287
+
+Dataset Statistics:
+  Number of graphs: 1145
+  Average nodes: 12.0 (min: 12, max: 12)
+  Average edges: 27.5
+  Label distribution: 587 positive, 558 negative
+  Feature dimension: 6
+
+Training configuration:
+  Model: gin
+  Input features: 6
+  Hidden channels: 64
+  Epochs: 50
+
+Starting training...
+Using device: cpu
+[34m[1mwandb[0m: [33mWARNING[0m Ignoring project '8_loop_scalar' when running a sweep.
+[34m[1mwandb[0m: wandb.init() called while a run is active and reinit is set to 'default', so returning the previous run.
+
+Starting training...
+Model architecture: gin
+Hidden dim: 64, Layers: 3
+Initial LR: 6.0323560078929346e-05
+Epoch   0/50: Train Loss=0.7070, Acc=0.5258, Test Loss=0.6536, Acc=0.6341, LR=0.000076
+Epoch  10/50: Train Loss=0.5489, Acc=0.6358, Test Loss=0.6001, Acc=0.6794, LR=0.001273
+Epoch  20/50: Train Loss=0.4846, Acc=0.6777, Test Loss=0.7143, Acc=0.6794, LR=0.001399
+Epoch  30/50: Train Loss=0.4243, Acc=0.7109, Test Loss=0.5299, Acc=0.7422, LR=0.000852
+Epoch  40/50: Train Loss=0.3489, Acc=0.7703, Test Loss=0.5262, Acc=0.7387, LR=0.000230
+Epoch  49/50: Train Loss=0.3327, Acc=0.7808, Test Loss=0.5124, Acc=0.7561, LR=0.000000
+
+Best test accuracy: 0.7735 at epoch 39
