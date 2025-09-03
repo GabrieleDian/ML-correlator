@@ -6,6 +6,7 @@ import wandb
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix, roc_auc_score
 from GNN_architectures import create_gnn_model
 import numpy as np
+import matplotlib.pyplot as plt
 
 def compute_metrics(y_true, y_pred):
     y_true = y_true.cpu().numpy()
@@ -70,8 +71,8 @@ def train_epoch(model, train_loader, optimizer, device, scheduler=None, pos_weig
 
     return avg_loss, accuracy, metrics
 
-def evaluate(model, test_loader, device,pos_weight=None, threshold=0.5):
-    """Evaluate model on test set"""
+def evaluate(model, test_loader, device, pos_weight=None, threshold=0.5, sweep_thresholds=True):
+    """Evaluate model on test set, optionally sweeping thresholds"""
     model.eval()
     total_loss = 0
     correct = 0
@@ -105,7 +106,27 @@ def evaluate(model, test_loader, device,pos_weight=None, threshold=0.5):
     metrics = compute_metrics(all_labels, all_preds)
     metrics['roc_auc'] = roc_auc_score(all_labels.numpy(), all_probs.numpy())
     
+    # ---- Threshold sweep ----
+    if sweep_thresholds:
+        thresholds = np.linspace(0, 1, 50)
+        accs, precs, recs = [], [], []
+        y_true = all_labels.numpy()
+        y_prob = all_probs.numpy()
+        for t in thresholds:
+            y_pred = (y_prob >= t).astype(int)
+            accs.append((y_pred == y_true).mean())
+            precs.append(precision_score(y_true, y_pred, zero_division=0))
+            recs.append(recall_score(y_true, y_pred, zero_division=0))
+        metrics['thresholds'] = thresholds
+        metrics['accuracy_vs_threshold'] = accs
+        metrics['precision_vs_threshold'] = precs
+        metrics['recall_vs_threshold'] = recs
+        
+    
     return avg_loss, accuracy, metrics
+
+
+
 
 def train(config, train_dataset, test_dataset):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -214,9 +235,24 @@ def train(config, train_dataset, test_dataset):
             #print(f"Train Confusion Matrix:\n{train_metrics['confusion_matrix']}")
             #print(f"Test Confusion Matrix:\n{test_metrics['confusion_matrix']}")
 
-    print(f"\nBest test accuracy: {best_test_acc:.4f} at epoch {best_epoch}")
+ 
+    if wandb.run is not None and 'thresholds' in test_metrics:
+        thresholds = test_metrics['thresholds']
+        accs = test_metrics['accuracy_vs_threshold']
+        precs = test_metrics['precision_vs_threshold']
+        recs = test_metrics['recall_vs_threshold']
 
-    if wandb.run is not None:
+        # Create matplotlib plot
+        plt.figure()
+        plt.plot(thresholds, accs, label="Accuracy")
+        plt.plot(thresholds, precs, label="Precision")
+        plt.plot(thresholds, recs, label="Recall")
+        plt.xlabel("Threshold")
+        plt.ylabel("Score")
+        plt.legend()
+        plt.title(f"Threshold curves - train:{config.train_loop_order}, test:{config.test_loop_order}")
+        wandb.log({"threshold_curves": wandb.Image(plt)})
+        plt.close()
         wandb.finish()
 
     return {
