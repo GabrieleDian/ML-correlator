@@ -25,6 +25,11 @@ def parse_loop_orders(value):
 def config_to_namespace(config_dict):
     """Convert nested config dict to SimpleNamespace for compatibility."""
     return SimpleNamespace(
+        # Data configuration
+        base_dir=config_dict.get('data', {}).get('base_dir', '../Graph_Edge_Data'),
+        train_loop_order=config_dict.get('data', {}).get('train_loop_order', None),
+        test_loop_order=config_dict.get('data', {}).get('test_loop_order', None),
+
         # Model configuration
         model_name=config_dict.get('model', {}).get('name', 'gin'),
         hidden_channels=config_dict.get('model', {}).get('hidden_channels', 64),
