@@ -3,8 +3,8 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  train_loop_order: 9             # Which loop to use for training
-  test_loop_order: 9                 # Which loop to use for testing
+  train_loop_order: 8             # Which loop to use for training
+  test_loop_order: 8                 # Which loop to use for testing
   
 # Feature configuration
 features:
@@ -54,12 +54,13 @@ training:
   weight_decay:   0.00003060739988229477
   scheduler_type: "onecycle"  # Options: onecycle, plateau, none
   threshold: 0.5              # Decision threshold for classification
+  log_threshold_curves: false   # Whether to log threshold sweep curves to WandB
   
 # Experiment configuration
 experiment:
   seed: 42
   use_wandb: true
-  wandb_project: "9_loop_all_scalar"
+  wandb_project: "8_loop_all_scalar"
   wandb_name: "gin_simple"
   save_model: false
   model_dir: "models"

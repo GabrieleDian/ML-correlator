@@ -1,0 +1,15 @@
+
+Starting training...
+Model architecture: gin
+Hidden dim: 64, Layers: 3
+Initial LR: 3.4466329794873084e-05
+Traceback (most recent call last):
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple.py", line 232, in <module>
+    main()
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple.py", line 208, in main
+    results = train(config, train_dataset, test_dataset)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/training_utils.py", line 197, in train
+    train_loss, train_acc, train_metrics = train_epoch(
+                                           ^^^^^^^^^^^^
+TypeError: train_epoch() got an unexpected keyword argument 'log_threshold_curves'
