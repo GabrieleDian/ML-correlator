@@ -9,3 +9,5 @@ eigen_2
 eigen_3
 adjacency_columns
 identity_columns
+W5_indicator
+W5_indicator
