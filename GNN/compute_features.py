@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
 import networkx as nx
+from networkx.algorithms import isomorphism
 import ast
 from pathlib import Path
 from tqdm import tqdm
-import os
 from joblib import Parallel, delayed
 from scipy.linalg import eigh
 
@@ -13,7 +13,7 @@ def load_graph_edges(loop_order, data_path=None):
     """Load graph edges from CSV file."""
     if data_path is None:
         # Use BASE_DIR if defined, otherwise default path
-        base = BASE_DIR if 'BASE_DIR' in globals() else Path('Graph_Edge_Data')
+        base = BASE_DIR if 'BASE_DIR' in globals() else Path('../Graph_Edge_Data')
         data_path = base / f'den_graph_data_{loop_order}.csv'
     
     df = pd.read_csv(data_path)
@@ -199,7 +199,15 @@ def compute_face_count_features(graphs_batch):
         
         features.append(face_counts)
     
-    return features
+def compute_W5_features(graphs_batch):
+    W5 = nx.wheel_graph(5)
+
+    results = []
+    for edges in graphs_batch:
+        G, n_nodes = edges_to_networkx(edges)
+        has_W5 = int(isomorphism.GraphMatcher(G, W5).subgraph_is_isomorphic())
+        results.append([has_W5] * n_nodes)
+    return results
 
 # Create a seperate dictionary for the eigenvector features
 #eigenvector_dict = {f'eigen_{i}': compute_top_k_eigenvector(k=k, i=i) for i in range(k)}
@@ -214,7 +222,8 @@ FEATURE_FUNCTIONS = {
     'clustering': compute_clustering_features,
     'closeness': compute_closeness_features,
     'pagerank': compute_pagerank_features,
-    'face_count': compute_face_count_features
+    'face_count': compute_face_count_features,
+    'W5_indicator': compute_W5_features
 }
 def pad_features(features_list, max_nodes):
     """Pad features to have consistent size across all graphs."""
@@ -235,7 +244,7 @@ def compute_and_save_feature(feature_name, loop_order, chunk_size=1000, n_jobs=4
     Saves as numpy array.
     """
     # Create output directory
-    base = BASE_DIR if 'BASE_DIR' in globals() else Path('Graph_Edge_Data')
+    base = BASE_DIR if 'BASE_DIR' in globals() else Path('../Graph_Edge_Data')
     output_dir = base / f'features_loop_{loop_order}'
     output_dir.mkdir(parents=True, exist_ok=True)
     
@@ -311,33 +320,63 @@ if __name__ == "__main__":
     import yaml
     
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', type=str, default='config.yaml', help='Path to config file')
+    parser.add_argument('--config', type=str, default=None, help='Path to config file')
     parser.add_argument('--loop', type=int, help='Loop order (overrides config)')
     parser.add_argument('--feature', type=str, help='Specific feature to compute')
     parser.add_argument('--chunk-size', type=int, help='Chunk size (overrides config)')
     parser.add_argument('--n-jobs', type=int, help='Number of jobs (overrides config)')
-    
     args = parser.parse_args()
     
-    # Load config
-    with open(args.config, 'r') as f:
-        config = yaml.safe_load(f)
-    
-    # Get parameters from config, with command line overrides
-    loop_order = args.loop if args.loop is not None else config['data']['loop_order']
-    chunk_size = args.chunk_size if args.chunk_size is not None else config['features']['chunk_size']
-    n_jobs = args.n_jobs if args.n_jobs is not None else config['features']['n_jobs']
-    
-    # Update data path to use base_dir from config
-    global BASE_DIR
-    BASE_DIR = Path(config['data']['base_dir'])
-    
-    if args.feature:
-        compute_and_save_feature(args.feature, loop_order, chunk_size, n_jobs)
+    config = {
+        'data': {
+            'loop_order': None,
+            'base_dir': './data'
+        },
+        'features': {
+            'chunk_size': 100,
+            'n_jobs': 1,
+            'compute_all': False,
+            'features_to_compute': []
+        }
+    }
+
+    # Load config if provided
+    if args.config is not None:
+        with open(args.config, 'r') as f:
+            user_config = yaml.safe_load(f)
+        for section in user_config:
+            if section in config:
+                config[section].update(user_config[section])
+            else:
+                config[section] = user_config[section]
+        
+           # Determine loop_order
+    if args.loop is not None:
+        loop_order_list = [args.loop]  # single integer from CLI
+    elif config['data'].get('loop_order') is not None:
+        loop_order_list = config['data']['loop_order']
+        if isinstance(loop_order_list, int):
+            loop_order_list = [loop_order_list]
     else:
-        # Use features list from config
-        if config['features']['compute_all']:
-            compute_all_features(loop_order, chunk_size, n_jobs)
+        # fallback to train_loop_order or test_loop_order from config
+        loop_order_list = config['data'].get('train_loop_order',
+                                             config['data'].get('test_loop_order', [1]))
+        if isinstance(loop_order_list, int):
+            loop_order_list = [loop_order_list]
+        
+        # Update data path to use base_dir from config
+        global BASE_DIR
+        BASE_DIR = Path(config['data']['base_dir'])
+    chunk_size = args.chunk_size if args.chunk_size is not None else config['features']['chunk_size']
+    n_jobs = args.n_jobs if args.n_jobs is not None else config['features']['n_jobs']    
+         # Iterate over all loops
+    for loop in loop_order_list:
+        if args.feature:
+            print(f"Computing feature {args.feature} for loop {loop}...")
+            compute_and_save_feature(args.feature, loop, chunk_size, n_jobs)
         else:
-            for feature in config['features']['features_to_compute']:
-                compute_and_save_feature(feature, loop_order, chunk_size, n_jobs)
+            if config['features']['compute_all']:
+                compute_all_features(loop, chunk_size, n_jobs)
+            else:
+                for feature in config['features']['features_to_compute']:
+                    compute_and_save_feature(feature, loop, chunk_size, n_jobs)

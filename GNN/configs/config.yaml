@@ -3,8 +3,8 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  train_loop_order: 8             # Which loop to use for training
-  test_loop_order: 8                 # Which loop to use for testing
+  train_loop_order: 9            # Which loop to use for training
+  test_loop_order: 9                 # Which loop to use for testing
   
 # Feature configuration
 features:
@@ -21,6 +21,7 @@ features:
     - pagerank
     - closeness
     - face_count
+    - W5_indicator
 
   # Features to use for training
   selected_features:
@@ -33,7 +34,7 @@ features:
    - pagerank
    - closeness
    - face_count
-
+   - W5_indicator
     
   # Computation settings
   chunk_size: 1000
@@ -42,9 +43,9 @@ features:
 # Model configuration
 model:
   name: "gin"              # Model architecture: gin, gat, hybrid, planar, simple
-  hidden_channels: 64
+  hidden_channels: 128
   num_layers: 3
-  dropout: 0.3
+  dropout: 0.4
 
 # Training configuration
 training:
@@ -60,7 +61,7 @@ training:
 experiment:
   seed: 42
   use_wandb: true
-  wandb_project: "8_loop_all_scalar"
+  wandb_project: "8_loop_all_scalar_W5"
   wandb_name: "gin_simple"
   save_model: false
   model_dir: "models"

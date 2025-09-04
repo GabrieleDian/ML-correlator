@@ -269,5 +269,9 @@ def train(config, train_dataset, test_dataset):
         'model_state': best_model_state,
         'final_train_acc': train_acc,
         'best_test_acc': best_test_acc,
-        'best_epoch': best_epoch
+        'best_epoch': best_epoch,
+        'final_train_roc_auc': train_metrics['roc_auc'],
+        'final_train_pr_auc': train_metrics['pr_auc'],
+        'final_test_roc_auc': test_metrics['roc_auc'],
+        'final_test_pr_auc': test_metrics['pr_auc']
     }

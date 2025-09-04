@@ -43,7 +43,7 @@ def config_to_namespace(config_dict):
         batch_size=config_dict.get('training', {}).get('batch_size', 32),
         scheduler_type=config_dict.get('training', {}).get('scheduler_type', 'onecycle'),
         threshold=config_dict.get('training', {}).get('threshold', 0.5),
-        log_threshold_curves=config_dict.get('training', {}).get('log_threshold_curves', False),  
+        log_threshold_curves=config_dict.get('training', {}).get('log_threshold_curves', False),  # NEW
         
         # WandB configuration
         use_wandb=config_dict.get('experiment', {}).get('use_wandb', True),
@@ -211,6 +211,10 @@ def main():
     print("\nTraining completed!")
     print(f"Best test accuracy: {results['best_test_acc']:.4f} at epoch {results['best_epoch']}")
     print(f"Final training accuracy: {results['final_train_acc']:.4f}")
+    print(f"Final training ROC AUC: {results['final_train_roc_auc']:.4f}")
+    print(f"Final training PR AUC: {results['final_train_pr_auc']:.4f}")
+    print(f"Final test ROC AUC: {results['final_test_roc_auc']:.4f}")
+    print(f"Final test PR AUC: {results['final_test_pr_auc']:.4f}")
     
     # Save model if requested
     save_model = config_dict.get('experiment', {}).get('save_model', False)
