@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
 import wandb
-from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix, roc_auc_score
+from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix, roc_auc_score, precision_recall_curve, auc
 from GNN_architectures import create_gnn_model
 import numpy as np
 import matplotlib.pyplot as plt
@@ -67,11 +67,15 @@ def train_epoch(model, train_loader, optimizer, device, scheduler=None, pos_weig
     all_probs = torch.cat(all_probs)
     metrics = compute_metrics(all_labels, all_preds)
     metrics['roc_auc'] = roc_auc_score(all_labels.numpy(), all_probs.numpy())
+    # PR-AUC
+    precision_vals, recall_vals, _ = precision_recall_curve(all_labels.numpy(),  all_probs.numpy())
+    pr_auc_val = auc(recall_vals, precision_vals)
+    metrics['pr_auc'] = pr_auc_val
 
 
     return avg_loss, accuracy, metrics
 
-def evaluate(model, test_loader, device, pos_weight=None, threshold=0.5, sweep_thresholds=True):
+def evaluate(model, test_loader, device, pos_weight=None, threshold=0.5, log_threshold_curves=True):
     """Evaluate model on test set, optionally sweeping thresholds"""
     model.eval()
     total_loss = 0
@@ -105,9 +109,13 @@ def evaluate(model, test_loader, device, pos_weight=None, threshold=0.5, sweep_t
     all_labels = torch.cat(all_labels)
     metrics = compute_metrics(all_labels, all_preds)
     metrics['roc_auc'] = roc_auc_score(all_labels.numpy(), all_probs.numpy())
+    # PR-AUC
+    precision_vals, recall_vals, _ = precision_recall_curve(all_labels.numpy(),  all_probs.numpy())
+    pr_auc_val = auc(recall_vals, precision_vals)
+    metrics['pr_auc'] = pr_auc_val
     
     # ---- Threshold sweep ----
-    if sweep_thresholds:
+    if log_threshold_curves:
         thresholds = np.linspace(0, 1, 50)
         accs, precs, recs = [], [], []
         y_true = all_labels.numpy()
@@ -190,11 +198,11 @@ def train(config, train_dataset, test_dataset):
             model, train_loader, optimizer, device,
             scheduler=scheduler,
             scheduler_type=scheduler_type,
-            threshold = config.threshold
+            threshold = config.threshold,
         )
         
         # Test
-        test_loss, test_acc, test_metrics = evaluate(model, test_loader, device, threshold=config.threshold)
+        test_loss, test_acc, test_metrics = evaluate(model, test_loader, device, threshold=config.threshold, log_threshold_curves=config.log_threshold_curves)
         
         # Step plateau scheduler after epoch
         if scheduler_type == 'plateau' and scheduler is not None:
@@ -218,11 +226,13 @@ def train(config, train_dataset, test_dataset):
                 'train_precision': train_metrics['precision'],
                 'train_recall': train_metrics['recall'],
                 'train_roc_auc': train_metrics['roc_auc'],
+                'train_pr_auc': train_metrics['pr_auc'],
                 'test_loss': test_loss,
                 'test_accuracy': test_acc,
                 'test_precision': test_metrics['precision'],
                 'test_recall': test_metrics['recall'],
                 'test_roc_auc': test_metrics['roc_auc'],
+                'test_pr_auc': test_metrics['pr_auc']
 
             })
 
@@ -236,7 +246,7 @@ def train(config, train_dataset, test_dataset):
             #print(f"Test Confusion Matrix:\n{test_metrics['confusion_matrix']}")
 
  
-    if wandb.run is not None and 'thresholds' in test_metrics:
+    if wandb.run is not None and config.log_threshold_curves and 'thresholds' in test_metrics:
         thresholds = test_metrics['thresholds']
         accs = test_metrics['accuracy_vs_threshold']
         precs = test_metrics['precision_vs_threshold']

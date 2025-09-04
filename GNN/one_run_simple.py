@@ -43,6 +43,7 @@ def config_to_namespace(config_dict):
         batch_size=config_dict.get('training', {}).get('batch_size', 32),
         scheduler_type=config_dict.get('training', {}).get('scheduler_type', 'onecycle'),
         threshold=config_dict.get('training', {}).get('threshold', 0.5),
+        log_threshold_curves=config_dict.get('training', {}).get('log_threshold_curves', False),  
         
         # WandB configuration
         use_wandb=config_dict.get('experiment', {}).get('use_wandb', True),
