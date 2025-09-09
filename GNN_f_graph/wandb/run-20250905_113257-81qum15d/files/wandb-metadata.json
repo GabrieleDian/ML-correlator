@@ -1,0 +1,35 @@
+{
+  "os": "Linux-6.8.0-49-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.12.3",
+  "startedAt": "2025-09-05T09:32:57.218260Z",
+  "args": [
+    "--config",
+    "configs/config.yaml"
+  ],
+  "program": "/home/rigers/Documents/GitHub/ML-correlator/GNN_f_graph/one_run_simple_f.py",
+  "codePath": "GNN_f_graph/one_run_simple_f.py",
+  "git": {
+    "remote": "https://github.com/GabrieleDian/ML-correlator.git",
+    "commit": "28e8a44cd5a683b2946dc424a70ade8e4772ac2d"
+  },
+  "email": "aliajrigers@gmail.com",
+  "root": "/home/rigers/Documents/GitHub/ML-correlator/GNN_f_graph",
+  "host": "rigersaliaj",
+  "executable": "/home/rigers/Documents/GitHub/Human-Learning/.venv/bin/python",
+  "codePathLocal": "one_run_simple_f.py",
+  "cpu_count": 4,
+  "cpu_count_logical": 8,
+  "disk": {
+    "/": {
+      "total": "250375106560",
+      "used": "206410727424"
+    }
+  },
+  "memory": {
+    "total": "16569905152"
+  },
+  "cpu": {
+    "count": 4,
+    "countLogical": 8
+  }
+}

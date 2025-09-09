@@ -1,0 +1,10 @@
+{"time":"2025-09-05T11:39:46.136585851+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN_f_graph/wandb/run-20250905_113945-dupoxlpu/logs/debug-core.log"}
+{"time":"2025-09-05T11:39:46.51682298+02:00","level":"INFO","msg":"stream: created new stream","id":"dupoxlpu"}
+{"time":"2025-09-05T11:39:46.51696522+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"dupoxlpu"}
+{"time":"2025-09-05T11:39:46.517023561+02:00","level":"INFO","msg":"sender: started","stream_id":"dupoxlpu"}
+{"time":"2025-09-05T11:39:46.517402858+02:00","level":"INFO","msg":"stream: started","id":"dupoxlpu"}
+{"time":"2025-09-05T11:39:46.517417152+02:00","level":"INFO","msg":"handler: started","stream_id":"dupoxlpu"}
+{"time":"2025-09-05T11:39:46.822720365+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-09-05T11:49:31.978349637+02:00","level":"INFO","msg":"stream: closing","id":"dupoxlpu"}
+{"time":"2025-09-05T11:49:31.978959095+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-09-05T11:49:31.979224103+02:00","level":"INFO","msg":"Stopped system monitor"}
