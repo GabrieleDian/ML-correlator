@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN_f_graph/one_run_simple_f.py", line 140, in <module>
+    main()
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN_f_graph/one_run_simple_f.py", line 117, in main
+    results = train(config, train_dataset, test_dataset)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN_f_graph/training_utils_f.py", line 127, in train
+    model = create_gnn_model(
+            ^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN_f_graph/GNN_architectures_f.py", line 226, in create_gnn_model
+    return model_class(
+           ^^^^^^^^^^^^
+TypeError: GINNetMultiEdge.__init__() got an unexpected keyword argument 'num_classes'
