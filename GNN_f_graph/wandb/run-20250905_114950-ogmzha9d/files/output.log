@@ -1,0 +1,11 @@
+Epoch   0/100: Train Loss=2.1062, Test Loss=1271.7812, LR=0.000037
+Epoch  10/100: Train Loss=0.6286, Test Loss=0.4296, LR=0.000285
+Epoch  20/100: Train Loss=0.5156, Test Loss=0.4651, LR=0.000699
+Epoch  30/100: Train Loss=0.4671, Test Loss=0.7110, LR=0.000861
+Epoch  40/100: Train Loss=0.4523, Test Loss=1.3077, LR=0.000807
+Epoch  50/100: Train Loss=0.4761, Test Loss=0.4197, LR=0.000679
+Epoch  60/100: Train Loss=0.3945, Test Loss=0.4512, LR=0.000501
+Epoch  70/100: Train Loss=0.4006, Test Loss=0.4953, LR=0.000310
+Epoch  80/100: Train Loss=0.3650, Test Loss=0.3832, LR=0.000143
+Epoch  90/100: Train Loss=0.3729, Test Loss=0.3550, LR=0.000032
+Epoch  99/100: Train Loss=0.3606, Test Loss=0.3374, LR=0.000000
