@@ -9,7 +9,7 @@ fromDecoratedToIntegrand[graph_]:= Module[{edgeList,sources,sinks,dashedEdges},
 edgeList=EdgeList[graph];
 sources=Cases[edgeList, UndirectedEdge[a_,e[i_,j_]]/;AtomQ[a]];
 sinks=Cases[edgeList, UndirectedEdge[e[i_,j_],a_]/;AtomQ[a]];
-dashedEdges=Table[Sequence@@ConstantArray[sources[[i,1]]->sinks[[i,2]],sinks[[i,1,2]]-1] ,{i,Length[sources]}];
+dashedEdges=Table[Sequence@@ConstantArray[Sort[sources[[i,1]]\[UndirectedEdge]sinks[[i,2]]],sinks[[i,1,2]]-1] ,{i,Length[sources]}];
 (Times@@(x@@@dashedEdges))/Times@@(x@@@Cases[edgeList,a_\[UndirectedEdge]b_/;And[AtomQ[a],AtomQ[b]]])
 ]
 
