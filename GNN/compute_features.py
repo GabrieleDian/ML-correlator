@@ -258,56 +258,16 @@ FEATURE_FUNCTIONS = {
     'W5_indicator': compute_W5_features
 }
 def pad_features(features_list, max_nodes):
-    """
-    Pad features to have consistent size across all graphs.
-    Supports 1D features (vectors) and 2D features (matrices).
-    Returns array of shape (n_graphs, max_nodes) for 1D,
-    or (n_graphs, max_nodes, max_cols) for 2D features.
-    Skips any None entries in features_list.
-    """
-    # Filter out None
-    features_list = [f for f in features_list if f is not None]
-    if len(features_list) == 0:
-        raise ValueError("No features to pad!")
-
-    # Determine max_cols for 2D features
-    max_cols = 0
-    for f in features_list:
-        arr = np.array(f)
-        if arr.ndim == 2:
-            max_cols = max(max_cols, arr.shape[1])
-
+    """Pad features to have consistent size across all graphs."""
     padded = []
-    for f in features_list:
-        arr = np.array(f)
-
-        if arr.ndim == 1:
-            # 1D vector
-            if len(arr) < max_nodes:
-                arr = np.pad(arr, (0, max_nodes - len(arr)), mode='constant')
-            else:
-                arr = arr[:max_nodes]
-
-        elif arr.ndim == 2:
-            n_rows, n_cols = arr.shape
-            # Pad rows
-            if n_rows < max_nodes:
-                arr = np.pad(arr, ((0, max_nodes - n_rows), (0, 0)), mode='constant')
-            else:
-                arr = arr[:max_nodes, :]
-            # Pad columns
-            if n_cols < max_cols:
-                arr = np.pad(arr, ((0, 0), (0, max_cols - n_cols)), mode='constant')
-            else:
-                arr = arr[:, :max_cols]
+    for features in features_list:
+        if len(features) < max_nodes:
+            # Pad with zeros
+            padded_features = features + [0] * (max_nodes - len(features))
         else:
-            raise ValueError(f"Unsupported feature dimension: {arr.ndim}")
-
-        padded.append(arr)
-
-    return np.stack(padded)
-
-
+            padded_features = features[:max_nodes]
+        padded.append(padded_features)
+    return np.array(padded)
 
 
 
