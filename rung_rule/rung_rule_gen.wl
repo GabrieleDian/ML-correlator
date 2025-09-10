@@ -1,10 +1,24 @@
 (* ::Package:: *)
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*General-Purpose Functions*)
 
 
-fourPointDataDir=StringDelete[NotebookDirectory[],"rung_rule"]<>"consolidated_data";
+If[Head[$FrontEnd] === FrontEndObject,
+	(* Running on Notebook/FrontEnd*)
+  $FileDirectory = NotebookDirectory[];
+  SetDirectory[NotebookDirectory[]],
+  (*Running on cluster or in script.*)
+  $FileDirectory = Directory[]
+];
+Print["The file directory is: ", $FileDirectory];
+
+
+ $DataPath = StringDrop[DirectoryName[$FileDirectory],-1];
+
+
+fourPointDataDir= $DataPath<>"/consolidated_data";
+Print["The data directory is: ", fourPointDataDir];
 
 
 niceTime[timeInSec_]:=If[timeInSec<($TimeUnit/100)||Not[NumericQ[timeInSec]]||Precision[timeInSec]==0,"",Block[{measure=Select[Transpose[{(Quotient[Mod[timeInSec,#1],#2]&@@@Partition[{timeInSec 10,3.15569277216`*^7,3600*24.,3600.,60.,1.,10^-3,10.^-6,10.^-9},2,1]),{" years"," days"," hours"," minutes"," seconds"," ms"," \[Mu]s"," ns"}}],#[[1]]>0&]},If[Length[measure]>0,Row[Row[#,""]&/@measure[[1;;Min[2,Length[measure]]]],", "],""]]];
@@ -12,7 +26,7 @@ map[function_,list_]:=If[Length[list]>0,Module[{monitor=0,len=Length[list],newFc
 littleGroup[graph_]:=Block[{num=Numerator[graph],den=Denominator[graph]},num=Join@@(Function[{y,z},y&/@Range[z]]@@@FactorList[num][[2;;-1]]);den=Join@@(Function[{y,z},y&/@Range[z]]@@@FactorList[den][[2;;-1]]);-(Count[num,#,{0,\[Infinity]}]-Count[den,#,{0,\[Infinity]}])&/@Sort[DeleteDuplicates[Flatten[List@@@Cases[graph,_x,{0,\[Infinity]}]]]]];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Basic Data Functions*)
 
 
@@ -29,11 +43,7 @@ fnumtodialnum[loop_,fnum_]:=Position[Table[Range[#[[i]]+1,#[[i+1]]],{i,1,Length[
 dialnumtofnum[loop_,{dial_,num_}]:=(Table[Range[#[[i]]+1,#[[i+1]]],{i,1,Length[#]-1}]&@Prepend[Accumulate[Length/@fGraphNums[loop]],0])[[dial,num]]
 
 
-Clear[fGraphListcan]
-fGraphListcan[loop_]:=fGraphListcan[loop]=canonicalizefgraph/@fGraphList[loop]
-
-
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Graph Analysis*)
 
 
@@ -74,28 +84,44 @@ numcan=takeSmallest[Times@@@PermutationReplace[numcan1,GraphAutomorphismGroup[de
 numcan/dencan]
 
 
+Clear[fGraphListcan]
+fGraphListcan[loop_]:=fGraphListcan[loop]=canonicalizefgraph/@fGraphList[loop]
+
+
 cycle[dial_,ve_]:=If[MemberQ[dial,ve],Join[Take[dial,{Position[dial,ve][[1,1]],Length[dial]}],Take[dial,{1,Position[dial,ve][[1,1]]-1}]],dial]
 
 
 displayfgraph[fgraph_]:=Column[{PlanarGraph[Denominator[fgraph]/.Times->List/.x->List,VertexLabels->"Name"],Numerator[fgraph]}]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*generate new graphs via binary relations*)
 
 
- Button[Get["IGraphM`"], FrontEndExecute[{FrontEnd`SelectionMove[FrontEnd`EvaluationCell[], After, CellGroup], FrontEnd`NotebookWrite[FrontEnd`EvaluationNotebook[], #, All], FrontEnd`SelectionEvaluateCreateCell[FrontEnd`EvaluationNotebook[]]}]& , Appearance -> None, BaseStyle -> "Link", Evaluator -> None, Method -> "Preemptive"]
-
-
-Button[Column[{"IGraph/M 0.6.5 (December 21, 2022)", "Evaluate \!\(\*ButtonBox[\"IGDocumentation[]\",BaseStyle->\"Link\",ButtonData->\"paclet:IGraphM\"]\) to get started."}, ItemSize -> {Automatic, Automatic}], FrontEndExecute[{FrontEnd`SelectionMove[FrontEnd`EvaluationCell[], After, CellGroup], FrontEnd`NotebookWrite[FrontEnd`EvaluationNotebook[], #, All], FrontEnd`SelectionEvaluateCreateCell[FrontEnd`EvaluationNotebook[]]}]& , Appearance -> None, BaseStyle -> "Link", Evaluator -> None, Method -> "Preemptive"]
+ Button[Get["IGraphM`"], FrontEndExecute[{FrontEnd`SelectionMove[FrontEnd`EvaluationCell[], After, CellGroup], FrontEnd`NotebookWrite[FrontEnd`EvaluationNotebook[], #, All], FrontEnd`SelectionEvaluateCreateCell[FrontEnd`EvaluationNotebook[]]}]& , Appearance -> None, BaseStyle -> "Link", Evaluator -> None, Method -> "Preemptive"];
 
 
 detectnonisomorphicdoubletrianglesfgraph[fgraph_]:=Module[{alldts,dtscurrent,dtsnoniso,autos},alldts=FindIsomorphicSubgraph[(fgraph//displayfgraph)[[1,1]],Graph[{{1,2},{1,3},{2,3},{1,4},{3,4}}],All];
 autos=graphAutomorphisms[fgraph];
 dtscurrent=alldts;
 dtsnoniso={};
-While[Length[dtscurrent]>0,dtsnoniso=Append[dtsnoniso,dtscurrent[[1]]];dtscurrent=Complement[dtscurrent,Table[VertexReplace[dtscurrent[[1]],ii],{ii,autos}],SameTest->IGSameGraphQ  ]];
+While[Length[dtscurrent]>0,
+dtsnoniso=Append[dtsnoniso,dtscurrent[[1]]];
+dtscurrent=Complement[dtscurrent,Table[VertexReplace[dtscurrent[[1]],ii],{ii,autos}],SameTest->IGSameGraphQ  ]];
 ({#[[1,1]],#[[2,2]],#[[1,2]],#[[3,2]]}&)/@EdgeList/@dtsnoniso]
+
+
+doubletrianglesfgraph[fgraph_]:=FindIsomorphicSubgraph[(fgraph//displayfgraph)[[1,1]],Graph[{{1,2},{1,3},{2,3},{1,4},{3,4}}],All]
+
+
+fGraphListcan[nn][[1]]
+
+
+myRungRule[fg_]:=Module[{dts,nn,newfgs},
+dts=doubletrianglesfgraph[fg];
+nn=Max[Cases[fg,_Integer,Infinity]];
+newfgs=(fg x[#[[1]],#[[2]]]x[#[[3]],#[[4]]]/(x[#[[1]],nn+1]x[#[[2]],nn+1]x[#[[3]],nn+1]x[#[[4]],nn+1])/.x[a_,b_]:>x[b,a]/;(a>b))&/@dts;
+canonicalizefgraph/@newfgs]
 
 
 rungrulegenerate[fg_]:=Module[{dts,nn,newfgs},
@@ -135,11 +161,17 @@ DeleteDuplicates[Sequence@@Thread[#]&/@rrgen]
 ]
 
 
+parallelGenerateRungWithCoeff[graphsWithCoeff_]:=Module[{rrgen},
+rrgen=ParallelMap[{rungrulegenerate[#[[1]]],#[[2]]}&,graphsWithCoeff];
+DeleteDuplicates[Sequence@@Thread[#]&/@rrgen]
+]
+
+
 (*Gives the edges of a graph as String in the notation of the phyton library networkx, that is a list of tuples*)
 edgeListNX[edges_List]:=StringReplace[StringReplace[ StringReplace[ToString[edges/. UndirectedEdge->List],{"{"->"(","}"->")"}],{"(("->"[(","))"->")]"}],"()"->"[]"]
 
 
-nn=6;
+nn=9;
 
 
 (* ::Subsubsection:: *)
@@ -178,7 +210,15 @@ Print[ToString[nn]<>"to"<>ToString[nn+1]<>"Completed. Lenght ", Length[coefDen] 
 (*8 loop from 7 loops*)
 
 
-result=generateRungWithCoeff[result];
+result//Length
+
+
+{time,result2}=Timing[parallelGenerateRungWithCoeff[result]];
+time
+
+
+{time,result2}=Timing[generateRungWithCoeff[result]];
+time
 
 
 data={List@@@(List@@Denominator[#[[1]]]),#[[2]]}&/@result;
