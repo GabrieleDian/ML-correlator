@@ -1,0 +1,24 @@
+
+Starting training...
+Model architecture: gin
+Hidden dim: 128, Layers: 3
+Initial LR: 3.4466329794873084e-05
+Epoch   0/100: Train Loss=0.6799, Acc=0.6450, Test Loss=0.6889, Acc=0.5758, LR=0.000037
+Epoch  10/100: Train Loss=0.5632, Acc=0.6832, Test Loss=0.6939, Acc=0.5758, LR=0.000283
+Epoch  20/100: Train Loss=0.5609, Acc=0.7099, Test Loss=0.8153, Acc=0.5303, LR=0.000696
+Epoch  30/100: Train Loss=0.5197, Acc=0.7023, Test Loss=1.1439, Acc=0.4848, LR=0.000861
+Epoch  40/100: Train Loss=0.5449, Acc=0.7328, Test Loss=0.8353, Acc=0.5303, LR=0.000808
+Epoch  50/100: Train Loss=0.4158, Acc=0.8053, Test Loss=0.8922, Acc=0.5909, LR=0.000681
+Epoch  60/100: Train Loss=0.3923, Acc=0.8206, Test Loss=0.8512, Acc=0.5909, LR=0.000504
+Epoch  70/100: Train Loss=0.3836, Acc=0.8359, Test Loss=0.9463, Acc=0.5606, LR=0.000313
+Epoch  80/100: Train Loss=0.3127, Acc=0.8550, Test Loss=0.9050, Acc=0.6364, LR=0.000144
+Epoch  90/100: Train Loss=0.3589, Acc=0.8321, Test Loss=0.9498, Acc=0.5909, LR=0.000033
+Epoch  99/100: Train Loss=0.3077, Acc=0.8740, Test Loss=1.0213, Acc=0.5606, LR=0.000000
+
+Training completed!
+Best test accuracy: 0.6667 at epoch 61
+Final training accuracy: 0.8740
+Final training ROC AUC: 0.9364
+Final training PR AUC: 0.9652
+Final test ROC AUC: 0.6175
+Final test PR AUC: 0.6882

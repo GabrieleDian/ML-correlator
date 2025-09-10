@@ -1,0 +1,25 @@
+
+Starting training...
+Model architecture: gin
+Hidden dim: 128, Layers: 3
+Initial LR: 3.4466329794873084e-05
+Epoch   0/100: Train Loss=0.6326, Acc=0.6514, Test Loss=0.5955, Acc=0.6585, LR=0.000037
+Traceback (most recent call last):
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple.py", line 236, in <module>
+    main()
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple.py", line 208, in main
+    results = train(config, train_dataset, test_dataset)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/training_utils.py", line 197, in train
+    train_loss, train_acc, train_metrics = train_epoch(
+                                           ^^^^^^^^^^^^
+  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/training_utils.py", line 44, in train_epoch
+    loss.backward()
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/_tensor.py", line 648, in backward
+    torch.autograd.backward(
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/autograd/__init__.py", line 353, in backward
+    _engine_run_backward(
+  File "/home/rigers/Documents/GitHub/Human-Learning/.venv/lib/python3.12/site-packages/torch/autograd/graph.py", line 824, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
