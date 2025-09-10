@@ -3,7 +3,7 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  train_loop_order: 7            # Which loop to use for training
+  train_loop_order: [5,6,7]            # Which loop to use for training
   test_loop_order: 8   
   extra_train: true              # Which loop to use for testing
   
