@@ -1,0 +1,16 @@
+{"time":"2025-09-05T11:49:51.117734316+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN_f_graph/wandb/run-20250905_114950-ogmzha9d/logs/debug-core.log"}
+{"time":"2025-09-05T11:49:51.433792561+02:00","level":"INFO","msg":"stream: created new stream","id":"ogmzha9d"}
+{"time":"2025-09-05T11:49:51.433823474+02:00","level":"INFO","msg":"stream: started","id":"ogmzha9d"}
+{"time":"2025-09-05T11:49:51.433840943+02:00","level":"INFO","msg":"handler: started","stream_id":"ogmzha9d"}
+{"time":"2025-09-05T11:49:51.433837119+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"ogmzha9d"}
+{"time":"2025-09-05T11:49:51.433863907+02:00","level":"INFO","msg":"sender: started","stream_id":"ogmzha9d"}
+{"time":"2025-09-05T11:49:51.744560067+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-09-05T12:10:56.57466984+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-09-05T12:10:56.574762611+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-09-05T12:10:57.536590643+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading output.log","runtime_seconds":0.681753316,"progress":"707B/707B"},{"desc":"uploading config.yaml","runtime_seconds":0.377651876,"progress":"1.0KB/1.0KB"}],"total_operations":2}}
+{"time":"2025-09-05T12:10:57.568609808+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-09-05T12:10:57.780304776+02:00","level":"INFO","msg":"stream: closing","id":"ogmzha9d"}
+{"time":"2025-09-05T12:10:57.78032883+02:00","level":"INFO","msg":"handler: closed","stream_id":"ogmzha9d"}
+{"time":"2025-09-05T12:10:57.78034457+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"ogmzha9d"}
+{"time":"2025-09-05T12:10:57.780367073+02:00","level":"INFO","msg":"sender: closed","stream_id":"ogmzha9d"}
+{"time":"2025-09-05T12:10:57.780419165+02:00","level":"INFO","msg":"stream: closed","id":"ogmzha9d"}

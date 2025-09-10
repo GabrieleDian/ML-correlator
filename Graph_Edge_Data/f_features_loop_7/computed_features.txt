@@ -1,0 +1,10 @@
+eigen_1
+eigen_2
+eigen_3
+adjacency_columns
+degree
+betweenness
+closeness
+pagerank
+face_count
+W5_indicator
