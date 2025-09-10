@@ -99,7 +99,9 @@ class SimpleGraphBuilder:
         return data
 
 
-def create_simple_dataset(loop_order, selected_features=None, normalize=True, data_dir='Graph_Edge_Data', scaler=None,max_features=None):
+def create_simple_dataset(loop_order, selected_features=None, normalize=True, 
+                          data_dir='Graph_Edge_Data', scaler=None, 
+                          max_features=None, extra_train=False):
     """
     Create dataset using pre-computed features.
     Args:
@@ -107,36 +109,34 @@ def create_simple_dataset(loop_order, selected_features=None, normalize=True, da
         selected_features: List of feature names to use
         normalize: Whether to normalize features
         scaler: Pre-fitted scaler to use (if None, will fit new scaler when normalize=True)
+        max_features: Force a maximum feature dimension (pads/truncates if needed)
+        extra_train: If True, load features from 'features_loop_{loop_order}to_extra'
     Returns:
         dataset: List of PyG Data objects
         scaler: StandardScaler object (if normalize=True)
+        current_max_features: Maximum feature dimension before padding/truncating
     """
     # Handle single loop order vs multiple loop orders
-    if isinstance(loop_order, int):
-        loop_orders = [loop_order]
-    else:
-        loop_orders = loop_order
+    loop_orders = [loop_order] if isinstance(loop_order, int) else loop_order
 
-    # Load pre-computed features
+    # Default features
     if selected_features is None:
-        # Default features
         selected_features = ['degree', 'betweenness', 'clustering']
 
     print(f"Loading features: {selected_features}")
-
     dataset = []
     idx_counter = 0
 
-    # Process each loop order
     for lo in loop_orders:
-        features_dict, labels = load_saved_features(lo, selected_features, data_dir)
-        # Load graph structure
-        print(f"Loading graph structures for loop order {lo}...")
-        graph_infos = load_graph_structure(lo, data_dir)
+        # Switch feature source depending on extra_train
+        feature_source = f"features_loop_{lo}to" if extra_train else f"features_loop_{lo}"
+        print(f"Loading features from {feature_source}...")
 
-        # Create dataset for this loop order
+        features_dict, labels = load_saved_features(lo, selected_features, data_dir, extra_train=extra_train)
+        graph_infos = load_graph_structure(lo, data_dir, extra_train=extra_train)
+
         for local_idx, (graph_info, label) in enumerate(zip(graph_infos, labels)):
-            builder = SimpleGraphBuilder(graph_info, features_dict, label, local_idx)  # Use local_idx
+            builder = SimpleGraphBuilder(graph_info, features_dict, label, local_idx)
             data = builder.build(selected_features)
             dataset.append(data)
             idx_counter += 1
@@ -144,47 +144,33 @@ def create_simple_dataset(loop_order, selected_features=None, normalize=True, da
     print(f"Created dataset with {len(dataset)} graphs")
     print(f"Feature dimension: {dataset[0].x.shape[1]}")
 
-    # Fix feature dimension mismatch
+    # Feature dimension alignment
     feature_dims = [data.x.shape[1] for data in dataset]
     current_max_features = max(feature_dims)
     min_features = min(feature_dims)
-    
-    # Use provided max_features or current max
+
     target_features = max_features if max_features is not None else current_max_features
-    
+
     if target_features != min_features or any(d != target_features for d in feature_dims):
         print(f"Standardizing to {target_features} features")
-        
         for data in dataset:
             if data.x.shape[1] < target_features:
-                # Pad with zeros
                 padding = torch.zeros(data.x.shape[0], target_features - data.x.shape[1])
                 data.x = torch.cat([data.x, padding], dim=1)
             elif data.x.shape[1] > target_features:
-                # Truncate 
                 data.x = data.x[:, :target_features]
-    
-    # Normalize if requested
-    scaler = None
+
+    # Normalize
     if normalize:
         print("Normalizing features...")
-        
-        # Collect all features
-        all_features = []
-        for data in dataset:
-            all_features.append(data.x.numpy())
-        all_features = np.vstack(all_features)
-        
-        # Fit scaler
+        all_features = np.vstack([data.x.numpy() for data in dataset])
         scaler = StandardScaler()
         scaler.fit(all_features)
-        
-        # Transform features
         for data in dataset:
             data.x = torch.FloatTensor(scaler.transform(data.x.numpy()))
-    
 
     return dataset, scaler, current_max_features
+
 
 #Statistics function to quickly summarize dataset
 def quick_dataset_stats(dataset):

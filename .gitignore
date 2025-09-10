@@ -2,3 +2,10 @@ many_loop_paper/
 my_tree_class
 graph_data_too_heavy/
 .venv/
+Graph_Edge_Data/features_loop_10/eigen_1.npy
+Graph_Edge_Data/features_loop_10/eigen_2.npy
+Graph_Edge_Data/features_loop_10/eigen_3.npy
+Graph_Edge_Data/features_loop_10/adjacency_columns.npy
+Graph_Edge_Data/features_loop_10/identity_columns.npy
+inversecusprule.nb
+inversecusprule.wl

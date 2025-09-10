@@ -29,6 +29,7 @@ def config_to_namespace(config_dict):
         base_dir=config_dict.get('data', {}).get('base_dir', '../Graph_Edge_Data'),
         train_loop_order=config_dict.get('data', {}).get('train_loop_order', None),
         test_loop_order=config_dict.get('data', {}).get('test_loop_order', None),
+        extra_train=config_dict.get('data', {}).get('extra_train', False),
 
         # Model configuration
         model_name=config_dict.get('model', {}).get('name', 'gin'),
@@ -149,6 +150,7 @@ def main():
     # Extract parameters with safe defaults
     train_loop_order = config_dict.get('data', {}).get('train_loop_order', 7)
     test_loop_order = config_dict.get('data', {}).get('test_loop_order', 8)
+    extra_train = config_dict.get('data', {}).get('extra_train', False)
     selected_features = config_dict.get('features', {}).get('selected_features', ['degree'])
     seed = config_dict.get('experiment', {}).get('seed', 42)
     base_dir = config_dict.get('data', {}).get('base_dir', 'Graph_Edge_Data')  # Use config path with fallback    # Set random seeds
@@ -157,14 +159,41 @@ def main():
     
     print(f"Training on loop orders {train_loop_order}, testing on loop orders {test_loop_order} with features: {selected_features}")
     
-    # Create training dataset
-    train_dataset, train_scaler, max_features = create_simple_dataset(
-        loop_order=train_loop_order,
-        selected_features=selected_features,
-        normalize=True,
-        data_dir=base_dir
-    )
-    
+        # Create training dataset
+    if extra_train:
+        # Load both "extra" and "normal" training sets
+        train_dataset_extra, train_scaler, max_features = create_simple_dataset(
+            loop_order=train_loop_order,
+            selected_features=selected_features,
+            normalize=True,
+            data_dir=base_dir,
+            extra_train=True
+        )
+        train_dataset_normal, _, _ = create_simple_dataset(
+            loop_order=train_loop_order,
+            selected_features=selected_features,
+            normalize=True,
+            scaler=train_scaler,       # keep same scaler
+            max_features=max_features, # keep same dimensions
+            data_dir=base_dir,
+            extra_train=False
+        )
+
+        # Combine both into final training dataset
+        train_dataset = train_dataset_extra + train_dataset_normal
+        print(f"Combined training dataset: {len(train_dataset)} graphs "
+            f"(extra: {len(train_dataset_extra)}, normal: {len(train_dataset_normal)})")
+
+    else:
+        # Normal behavior
+        train_dataset, train_scaler, max_features = create_simple_dataset(
+            loop_order=train_loop_order,
+            selected_features=selected_features,
+            normalize=True,
+            data_dir=base_dir,
+            extra_train=False
+        )
+
     # Handle test dataset
     if test_loop_order is None or test_loop_order == train_loop_order:
         # Do 80-20 split on training data
@@ -178,14 +207,15 @@ def main():
     else:
         # Use separate test data
         test_dataset, _, _ = create_simple_dataset(
-            loop_order=test_loop_order,           
+            loop_order=test_loop_order,
             selected_features=selected_features,
             normalize=True,
-            scaler=train_scaler,  # Use same scaler as training
-            max_features=max_features, # Use the same as training
-            data_dir=base_dir
-
+            scaler=train_scaler,       # reuse training scaler
+            max_features=max_features, # enforce same dims
+            data_dir=base_dir,
+            extra_train=False          # tests never use "extra"
         )
+
     
     # Print dataset statistics
     quick_dataset_stats(train_dataset)
