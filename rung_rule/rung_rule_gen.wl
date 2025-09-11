@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*General-Purpose Functions*)
 
 
@@ -12,6 +12,9 @@ If[Head[$FrontEnd] === FrontEndObject,
   $FileDirectory = Directory[]
 ];
 Print["The file directory is: ", $FileDirectory];
+
+
+SetDirectory[$FileDirectory]
 
 
  $DataPath = StringDrop[DirectoryName[$FileDirectory],-1];
@@ -26,7 +29,7 @@ map[function_,list_]:=If[Length[list]>0,Module[{monitor=0,len=Length[list],newFc
 littleGroup[graph_]:=Block[{num=Numerator[graph],den=Denominator[graph]},num=Join@@(Function[{y,z},y&/@Range[z]]@@@FactorList[num][[2;;-1]]);den=Join@@(Function[{y,z},y&/@Range[z]]@@@FactorList[den][[2;;-1]]);-(Count[num,#,{0,\[Infinity]}]-Count[den,#,{0,\[Infinity]}])&/@Sort[DeleteDuplicates[Flatten[List@@@Cases[graph,_x,{0,\[Infinity]}]]]]];
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Basic Data Functions*)
 
 
@@ -43,7 +46,7 @@ fnumtodialnum[loop_,fnum_]:=Position[Table[Range[#[[i]]+1,#[[i+1]]],{i,1,Length[
 dialnumtofnum[loop_,{dial_,num_}]:=(Table[Range[#[[i]]+1,#[[i+1]]],{i,1,Length[#]-1}]&@Prepend[Accumulate[Length/@fGraphNums[loop]],0])[[dial,num]]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Graph Analysis*)
 
 
@@ -98,7 +101,7 @@ displayfgraph[fgraph_]:=Column[{PlanarGraph[Denominator[fgraph]/.Times->List/.x-
 (*generate new graphs via binary relations*)
 
 
- Button[Get["IGraphM`"], FrontEndExecute[{FrontEnd`SelectionMove[FrontEnd`EvaluationCell[], After, CellGroup], FrontEnd`NotebookWrite[FrontEnd`EvaluationNotebook[], #, All], FrontEnd`SelectionEvaluateCreateCell[FrontEnd`EvaluationNotebook[]]}]& , Appearance -> None, BaseStyle -> "Link", Evaluator -> None, Method -> "Preemptive"];
+Get["IGraphM`"]
 
 
 detectnonisomorphicdoubletrianglesfgraph[fgraph_]:=Module[{alldts,dtscurrent,dtsnoniso,autos},alldts=FindIsomorphicSubgraph[(fgraph//displayfgraph)[[1,1]],Graph[{{1,2},{1,3},{2,3},{1,4},{3,4}}],All];
@@ -112,9 +115,6 @@ dtscurrent=Complement[dtscurrent,Table[VertexReplace[dtscurrent[[1]],ii],{ii,aut
 
 
 doubletrianglesfgraph[fgraph_]:=FindIsomorphicSubgraph[(fgraph//displayfgraph)[[1,1]],Graph[{{1,2},{1,3},{2,3},{1,4},{3,4}}],All]
-
-
-fGraphListcan[nn][[1]]
 
 
 myRungRule[fg_]:=Module[{dts,nn,newfgs},
@@ -155,6 +155,10 @@ canonicalizefgraph/@newfgs]
 (*L+n loop graphs from L loops (only rung rule)*)
 
 
+(* ::Subsubsection:: *)
+(*functions and setup*)
+
+
 generateRungWithCoeff[graphsWithCoeff_]:=Module[{rrgen},
 rrgen={rungrulegenerate[#[[1]]],#[[2]]}&/@graphsWithCoeff;
 DeleteDuplicates[Sequence@@Thread[#]&/@rrgen]
@@ -171,11 +175,14 @@ DeleteDuplicates[Sequence@@Thread[#]&/@rrgen]
 edgeListNX[edges_List]:=StringReplace[StringReplace[ StringReplace[ToString[edges/. UndirectedEdge->List],{"{"->"(","}"->")"}],{"(("->"[(","))"->")]"}],"()"->"[]"]
 
 
-nn=9;
+nn=6;
+
+
+rungrulegenerate[fGraphListcan[6]]
 
 
 (* ::Subsubsection:: *)
-(*8 loop from 7 loops*)
+(*9 loop from 10 loops*)
 
 
 gWithCoeff=Thread[{fGraphListcan[nn],amplitudeCoefficients[nn]}];
@@ -207,14 +214,10 @@ Print[ToString[nn]<>"to"<>ToString[nn+1]<>"Completed. Lenght ", Length[coefDen] 
 
 
 (* ::Subsubsection:: *)
-(*8 loop from 7 loops*)
+(*10 loop from 11 loops*)
 
 
 result//Length
-
-
-{time,result2}=Timing[parallelGenerateRungWithCoeff[result]];
-time
 
 
 {time,result2}=Timing[generateRungWithCoeff[result]];
