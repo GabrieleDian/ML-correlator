@@ -3,8 +3,8 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  train_loop_order: ['5','6','7']           # Which loop to use for training
-  test_loop_order: '7to9'   
+  train_loop_order: ['5','6','7','7to8','7to9','7to10']           # Which loop to use for training
+  test_loop_order: '8N7'   
   extra_train: true              # Which loop to use for testing
   
 # Feature configuration
@@ -61,7 +61,7 @@ training:
 experiment:
   seed: 42
   use_wandb: true
-  wandb_project: "train_5_6_7_test_7to8_all_scalar"
+  wandb_project: "train_5_6_7toall_test_8N7_all_scalar"
   wandb_name: "gin_simple"
   save_model: false
   model_dir: "models"
