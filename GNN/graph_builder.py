@@ -99,25 +99,22 @@ class SimpleGraphBuilder:
         return data
 
 
-def create_simple_dataset(loop_order, selected_features=None, normalize=True, 
+def create_simple_dataset(file_ext='7', selected_features=None, normalize=True, 
                           data_dir='Graph_Edge_Data', scaler=None, 
-                          max_features=None, extra_train=False):
+                          max_features=None):
     """
     Create dataset using pre-computed features.
     Args:
-        loop_order: Loop order (int) or list of loop orders (e.g., [7,8,9] for training, 10 for testing)
+        file_ext: Loop order(s) to load (int or list of int)
         selected_features: List of feature names to use
         normalize: Whether to normalize features
         scaler: Pre-fitted scaler to use (if None, will fit new scaler when normalize=True)
         max_features: Force a maximum feature dimension (pads/truncates if needed)
-        extra_train: If True, load features from 'features_loop_{loop_order}to_extra'
     Returns:
         dataset: List of PyG Data objects
         scaler: StandardScaler object (if normalize=True)
         current_max_features: Maximum feature dimension before padding/truncating
     """
-    # Handle single loop order vs multiple loop orders
-    loop_orders = [loop_order] if isinstance(loop_order, int) else loop_order
 
     # Default features
     if selected_features is None:
@@ -126,20 +123,17 @@ def create_simple_dataset(loop_order, selected_features=None, normalize=True,
     print(f"Loading features: {selected_features}")
     dataset = []
     idx_counter = 0
+    feature_source =  f"features_loop_{file_ext}"
+    print(f"Loading features from {feature_source}...")
 
-    for lo in loop_orders:
-        # Switch feature source depending on extra_train
-        feature_source = f"features_loop_{lo}to" if extra_train else f"features_loop_{lo}"
-        print(f"Loading features from {feature_source}...")
+    features_dict, labels = load_saved_features(file_ext, selected_features, data_dir)
+    graph_infos = load_graph_structure(file_ext, data_dir)
 
-        features_dict, labels = load_saved_features(lo, selected_features, data_dir, extra_train=extra_train)
-        graph_infos = load_graph_structure(lo, data_dir, extra_train=extra_train)
-
-        for local_idx, (graph_info, label) in enumerate(zip(graph_infos, labels)):
-            builder = SimpleGraphBuilder(graph_info, features_dict, label, local_idx)
-            data = builder.build(selected_features)
-            dataset.append(data)
-            idx_counter += 1
+    for local_idx, (graph_info, label) in enumerate(zip(graph_infos, labels)):
+        builder = SimpleGraphBuilder(graph_info, features_dict, label, local_idx)
+        data = builder.build(selected_features)
+        dataset.append(data)
+        idx_counter += 1
 
     print(f"Created dataset with {len(dataset)} graphs")
     print(f"Feature dimension: {dataset[0].x.shape[1]}")
@@ -194,7 +188,8 @@ if __name__ == "__main__":
     
     # Create dataset with specific features
     dataset, scaler = create_simple_dataset(
-        loop_order=8,
+        file_ext='7',
+        selected_features=['degree', 'betweenness', 'clustering'],
         normalize=True
     )
     

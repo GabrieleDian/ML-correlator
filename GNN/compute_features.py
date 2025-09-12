@@ -9,33 +9,20 @@ from joblib import Parallel, delayed
 from scipy.linalg import eigh
 
 
-def load_graph_edges(loop_order, base_dir=None, extra_train=False):
+def load_graph_edges(file_ext='7', base_dir=None):
     """
-    Load graphs for a loop_order. If extra_train=True, only load files of the form
-    den_graph_data_{loop_order}to*.csv
+    Load graph edges and labels from CSV file.
     """
     if base_dir is None:
         base_dir = BASE_DIR if 'BASE_DIR' in globals() else Path('../Graph_Edge_Data')
 
     edges_list = []
     labels = []
-
-    if extra_train:
-        # Only extra graphs
-        pattern = base_dir / f'den_graph_data_{loop_order}to*.csv'
-        files = list(pattern.parent.glob(pattern.name))
-        if not files:
-            raise FileNotFoundError(f"No extra files found matching {pattern}")
-        for f in files:
-            df = pd.read_csv(f)
-            edges_list.extend([ast.literal_eval(e) for e in df['EDGES']])
-            labels.extend(df['COEFFICIENTS'].tolist())
-    else:
-        # Only standard graphs
-        file_path = base_dir / f'den_graph_data_{loop_order}.csv'
-        df = pd.read_csv(file_path)
-        edges_list = [ast.literal_eval(e) for e in df['EDGES']]
-        labels = df['COEFFICIENTS'].tolist()
+    # Only standard graphs
+    file_path = base_dir / f'den_graph_data_{file_ext}.csv'
+    df = pd.read_csv(file_path)
+    edges_list = [ast.literal_eval(e) for e in df['EDGES']]
+    labels = df['COEFFICIENTS'].tolist()
 
     return edges_list, labels
 
@@ -188,43 +175,39 @@ def compute_pagerank_features(graphs_batch):
 import networkx as nx
 
 def compute_face_count_features(graphs_batch):
-    """
-    Compute face count features for a batch of planar graphs.
-    For each node, count how many distinct faces (including outer face) it belongs to.
-    """
+    """Compute face count features for a batch of planar graphs."""
     features = []
-
+    
     for edges in graphs_batch:
-        # Build graph: support edges as (u,v) or (u,v,w)
-        G = nx.Graph()
-        for e in edges:
-            if len(e) == 2:
-                u, v = e
-            elif len(e) == 3:
-                u, v, _ = e
-            else:
-                raise ValueError(f"Unexpected edge format: {e}")
-            G.add_edge(u, v)
+        # Build graph in the same way as your PageRank code
+        G, n_nodes = edges_to_networkx(edges)
 
-        # Ensure nodes are labeled consistently
-        nodes = sorted(G.nodes())
-        face_count = {n: 0 for n in nodes}
-
-        # Get planar embedding
+        # Check planarity
         is_planar, embedding = nx.check_planarity(G)
         if not is_planar:
             raise ValueError("Graph is not planar!")
 
-        # Enumerate faces
-        faces = list(embedding.faces())
+        # Collect unique faces
+        seen_faces = set()
+        faces = []
+        for u, v in embedding.edges():
+            face = tuple(embedding.traverse_face(u, v))
+            # Normalize face so duplicates are detected
+            min_idx = face.index(min(face))
+            normalized = face[min_idx:] + face[:min_idx]
+            if normalized not in seen_faces:
+                seen_faces.add(normalized)
+                faces.append(face)
 
-        # Count node appearances in faces
+        # Count face participation per node
+        face_count = {n: 0 for n in range(n_nodes)}
         for face in faces:
             for n in face:
                 face_count[n] += 1
 
-        # Append features in node order
-        features.append([face_count[n] for n in nodes])
+        # Store as list in node order
+        face_count_list = [face_count[i] for i in range(n_nodes)]
+        features.append(face_count_list)
 
     return features
 
@@ -257,27 +240,31 @@ FEATURE_FUNCTIONS = {
     'face_count': compute_face_count_features,
     'W5_indicator': compute_W5_features
 }
+
+import numpy as np
+
+# Combine features of different dimensions
 def pad_features(features_list, max_nodes):
-    """Pad features to have consistent size across all graphs."""
     padded = []
     for features in features_list:
-        if len(features) < max_nodes:
-            # Pad with zeros
-            padded_features = features + [0] * (max_nodes - len(features))
+        features = np.array(features)
+        n_nodes = features.shape[0]
+        if n_nodes < max_nodes:
+            pad_shape = (max_nodes - n_nodes,) + features.shape[1:]
+            features_padded = np.vstack([features, np.zeros(pad_shape)])
         else:
-            padded_features = features[:max_nodes]
-        padded.append(padded_features)
+            features_padded = features[:max_nodes]
+        padded.append(features_padded)
     return np.array(padded)
 
 
 
-def compute_and_save_feature(feature_name, loop_order, chunk_size=1000, n_jobs=4,
-                             extra_train=False, base_dir=None):
+def compute_and_save_feature(feature_name, file_ext='7',chunk_size=1000, n_jobs=4,base_dir=None):
     if base_dir is None:
         base_dir = Path('../Graph_Edge_Data')
 
     # Folder naming
-    folder_name = f"features_loop_{loop_order}to" if extra_train else f"features_loop_{loop_order}"
+    folder_name = f"features_loop_{file_ext}" 
     output_dir = base_dir / folder_name
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -289,11 +276,14 @@ def compute_and_save_feature(feature_name, loop_order, chunk_size=1000, n_jobs=4
     print(f"Computing {feature_name} for {folder_name}...")
 
     # Load edges
-    edges_list, _ = load_graph_edges(loop_order, base_dir, extra_train=extra_train)
+    edges_list, _ = load_graph_edges(file_ext, base_dir )
 
     n_graphs = len(edges_list)
     max_nodes = max(len(set(u for e in edges for u in e)) for edges in edges_list)
-
+    print(f"Max nodes in graphs: {max_nodes}")
+    if feature_name not in FEATURE_FUNCTIONS:
+        print(f"Feature {feature_name} not recognized. Skipping.")
+        return
     compute_func = FEATURE_FUNCTIONS[feature_name]
     all_features = []
 
@@ -310,7 +300,7 @@ def compute_and_save_feature(feature_name, loop_order, chunk_size=1000, n_jobs=4
             chunk_features = compute_func(chunk_edges)
             if chunk_features is None:
                 chunk_features = []
-
+        all_features.extend(chunk_features)
 
     features_array = pad_features(all_features, max_nodes)
     np.save(output_file, features_array)
@@ -318,17 +308,16 @@ def compute_and_save_feature(feature_name, loop_order, chunk_size=1000, n_jobs=4
 
 
 
-def compute_all_features(loop_order, chunk_size=1000, n_jobs=4, extra_train=False, base_dir=None):
-    folder_name = f"loop {loop_order}to" if extra_train else f"loop {loop_order}"
+def compute_all_features(file_ext=7, chunk_size=1000, n_jobs=4, base_dir=None):
+    folder_name = f"loop {file_ext}"
     print(f"Computing all features for {folder_name}...")
 
     for feature_name in FEATURE_FUNCTIONS.keys():
         compute_and_save_feature(
             feature_name,
-            loop_order,
+            file_ext=file_ext,
             chunk_size=chunk_size,
             n_jobs=n_jobs,
-            extra_train=extra_train,
             base_dir=base_dir
         )
 
@@ -342,7 +331,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default=None, help='Path to config file')
-    parser.add_argument('--loop', type=int, help='Loop order (overrides config)')
+    parser.add_argument('--file_ext', type=str, help='Loop order (overrides config)')
     parser.add_argument('--feature', type=str, help='Specific feature to compute')
     parser.add_argument('--chunk-size', type=int, help='Chunk size (overrides config)')
     parser.add_argument('--n-jobs', type=int, help='Number of jobs (overrides config)')
@@ -351,11 +340,8 @@ if __name__ == "__main__":
     # Default config
     config = {
         'data': {
-            'train_loop_order': None,
-            'test_loop_order': None,
-            'base_dir': '../Graph_Edge_Data',
-            'extra_train': False
-        },
+            'file_ext': 7,
+            'base_dir': '../Graph_Edge_Data',        },
         'features': {
             'chunk_size': 100,
             'n_jobs': 1,
@@ -374,59 +360,27 @@ if __name__ == "__main__":
             else:
                 config[section] = user_config[section]
 
-    # Determine loop_order_list
-    if args.loop is not None:
-        loop_order_list = [args.loop]
-    elif config['data'].get('train_loop_order') is not None:
-        loop_order_list = config['data']['train_loop_order']
-        if isinstance(loop_order_list, int):
-            loop_order_list = [loop_order_list]
-    elif config['data'].get('test_loop_order') is not None:
-        loop_order_list = config['data']['test_loop_order']
-        if isinstance(loop_order_list, int):
-            loop_order_list = [loop_order_list]
-    else:
-        loop_order_list = [1]  # fallback
-
-    # Determine extra_train from config (strict boolean)
-    extra_train = config['data'].get('extra_train', False)
-    if not isinstance(extra_train, bool):
-        raise ValueError("extra_train in config must be true or false (boolean)")
-
-    # Set chunk_size, n_jobs, base_dir
+    # Set chunk_size, n_jobs, base_dir and file_ext
+    file_ext = args.file_ext if args.file_ext else config['data']['file_ext']
     chunk_size = args.chunk_size if args.chunk_size else config['features']['chunk_size']
     n_jobs = args.n_jobs if args.n_jobs else config['features']['n_jobs']
     base_dir = Path(config['data'].get('base_dir', '../Graph_Edge_Data'))
 
-    # Iterate over loops
-    for loop in loop_order_list:
-        if args.feature:
-            # Compute a single feature
+    
+            # Compute multiple or all features
+    if config['features']['compute_all']:
+        compute_all_features(
+            file_ext=file_ext,
+            chunk_size=chunk_size,
+            n_jobs=n_jobs,
+            base_dir=base_dir
+        )
+    else:
+        for feature_name in config['features']['features_to_compute']:
             compute_and_save_feature(
-                args.feature,
-                loop_order=loop,
+                feature_name,
+                file_ext=file_ext,
                 chunk_size=chunk_size,
                 n_jobs=n_jobs,
-                extra_train=extra_train,
                 base_dir=base_dir
-            )
-        else:
-            # Compute multiple or all features
-            if config['features']['compute_all']:
-                compute_all_features(
-                    loop_order=loop,
-                    chunk_size=chunk_size,
-                    n_jobs=n_jobs,
-                    extra_train=extra_train,
-                    base_dir=base_dir
-                )
-            else:
-                for feature_name in config['features']['features_to_compute']:
-                    compute_and_save_feature(
-                        feature_name,
-                        loop_order=loop,
-                        chunk_size=chunk_size,
-                        n_jobs=n_jobs,
-                        extra_train=extra_train,
-                        base_dir=base_dir
                     )
