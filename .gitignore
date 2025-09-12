@@ -9,3 +9,4 @@ Graph_Edge_Data/features_loop_10/adjacency_columns.npy
 Graph_Edge_Data/features_loop_10/identity_columns.npy
 inversecusprule.nb
 inversecusprule.wl
+GNN/wandb
