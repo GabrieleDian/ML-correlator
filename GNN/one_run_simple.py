@@ -13,14 +13,6 @@ from graph_builder import create_simple_dataset, quick_dataset_stats
 from training_utils import train
 from types import SimpleNamespace
 
-def parse_loop_orders(value):
-    """Parse loop orders - accepts single int or comma-separated list"""
-    if ',' in value:
-        # Multiple values: "7,8,9"
-        return [int(x.strip()) for x in value.split(',')]
-    else:
-        # Single value: "7"
-        return int(value)
 
 def config_to_namespace(config_dict):
     """Convert nested config dict to SimpleNamespace for compatibility."""
@@ -29,7 +21,6 @@ def config_to_namespace(config_dict):
         base_dir=config_dict.get('data', {}).get('base_dir', '../Graph_Edge_Data'),
         train_loop_order=config_dict.get('data', {}).get('train_loop_order', None),
         test_loop_order=config_dict.get('data', {}).get('test_loop_order', None),
-        extra_train=config_dict.get('data', {}).get('extra_train', False),
 
         # Model configuration
         model_name=config_dict.get('model', {}).get('name', 'gin'),
@@ -103,10 +94,10 @@ def main():
         # Normal run - parse command line arguments
         parser = argparse.ArgumentParser(description='Train GNN with pre-computed features')
         parser.add_argument('--config', type=str, default='config.yaml', help='Path to config file')
-        parser.add_argument('--train_loop', type=parse_loop_orders, 
-                   help='Train Loop order(s) - single int (7) or comma-separated list (7,8,9)')
-        parser.add_argument('--test_loop', type=parse_loop_orders, default=None,
-                   help='Test Loop order(s) - single int or comma-separated list')
+        parser.add_argument('--train_loop', type=str, 
+                   help='Train Loop order(s) - single string "7" , comma-separated list (7,8,9) or  "(7to8","7to9","7to1")')
+        parser.add_argument('--test_loop', type=str, default=None,
+                   help='Test Loop order(s) - single string "7" , comma-separated list (7,8,9) or  "(7to8","7to9","7to1")')
         parser.add_argument('--features', nargs='+', help='Features to use (overrides config)')
         parser.add_argument('--epochs', type=int, help='Number of epochs (overrides config)')
         parser.add_argument('--seed', type=int, help='Random seed (overrides config)')
@@ -147,55 +138,70 @@ def main():
                 config_dict['experiment'] = {}
             config_dict['experiment']['seed'] = args.seed
     
+    # Handle properly list of values for training and testing.
+    import ast
+    def normalize_loop_order(value):
+        """
+        Normalize loop order input into a list of strings.
+        Accepts: str ("7", "7to8", "7,8,9", "['7','8']")
+                or list
+        Returns: list[str]
+        """
+        if isinstance(value, list):
+            return [str(v) for v in value]
+
+        if isinstance(value, str):
+            # Try to parse a Python list string
+            try:
+                parsed = ast.literal_eval(value)
+                if isinstance(parsed, list):
+                    return [str(v) for v in parsed]
+            except Exception:
+                pass
+            # Handle comma-separated case
+            if "," in value:
+                return [v.strip() for v in value.split(",")]
+            return [value.strip()]
+        raise ValueError(f"Unsupported loop order format: {value}")
     # Extract parameters with safe defaults
-    train_loop_order = config_dict.get('data', {}).get('train_loop_order', 7)
-    test_loop_order = config_dict.get('data', {}).get('test_loop_order', 8)
-    extra_train = config_dict.get('data', {}).get('extra_train', False)
+    train_loop_orders = normalize_loop_order(config_dict.get('data', {}).get('train_loop_order', '7'))
+    test_loop_orders = normalize_loop_order(config_dict.get('data', {}).get('test_loop_order', '8'))
     selected_features = config_dict.get('features', {}).get('selected_features', ['degree'])
     seed = config_dict.get('experiment', {}).get('seed', 42)
-    base_dir = config_dict.get('data', {}).get('base_dir', 'Graph_Edge_Data')  # Use config path with fallback    # Set random seeds
+    base_dir = config_dict.get('data', {}).get('base_dir', 'Graph_Edge_Data')  # Use config path with fallback
+    # Set random seeds
     torch.manual_seed(seed)
     np.random.seed(seed)
     
-    print(f"Training on loop orders {train_loop_order}, testing on loop orders {test_loop_order} with features: {selected_features}")
+    print(f"Training on loop orders {train_loop_orders}, testing on loop orders {test_loop_orders} with features: {selected_features}")
     
-        # Create training dataset
-    if extra_train:
-        # Load both "extra" and "normal" training sets
-        train_dataset_extra, train_scaler, max_features = create_simple_dataset(
-            loop_order=train_loop_order,
+        # Build training dataset
+    train_datasets = []
+    train_scaler = None
+    max_features = None
+
+    for file_ext in train_loop_orders:
+        ds, scaler, feats = create_simple_dataset(
+            file_ext=file_ext,
             selected_features=selected_features,
             normalize=True,
             data_dir=base_dir,
-            extra_train=True
+            scaler=train_scaler,
+            max_features=max_features
         )
-        train_dataset_normal, _, _ = create_simple_dataset(
-            loop_order=train_loop_order,
-            selected_features=selected_features,
-            normalize=True,
-            scaler=train_scaler,       # keep same scaler
-            max_features=max_features, # keep same dimensions
-            data_dir=base_dir,
-            extra_train=False
-        )
+        train_datasets.append(ds)
 
-        # Combine both into final training dataset
-        train_dataset = train_dataset_extra + train_dataset_normal
-        print(f"Combined training dataset: {len(train_dataset)} graphs "
-            f"(extra: {len(train_dataset_extra)}, normal: {len(train_dataset_normal)})")
+        # Capture scaler/max_features from the first dataset
+        if train_scaler is None:
+            train_scaler = scaler
+        if max_features is None:
+            max_features = feats
 
-    else:
-        # Normal behavior
-        train_dataset, train_scaler, max_features = create_simple_dataset(
-            loop_order=train_loop_order,
-            selected_features=selected_features,
-            normalize=True,
-            data_dir=base_dir,
-            extra_train=False
-        )
+    # Concatenate into a single training dataset
+    train_dataset = torch.utils.data.ConcatDataset(train_datasets)
 
-    # Handle test dataset
-    if test_loop_order is None or test_loop_order == train_loop_order:
+    # Build test dataset
+    if test_loop_orders == train_loop_orders:
         # Do 80-20 split on training data
         train_size = int(0.8 * len(train_dataset))
         test_size = len(train_dataset) - train_size
@@ -203,19 +209,20 @@ def main():
             train_dataset, [train_size, test_size],
             generator=torch.Generator().manual_seed(42)
         )
-        print(f"Train size: {train_size}, Test size: {test_size}")
     else:
-        # Use separate test data
-        test_dataset, _, _ = create_simple_dataset(
-            loop_order=test_loop_order,
-            selected_features=selected_features,
-            normalize=True,
-            scaler=train_scaler,       # reuse training scaler
-            max_features=max_features, # enforce same dims
-            data_dir=base_dir,
-            extra_train=False          # tests never use "extra"
-        )
+        test_datasets = []
+        for file_ext in test_loop_orders:
+            ds, _, _ = create_simple_dataset(
+                file_ext=file_ext,
+                selected_features=selected_features,
+                normalize=True,
+                scaler=train_scaler,
+                max_features=max_features,
+                data_dir=base_dir
+            )
+            test_datasets.append(ds)
 
+        test_dataset = torch.utils.data.ConcatDataset(test_datasets)
     
     # Print dataset statistics
     quick_dataset_stats(train_dataset)
@@ -225,7 +232,7 @@ def main():
     config.in_channels = train_dataset[0].x.shape[1]
     
     # Update experiment name
-    config.experiment_name = f"{config.model_name}_train_loop_{train_loop_order}_,test_loop_{test_loop_order}_train_{'_'.join(selected_features)}"
+    config.experiment_name = f"{config.model_name}_train_loop_{train_loop_orders}_,test_loop_{test_loop_orders}_train_{'_'.join(selected_features)}"
     
     print(f"\nTraining configuration:")
     print(f"  Model: {config.model_name}")

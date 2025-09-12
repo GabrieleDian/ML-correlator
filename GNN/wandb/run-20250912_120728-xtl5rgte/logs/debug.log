@@ -1,0 +1,34 @@
+2025-09-12 12:07:28,846 INFO    MainThread:47325 [wandb_setup.py:_flush():81] Current SDK version is 0.20.1
+2025-09-12 12:07:28,847 INFO    MainThread:47325 [wandb_setup.py:_flush():81] Configure stats pid to 47325
+2025-09-12 12:07:28,847 INFO    MainThread:47325 [wandb_setup.py:_flush():81] Loading settings from /home/rigers/.config/wandb/settings
+2025-09-12 12:07:28,847 INFO    MainThread:47325 [wandb_setup.py:_flush():81] Loading settings from /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/settings
+2025-09-12 12:07:28,847 INFO    MainThread:47325 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2025-09-12 12:07:28,847 INFO    MainThread:47325 [wandb_init.py:setup_run_log_directory():703] Logging user logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250912_120728-xtl5rgte/logs/debug.log
+2025-09-12 12:07:28,847 INFO    MainThread:47325 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250912_120728-xtl5rgte/logs/debug-internal.log
+2025-09-12 12:07:28,847 INFO    MainThread:47325 [wandb_init.py:init():831] calling init triggers
+2025-09-12 12:07:28,847 INFO    MainThread:47325 [wandb_init.py:init():836] wandb.init called with sweep_config: {'config': 'configs/config.yaml', 'dropout': 0.2386747550094596, 'learning_rate': 0.0005832606202289923, 'weight_decay': 3.242413896186194e-05}
+config: {'_wandb': {}}
+2025-09-12 12:07:28,847 INFO    MainThread:47325 [wandb_init.py:init():872] starting backend
+2025-09-12 12:07:29,053 INFO    MainThread:47325 [wandb_init.py:init():875] sending inform_init request
+2025-09-12 12:07:29,055 INFO    MainThread:47325 [wandb_init.py:init():883] backend started and connected
+2025-09-12 12:07:29,056 INFO    MainThread:47325 [wandb_run.py:_config_callback():1358] config_cb None None {'config': 'configs/config.yaml', 'dropout': 0.2386747550094596, 'learning_rate': 0.0005832606202289923, 'weight_decay': 3.242413896186194e-05}
+2025-09-12 12:07:29,057 INFO    MainThread:47325 [wandb_init.py:init():956] updated telemetry
+2025-09-12 12:07:29,060 INFO    MainThread:47325 [wandb_init.py:init():980] communicating run to backend with 90.0 second timeout
+2025-09-12 12:07:29,664 INFO    MainThread:47325 [wandb_init.py:init():1032] starting run threads in backend
+2025-09-12 12:07:29,736 INFO    MainThread:47325 [wandb_run.py:_console_start():2453] atexit reg
+2025-09-12 12:07:29,736 INFO    MainThread:47325 [wandb_run.py:_redirect():2301] redirect: wrap_raw
+2025-09-12 12:07:29,736 INFO    MainThread:47325 [wandb_run.py:_redirect():2370] Wrapping output streams.
+2025-09-12 12:07:29,736 INFO    MainThread:47325 [wandb_run.py:_redirect():2393] Redirects installed.
+2025-09-12 12:07:29,737 INFO    MainThread:47325 [wandb_init.py:init():1078] run started, returning control to user process
+2025-09-12 12:07:33,731 INFO    MainThread:47325 [wandb_init.py:setup_run_log_directory():703] Logging user logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250912_120733-xtl5rgte/logs/debug.log
+2025-09-12 12:07:33,731 INFO    MainThread:47325 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to /home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250912_120733-xtl5rgte/logs/debug-internal.log
+2025-09-12 12:07:33,731 INFO    MainThread:47325 [wandb_init.py:init():831] calling init triggers
+2025-09-12 12:07:33,731 INFO    MainThread:47325 [wandb_init.py:init():836] wandb.init called with sweep_config: {'config': 'configs/config.yaml', 'dropout': 0.2386747550094596, 'learning_rate': 0.0005832606202289923, 'weight_decay': 3.242413896186194e-05}
+config: {'base_dir': '../Graph_Edge_Data', 'train_loop_order': ['5', '6', '7'], 'test_loop_order': '7to9', 'model_name': 'gin', 'hidden_channels': 128, 'num_layers': 3, 'dropout': 0.2386747550094596, 'lr': 0.0005832606202289923, 'weight_decay': 3.060739988229477e-05, 'epochs': 100, 'batch_size': 64, 'scheduler_type': 'onecycle', 'threshold': 0.5, 'log_threshold_curves': False, 'use_wandb': True, 'project': 'train_5_6_7_test_7to8_all_scalar', 'experiment_name': "gin_train_loop_['5', '6', '7']_,test_loop_['7to9']_train_eigen_1_eigen_2_eigen_3_degree_betweenness_pagerank_closeness_clustering_face_count", 'in_channels': 9, '_wandb': {}}
+2025-09-12 12:08:40,805 INFO    MainThread:47325 [wandb_run.py:_finish():2219] finishing run aliajrigers-desydeutsches-elektronen-synchrotron/ML-correlator-GNN/xtl5rgte
+2025-09-12 12:08:40,805 INFO    MainThread:47325 [wandb_run.py:_atexit_cleanup():2418] got exitcode: 0
+2025-09-12 12:08:40,805 INFO    MainThread:47325 [wandb_run.py:_restore():2400] restore
+2025-09-12 12:08:40,805 INFO    MainThread:47325 [wandb_run.py:_restore():2406] restore done
+2025-09-12 12:08:41,769 INFO    MainThread:47325 [wandb_run.py:_footer_history_summary_info():4000] rendering history
+2025-09-12 12:08:41,770 INFO    MainThread:47325 [wandb_run.py:_footer_history_summary_info():4032] rendering summary
+2025-09-12 12:08:41,770 INFO    MainThread:47325 [wandb_run.py:_footer_sync_info():3961] logging synced files

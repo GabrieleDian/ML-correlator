@@ -1,0 +1,16 @@
+{"time":"2025-09-10T19:15:30.036108566+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250910_191529-hyio28be/logs/debug-core.log"}
+{"time":"2025-09-10T19:15:30.343071078+02:00","level":"INFO","msg":"stream: created new stream","id":"hyio28be"}
+{"time":"2025-09-10T19:15:30.343109583+02:00","level":"INFO","msg":"stream: started","id":"hyio28be"}
+{"time":"2025-09-10T19:15:30.343156877+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"hyio28be"}
+{"time":"2025-09-10T19:15:30.343162302+02:00","level":"INFO","msg":"sender: started","stream_id":"hyio28be"}
+{"time":"2025-09-10T19:15:30.343201728+02:00","level":"INFO","msg":"handler: started","stream_id":"hyio28be"}
+{"time":"2025-09-10T19:15:30.552099176+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-09-10T19:16:00.334373446+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-09-10T19:16:00.334430791+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-09-10T19:16:01.335698262+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading history steps 13-99, summary, console lines 66-83","runtime_seconds":0.459256214},{"desc":"uploading config.yaml","runtime_seconds":0.389594644,"progress":"746B/746B"}],"total_operations":2}}
+{"time":"2025-09-10T19:16:01.363988917+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-09-10T19:16:01.981543727+02:00","level":"INFO","msg":"stream: closing","id":"hyio28be"}
+{"time":"2025-09-10T19:16:01.981555304+02:00","level":"INFO","msg":"handler: closed","stream_id":"hyio28be"}
+{"time":"2025-09-10T19:16:01.981568157+02:00","level":"INFO","msg":"sender: closed","stream_id":"hyio28be"}
+{"time":"2025-09-10T19:16:01.981564159+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"hyio28be"}
+{"time":"2025-09-10T19:16:01.981615605+02:00","level":"INFO","msg":"stream: closed","id":"hyio28be"}

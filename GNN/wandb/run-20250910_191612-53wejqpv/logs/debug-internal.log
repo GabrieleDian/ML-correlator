@@ -1,0 +1,16 @@
+{"time":"2025-09-10T19:16:12.225637362+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250910_191612-53wejqpv/logs/debug-core.log"}
+{"time":"2025-09-10T19:16:12.526230577+02:00","level":"INFO","msg":"stream: created new stream","id":"53wejqpv"}
+{"time":"2025-09-10T19:16:12.526260417+02:00","level":"INFO","msg":"stream: started","id":"53wejqpv"}
+{"time":"2025-09-10T19:16:12.526327642+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"53wejqpv"}
+{"time":"2025-09-10T19:16:12.526367861+02:00","level":"INFO","msg":"sender: started","stream_id":"53wejqpv"}
+{"time":"2025-09-10T19:16:12.526380568+02:00","level":"INFO","msg":"handler: started","stream_id":"53wejqpv"}
+{"time":"2025-09-10T19:16:12.93776828+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-09-10T19:16:42.443442768+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-09-10T19:16:42.443523513+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-09-10T19:16:43.444771628+02:00","level":"INFO","msg":"handler: operation stats","stats":{"operations":[{"desc":"uploading history steps 15-99, summary, console lines 66-83","runtime_seconds":0.208546809},{"desc":"uploading config.yaml","runtime_seconds":0.204505469,"progress":"746B/746B"}],"total_operations":2}}
+{"time":"2025-09-10T19:16:43.482967282+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-09-10T19:16:43.768420313+02:00","level":"INFO","msg":"stream: closing","id":"53wejqpv"}
+{"time":"2025-09-10T19:16:43.76848673+02:00","level":"INFO","msg":"handler: closed","stream_id":"53wejqpv"}
+{"time":"2025-09-10T19:16:43.768568077+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"53wejqpv"}
+{"time":"2025-09-10T19:16:43.768609931+02:00","level":"INFO","msg":"sender: closed","stream_id":"53wejqpv"}
+{"time":"2025-09-10T19:16:43.76884881+02:00","level":"INFO","msg":"stream: closed","id":"53wejqpv"}

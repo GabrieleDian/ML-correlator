@@ -1,0 +1,16 @@
+{"time":"2025-09-12T11:29:50.105769059+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250912_112949-imb3oudp/logs/debug-core.log"}
+{"time":"2025-09-12T11:29:50.4012044+02:00","level":"INFO","msg":"stream: created new stream","id":"imb3oudp"}
+{"time":"2025-09-12T11:29:50.401240142+02:00","level":"INFO","msg":"stream: started","id":"imb3oudp"}
+{"time":"2025-09-12T11:29:50.401294168+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"imb3oudp"}
+{"time":"2025-09-12T11:29:50.401307855+02:00","level":"INFO","msg":"handler: started","stream_id":"imb3oudp"}
+{"time":"2025-09-12T11:29:50.401334569+02:00","level":"INFO","msg":"sender: started","stream_id":"imb3oudp"}
+{"time":"2025-09-12T11:29:50.681375164+02:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-09-12T11:30:18.753307549+02:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-09-12T11:30:18.753354108+02:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-09-12T11:30:19.754737279+02:00","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2025-09-12T11:30:23.343770016+02:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-09-12T11:30:23.654863673+02:00","level":"INFO","msg":"stream: closing","id":"imb3oudp"}
+{"time":"2025-09-12T11:30:23.654882704+02:00","level":"INFO","msg":"handler: closed","stream_id":"imb3oudp"}
+{"time":"2025-09-12T11:30:23.654893085+02:00","level":"INFO","msg":"writer: Close: closed","stream_id":"imb3oudp"}
+{"time":"2025-09-12T11:30:23.654901108+02:00","level":"INFO","msg":"sender: closed","stream_id":"imb3oudp"}
+{"time":"2025-09-12T11:30:23.6549411+02:00","level":"INFO","msg":"stream: closed","id":"imb3oudp"}

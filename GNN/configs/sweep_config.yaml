@@ -12,13 +12,18 @@ parameters:
   config:
     value: configs/config.yaml
 
+  # Hyperparameters to sweep
+  dropout:
+    distribution: uniform
+    min: 0.2
+    max: 0.5
   learning_rate:
     distribution: uniform
     min : 0.0001
-    max : 0.0005
+    max : 0.001
   
   weight_decay:
     distribution: uniform
     min: 0.00001
-    max: 0.00005
+    max: 0.0001
 
