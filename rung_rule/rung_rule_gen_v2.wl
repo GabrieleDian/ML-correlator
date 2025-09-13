@@ -1,5 +1,9 @@
 (* ::Package:: *)
 
+(* ::Title:: *)
+(*Extra data with Rung rule *)
+
+
 (* ::Section::Closed:: *)
 (*General-Purpose Functions*)
 
@@ -94,7 +98,7 @@ cycle[dial_,ve_]:=If[MemberQ[dial,ve],Join[Take[dial,{Position[dial,ve][[1,1]],L
 displayfgraph[fgraph_]:=Column[{PlanarGraph[Denominator[fgraph]/.Times->List/.x->List,VertexLabels->"Name"],Numerator[fgraph]}]
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*generate new graphs via binary relations*)
 
 
@@ -219,39 +223,53 @@ DeleteDuplicates[rrgen]
 edgeListNX[edges_List]:=StringReplace[StringReplace[ StringReplace[ToString[edges/. UndirectedEdge->List],{"{"->"(","}"->")"}],{"(("->"[(","))"->")]"}],"()"->"[]"]
 
 
-nn=7;
+SetAttributes[ProdToList,Listable]
+ProdToList[x_]:=Block[{Times=List,Power=Table},If[Head[x]===List,Flatten@x,{x}]]
+
+
+nn=8;
 
 
 (* ::Subsubsection:: *)
 (*n+1 loop from n loops*)
 
 
-gWithCoeff=Thread[{amplitudeCoefficients[nn],fGraphListcan[nn]}];
+nonZeroFgraph=Select[Thread[{amplitudeCoefficients[nn],fGraphListcan[nn]}],!(#[[1]]===0)&];
 
 
-result=parallelGenerateRungWithCoeff[gWithCoeff];
+result=parallelGenerateRungWithCoeff[nonZeroFgraph];
 
 
-data={List@@@(List@@Denominator[#[[2]]]),#[[1]]}&/@result;
+Clear[nonZeroFgraph]
 
 
-sameDen=GatherBy[data,First];
+(*Save f-graph data*)
 
 
-coefDen=Map[Boole[Or@@#]&,Map[!(#[[2]]===0)&,sameDen,{2}]];
+data={#[[1]],List@@@(List@@Denominator[#[[2]]]),List@@@(ProdToList[Numerator[#[[2]]]])}&/@result;
 
 
-denEdges=edgeListNX/@(#[[1,1]]&/@sameDen);
+csv=Prepend[data,{"COEFFICIENTS","DEN_EDGES","NUM_EDGES"}];
+Export["f_graph_data_"<>ToString[nn]<>"to"<>ToString[nn+1]<>".csv",csv]
 
 
-dataDen =Transpose[{coefDen,denEdges}];
+Print[ToString[nn]<>"to"<>ToString[nn+1]<>"f-graph completed. Lenght ", Length[data] ]
 
 
-csv=Prepend[dataDen,{"COEFFICIENTS","EDGES"}];
+(*Save den-Graph data*)
+
+
+sameDen={1,#[[1,2]]}&/@ GatherBy[data,#[[2]]&];
+
+
+csv=Prepend[sameDen,{"COEFFICIENTS","EDGES"}];
 Export["den_graph_data_"<>ToString[nn]<>"to"<>ToString[nn+1]<>".csv",csv]
 
 
-Print[ToString[nn]<>"to"<>ToString[nn+1]<>"Completed. Lenght ", Length[coefDen] ]
+Print[ToString[nn]<>"to"<>ToString[nn+1]<>"den-Graph completed. Lenght ", Length[sameDen] ]
+
+
+Clear[data,sameDen]
 
 
 (*Test that the result is correct*)
@@ -264,58 +282,106 @@ First/@result===%*)
 (*n+2 loop from n loops*)
 
 
+extraLoop=2;
+
+
 result=parallelGenerateRungWithCoeff[result];
 
 
-data={List@@@(List@@Denominator[#[[2]]]),#[[1]]}&/@result;
+Clear[nonZeroFgraph]
 
 
-sameDen=GatherBy[data,First];
+(*Save f-graph data*)
 
 
-coefDen=Map[Boole[Or@@#]&,Map[!(#[[2]]===0)&,sameDen,{2}]];
+data={#[[1]],List@@@(List@@Denominator[#[[2]]]),List@@@(ProdToList[Numerator[#[[2]]]])}&/@result;
 
 
-denEdges=edgeListNX/@(#[[1,1]]&/@sameDen);
+csv=Prepend[data,{"COEFFICIENTS","DEN_EDGES","NUM_EDGES"}];
+Export["f_graph_data_"<>ToString[nn]<>"to"<>ToString[nn+extraLoop]<>".csv",csv]
 
 
-dataDen =Transpose[{coefDen,denEdges}];
+Print[ToString[nn]<>"to"<>ToString[nn+extraLoop]<>"f-graph completed. Lenght ", Length[data] ]
 
 
-csv=Prepend[dataDen,{"COEFFICIENTS","EDGES"}];
-Export["den_graph_data_"<>ToString[nn]<>"to"<>ToString[nn+2]<>".csv",csv]
+(*Save den-Graph data*)
 
 
-Print[ToString[nn]<>"to"<>ToString[nn+2]<>"Completed. Lenght ", Length[coefDen] ]
+sameDen={1,#[[1,2]]}&/@ GatherBy[data,#[[2]]&];
+
+
+csv=Prepend[sameDen,{"COEFFICIENTS","EDGES"}];
+Export["den_graph_data_"<>ToString[nn]<>"to"<>ToString[nn+extraLoop]<>".csv",csv]
+
+
+Print[ToString[nn]<>"to"<>ToString[nn+extraLoop]<>"den-Graph completed. Lenght ", Length[sameDen] ]
+
+
+Clear[data,sameDen]
+
+
+(*Test that the result is correct*)
+(*Position[fGraphListcan[7],#[[2]]]&/@result;
+Flatten[Extract[amplitudeCoefficients[7],%]]
+First/@result===%*)
 
 
 (* ::Subsubsection:: *)
 (*n+3 loop from n loops*)
 
 
+extraLoop=3;
+
+
 result=parallelGenerateRungWithCoeff[result];
 
 
-data={List@@@(List@@Denominator[#[[2]]]),#[[1]]}&/@result;
+Clear[nonZeroFgraph]
 
 
-sameDen=GatherBy[data,First];
+(*Save f-graph data*)
 
 
-coefDen=Map[Boole[Or@@#]&,Map[!(#[[2]]===0)&,sameDen,{2}]];
+data={#[[1]],List@@@(List@@Denominator[#[[2]]]),List@@@(ProdToList[Numerator[#[[2]]]])}&/@result;
 
 
-denEdges=edgeListNX/@(#[[1,1]]&/@sameDen);
+csv=Prepend[data,{"COEFFICIENTS","DEN_EDGES","NUM_EDGES"}];
+Export["f_graph_data_"<>ToString[nn]<>"to"<>ToString[nn+extraLoop]<>".csv",csv]
 
 
-dataDen =Transpose[{coefDen,denEdges}];
+Print[ToString[nn]<>"to"<>ToString[nn+extraLoop]<>"f-graph completed. Lenght ", Length[data] ]
 
 
-csv=Prepend[dataDen,{"COEFFICIENTS","EDGES"}];
-Export["den_graph_data_"<>ToString[nn]<>"to"<>ToString[nn+3]<>".csv",csv]
+(*Save den-Graph data*)
 
 
-Print[ToString[nn]<>"to"<>ToString[nn+3]<>"Completed. Lenght ", Length[coefDen] ]
+sameDen={1,#[[1,2]]}&/@ GatherBy[data,#[[2]]&];
+
+
+csv=Prepend[sameDen,{"COEFFICIENTS","EDGES"}];
+Export["den_graph_data_"<>ToString[nn]<>"to"<>ToString[nn+extraLoop]<>".csv",csv]
+
+
+Print[ToString[nn]<>"to"<>ToString[nn+extraLoop]<>"den-Graph completed. Lenght ", Length[sameDen] ]
+
+
+Clear[data,sameDen]
+
+
+(*Test that the result is correct*)
+(*Position[fGraphListcan[7],#[[2]]]&/@result;
+Flatten[Extract[amplitudeCoefficients[7],%]]
+First/@result===%*)
+
+
+(* ::Subsubsection:: *)
+(*Check*)
+
+
+(*Test that the result is correct*)
+(*Position[fGraphListcan[7],#[[2]]]&/@result;
+Flatten[Extract[amplitudeCoefficients[7],%]]
+First/@result===%*)
 
 
 (*Check runge rule is implemented correctly
