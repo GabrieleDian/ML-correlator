@@ -226,7 +226,7 @@ edgeListNX[edges_List]:=StringReplace[StringReplace[ StringReplace[ToString[edge
 nn=7;
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*n+1 loop from n loops*)
 
 
