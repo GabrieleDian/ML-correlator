@@ -223,7 +223,7 @@ ProdToList[x_]:=Block[{Times=List,Power=Table},If[Head[x]===List,Flatten@x,{x}]]
 edgeListNX[edges_List]:=StringReplace[StringReplace[ StringReplace[ToString[edges/. UndirectedEdge->List],{"{"->"(","}"->")"}],{"(("->"[(","))"->")]"}],"()"->"[]"]
 
 
-nn=7;
+nn=8;
 
 
 (* ::Subsubsection:: *)
@@ -246,7 +246,7 @@ data={1,edgeListNX[List@@@(List@@Denominator[#])]}&/@uniqueDen;
 
 
 csv=Prepend[data,{"COEFFICIENTS","EDGES"}];
-Export["den_graph_data_"<>ToString[nn]<>"to"<>ToString[nn+1]<>".csv",csv]
+Export["den_graph_reduced_data_"<>ToString[nn]<>"to"<>ToString[nn+1]<>".csv",csv]
 
 
 Print[ToString[nn]<>"to"<>ToString[nn+1]<>"Completed. Lenght ", Length[data] ]
@@ -258,7 +258,7 @@ Flatten[Extract[amplitudeCoefficients[7],%]]
 First/@result===%*)
 
 
-(* ::Subsubsection::Closed:: *)
+(* ::Subsubsection:: *)
 (*n+2 loop from n loops*)
 
 
@@ -275,7 +275,7 @@ data={1,edgeListNX[List@@@(List@@Denominator[#])]}&/@uniqueDen;
 
 
 csv=Prepend[data,{"COEFFICIENTS","EDGES"}];
-Export["den_graph_data_"<>ToString[nn]<>"to"<>ToString[nn+2]<>".csv",csv]
+Export["den_graph_reduced_data_"<>ToString[nn]<>"to"<>ToString[nn+2]<>".csv",csv]
 
 
 Print[ToString[nn]<>"to"<>ToString[nn+2]<>"Completed. Lenght ", Length[data] ]
@@ -304,7 +304,7 @@ data={1,edgeListNX[List@@@(List@@Denominator[#])]}&/@uniqueDen;
 
 
 csv=Prepend[data,{"COEFFICIENTS","EDGES"}];
-Export["den_graph_data_"<>ToString[nn]<>"to"<>ToString[nn+3]<>".csv",csv]
+Export["den_graph_reduced_data_"<>ToString[nn]<>"to"<>ToString[nn+3]<>".csv",csv]
 
 
 Print[ToString[nn]<>"to"<>ToString[nn+3]<>"Completed. Lenght ", Length[data] ]
