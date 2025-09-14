@@ -3,8 +3,8 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  train_loop_order: ['5','6','7','7to8','7to9','7to10']           # Which loop to use for training
-  test_loop_order: '8N7'   
+  train_loop_order: ['7','8','9','10']           # Which loop to use for training
+  test_loop_order: '11'   
   extra_train: true              # Which loop to use for testing
   
 # Feature configuration
@@ -20,7 +20,7 @@ features:
     - degree
     - betweenness
     - pagerank
-    - closenessc
+    - closeness
     - clustering
     - face_count
 
@@ -43,14 +43,14 @@ features:
 # Model configuration
 model:
   name: "gin"              # Model architecture: gin, gat, hybrid, planar, simple
-  hidden_channels: 128
+  hidden_channels: 512
   num_layers: 3
   dropout: 0.4
 
 # Training configuration
 training:
   epochs: 100
-  batch_size: 64
+  batch_size: 256
   learning_rate:   0.00028721941495727597
   weight_decay:   0.00003060739988229477
   scheduler_type: "onecycle"  # Options: onecycle, plateau, none
@@ -61,7 +61,7 @@ training:
 experiment:
   seed: 42
   use_wandb: true
-  wandb_project: "train_5_6_7toall_test_8N7_all_scalar"
+  wandb_project: "train_7_8_9_10_test_11_all_scalar"
   wandb_name: "gin_simple"
-  save_model: false
   model_dir: "models"
+  save_model: true
