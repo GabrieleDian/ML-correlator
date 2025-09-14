@@ -203,6 +203,10 @@ canonicalizefgraph/@newfgs]
 (*L+n loop graphs from L loops (only rung rule)*)
 
 
+(* ::Subsubsection:: *)
+(*Functions*)
+
+
 generateRungWithCoeff[graphsWithCoeff_]:=Module[{rrgen},
 rrgen={#[[1]],fullRungRule[#[[2]]]}&/@graphsWithCoeff;
 DeleteDuplicates[Sequence@@Thread[#]&/@rrgen]
@@ -223,7 +227,7 @@ ProdToList[x_]:=Block[{Times=List,Power=Table},If[Head[x]===List,Flatten@x,{x}]]
 edgeListNX[edges_List]:=StringReplace[StringReplace[ StringReplace[ToString[edges/. UndirectedEdge->List],{"{"->"(","}"->")"}],{"(("->"[(","))"->")]"}],"()"->"[]"]
 
 
-nn=8;
+nn=6;
 
 
 (* ::Subsubsection:: *)
@@ -233,20 +237,14 @@ nn=8;
 nonZeroFgraph=First/@Select[Thread[{fGraphListcan[nn],amplitudeCoefficients[nn]}],!(#[[2]]===0)&];
 
 
-result=Flatten[ParallelMap[fullRungRule,nonZeroFgraph],1];
-
-
-uniqueDen=First/@ GatherBy[result,Denominator];
-
-
-uniqueDen//Length
+uniqueDen=DeleteDuplicatesBy[Flatten[ParallelMap[fullRungRule, nonZeroFgraph], 1],Denominator];
 
 
 data={1,edgeListNX[List@@@(List@@Denominator[#])]}&/@uniqueDen;
 
 
 csv=Prepend[data,{"COEFFICIENTS","EDGES"}];
-Export["den_graph_reduced_data_"<>ToString[nn]<>"to"<>ToString[nn+1]<>".csv",csv]
+Export["den_graph_data_"<>ToString[nn]<>"to"<>ToString[nn+1]<>".csv",csv]
 
 
 Print[ToString[nn]<>"to"<>ToString[nn+1]<>"Completed. Lenght ", Length[data] ]
@@ -262,20 +260,14 @@ First/@result===%*)
 (*n+2 loop from n loops*)
 
 
-result=Flatten[ParallelMap[fullRungRule,uniqueDen],1];
-
-
-uniqueDen=First/@ GatherBy[result,Denominator];
-
-
-uniqueDen//Length
+uniqueDen=DeleteDuplicatesBy[Flatten[ParallelMap[fullRungRule, uniqueDen], 1],Denominator];
 
 
 data={1,edgeListNX[List@@@(List@@Denominator[#])]}&/@uniqueDen;
 
 
 csv=Prepend[data,{"COEFFICIENTS","EDGES"}];
-Export["den_graph_reduced_data_"<>ToString[nn]<>"to"<>ToString[nn+2]<>".csv",csv]
+Export["den_graph_data_"<>ToString[nn]<>"to"<>ToString[nn+2]<>".csv",csv]
 
 
 Print[ToString[nn]<>"to"<>ToString[nn+2]<>"Completed. Lenght ", Length[data] ]
@@ -291,26 +283,17 @@ First/@result===%*)
 (*n+3 loop from n loops*)
 
 
-result=Flatten[ParallelMap[fullRungRule,uniqueDen],1];
-
-
-uniqueDen=First/@ GatherBy[result,Denominator];
-
-
-uniqueDen//Length
+uniqueDen=DeleteDuplicatesBy[Flatten[ParallelMap[fullRungRule, uniqueDen], 1],Denominator];
 
 
 data={1,edgeListNX[List@@@(List@@Denominator[#])]}&/@uniqueDen;
 
 
 csv=Prepend[data,{"COEFFICIENTS","EDGES"}];
-Export["den_graph_reduced_data_"<>ToString[nn]<>"to"<>ToString[nn+3]<>".csv",csv]
+Export["den_graph_data_"<>ToString[nn]<>"to"<>ToString[nn+3]<>".csv",csv]
 
 
 Print[ToString[nn]<>"to"<>ToString[nn+3]<>"Completed. Lenght ", Length[data] ]
-
-
-2701
 
 
 (* ::Subsubsection:: *)
