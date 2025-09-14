@@ -98,7 +98,6 @@ displayfgraph[fgraph_]:=Column[{PlanarGraph[Denominator[fgraph]/.Times->List/.x-
 (*generate new graphs via binary relations*)
 
 
-Get["IGraphM`"]
 
 
 detectnonisomorphicdoubletrianglesfgraph[fgraph_]:=Module[{alldts,dtscurrent,dtsnoniso,autos},alldts=FindIsomorphicSubgraph[(fgraph//displayfgraph)[[1,1]],Graph[{{1,2},{1,3},{2,3},{1,4},{3,4}}],All];
@@ -223,7 +222,7 @@ ProdToList[x_]:=Block[{Times=List,Power=Table},If[Head[x]===List,Flatten@x,{x}]]
 edgeListNX[edges_List]:=StringReplace[StringReplace[ StringReplace[ToString[edges/. UndirectedEdge->List],{"{"->"(","}"->")"}],{"(("->"[(","))"->")]"}],"()"->"[]"]
 
 
-nn=8;
+nn=9;
 
 
 (* ::Subsubsection:: *)
