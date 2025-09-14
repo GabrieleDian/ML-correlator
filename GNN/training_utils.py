@@ -66,9 +66,9 @@ def train_epoch(model, train_loader, optimizer, device, scheduler=None, pos_weig
     all_labels = torch.cat(all_labels)
     all_probs = torch.cat(all_probs)
     metrics = compute_metrics(all_labels, all_preds)
-    metrics['roc_auc'] = roc_auc_score(all_labels.numpy(), all_probs.numpy())
+    metrics['roc_auc'] = roc_auc_score(all_labels.cpu().numpy(), all_probs.cpu().numpy())
     # PR-AUC
-    precision_vals, recall_vals, _ = precision_recall_curve(all_labels.numpy(),  all_probs.numpy())
+    precision_vals, recall_vals, _ = precision_recall_curve(all_labels.cpu().numpy(),  all_probs.cpu().numpy())
     pr_auc_val = auc(recall_vals, precision_vals)
     metrics['pr_auc'] = pr_auc_val
 
@@ -108,9 +108,9 @@ def evaluate(model, test_loader, device, pos_weight=None, threshold=0.5, log_thr
     all_preds = torch.cat(all_preds)
     all_labels = torch.cat(all_labels)
     metrics = compute_metrics(all_labels, all_preds)
-    metrics['roc_auc'] = roc_auc_score(all_labels.numpy(), all_probs.numpy())
+    metrics['roc_auc'] = roc_auc_score(all_labels.cpu().numpy(), all_probs.cpu().numpy())
     # PR-AUC
-    precision_vals, recall_vals, _ = precision_recall_curve(all_labels.numpy(),  all_probs.numpy())
+    precision_vals, recall_vals, _ = precision_recall_curve(all_labels.cpu().numpy(),  all_probs.cpu().numpy())
     pr_auc_val = auc(recall_vals, precision_vals)
     metrics['pr_auc'] = pr_auc_val
     
