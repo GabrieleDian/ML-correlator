@@ -18,7 +18,7 @@ model_cfg = cfg['model']
 features_cfg = cfg['features']
 data_cfg = cfg['data']
 experiment_cfg = cfg['experiment']
-
+train_loop_orders = data_cfg['train_loop_order']
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # ----------------------------
@@ -29,18 +29,29 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 hidden_dim = model_cfg['hidden_channels']
 num_layers = model_cfg['num_layers']
 dropout = model_cfg['dropout']
-
+base_dir = data_cfg['base_dir']
+selected_features = features_cfg['selected_features']
+train_datasets = []
+train_scaler = None
+max_features = None
 # ----------------------------
-# 3. Create test dataset
+# 3. Create train dataset
 # ----------------------------
-test_dataset, scaler, max_features = create_simple_dataset(
-    file_ext=data_cfg['test_loop_order'],
-    selected_features=features_cfg['selected_features'],
-    normalize=True,
-    data_dir=data_cfg['base_dir']
-)
+dir=data_cfg['base_dir']
+for file_ext in train_loop_orders:
+        ds, scaler, feats = create_simple_dataset(
+            file_ext=file_ext,
+            selected_features=selected_features,
+            normalize=True,
+            data_dir=base_dir,
+            scaler=train_scaler,
+            max_features=max_features
+        )
+        train_datasets.append(ds)
 
-num_features = test_dataset[0].x.shape[1]  # determine input features from dataset
+train_dataset = torch.utils.data.ConcatDataset(train_datasets)
+
+num_features = train_dataset[0].x.shape[1]  # determine input features from dataset
 
 # Now we can create the model
 model = create_gnn_model(
@@ -68,13 +79,13 @@ model.eval()
 # ----------------------------
 # 5. Run inference
 # ----------------------------
-test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=32, shuffle=False)
 
 all_preds = []
 all_labels = []
 
 with torch.no_grad():
-    for batch in test_loader:
+    for batch in train_loader:
         batch = batch.to(device)
         out = model(batch.x, batch.edge_index, batch.batch)
         preds = torch.sigmoid(out).cpu().numpy()
@@ -85,7 +96,7 @@ with torch.no_grad():
 # ----------------------------
 # 6. Save predictions
 # ----------------------------
-output_file = f"test_predictions_loop_{data_cfg['test_loop_order']}.csv"
+output_file = f"train_predictions_loop_{data_cfg['train_loop_order']}.csv"
 import numpy as np
 
 df = pd.DataFrame({
