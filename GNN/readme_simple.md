@@ -10,25 +10,28 @@ Create a `config.yaml` file (example provided) with your settings.
 
 ### 2. Compute Features (Do this ONCE)
 
+The code will take the file_ext from the config file, look for den_raph_data_{file_ext}.csv in the data directory, compute the specified features, and save them in a subdirectory `features_loop_{file_ext}`.
+
 ```bash
 # Compute all features using config
 python compute_features.py --config config.yaml
 
 # Or override loop from command line
-python compute_features.py --config config.yaml --loop 8
+python compute_features.py --config config.yaml --file_ext '8'
 
 # Or compute just one feature
 python compute_features.py --config config.yaml --feature degree
 ```
 
 ### 3. Train Model
+Again one can choose train_loop and test_loop to direct the code in the relevant graph files (either single or multiple loops can be specified for training).
 
 ```bash
-# Train using config file, specify train and test loop orders
-python one_run_simple.py --config config.yaml --train_loop 7,8 test_loop 9
+# Train using config file, specify train
+python one_run_simple.py --config config.yaml 
 
 # Override specific parameters
-python one_run_simple.py --config config.yaml --train_loop 8 test_loop 8 --epochs 200
+python one_run_simple.py --config config.yaml --train_loop '8' test_loop '8' --epochs 200
 python one_run_simple.py --config config.yaml --features degree betweenness
 ```
 
@@ -93,7 +96,7 @@ FEATURE_FUNCTIONS = {
 
 3. Compute it:
 ```bash
-python compute_features.py --loop 8 --feature my_feature
+python compute_features.py --file_ext '8' --feature my_feature
 ```
 
 ## Tips
