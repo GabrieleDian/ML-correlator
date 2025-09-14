@@ -3,14 +3,12 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  file_ext: '8N7'           # Which loop to use for training  
+  file_ext: '9to10'           # Which loop to use for training  
 # Feature configuration
 features:
   # Features to compute (when running compute_features.py)
-  compute_all: true
+  compute_all: false
   features_to_compute:
-    - identity_columns
-    - adjacency_columns
     - eigen_1
     - eigen_2
     - eigen_3
