@@ -55,7 +55,7 @@ model = create_gnn_model(
 # ----------------------------
 # 4. Load model checkpoint
 # ---------------------------
-model_name = "gin_train_loop_['7', '8', '9', '10']_,test_loop_['11']_train_eigen_1_eigen_2_eigen_3_degree_betweenness_pagerank_closeness_clustering_face_count_best.pt"
+model_name = "best_model.pt"
 model_path = Path(experiment_cfg['model_dir']) / model_name
 
 if not model_path.exists():
