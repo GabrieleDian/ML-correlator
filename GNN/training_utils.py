@@ -189,9 +189,6 @@ def train(config, train_dataset, test_dataset):
     print(f"Hidden dim: {config.hidden_channels}, Layers: {getattr(config, 'num_layers', 3)}")
     print(f"Initial LR: {optimizer.param_groups[0]['lr']}")
     
-    best_test_acc = 0
-    best_epoch = 0
-    
     for epoch in range(config.epochs):
         # Training
         train_loss, train_acc, train_metrics = train_epoch(
@@ -201,19 +198,12 @@ def train(config, train_dataset, test_dataset):
             threshold = config.threshold,
         )
         
-        # Test
-        test_loss, test_acc, test_metrics = evaluate(model, test_loader, device, threshold=config.threshold, log_threshold_curves=config.log_threshold_curves)
         
         # Step plateau scheduler after epoch
         if scheduler_type == 'plateau' and scheduler is not None:
             scheduler.step(test_loss)
 
-        # Track best model
-        if test_acc > best_test_acc:
-            best_test_acc = test_acc
-            best_epoch = epoch
-            best_model_state = model.state_dict().copy()
-        
+       
     
         # Get current learning rate
         current_lr = optimizer.param_groups[0]['lr']
@@ -226,26 +216,20 @@ def train(config, train_dataset, test_dataset):
                 'train_precision': train_metrics['precision'],
                 'train_recall': train_metrics['recall'],
                 'train_roc_auc': train_metrics['roc_auc'],
-                'train_pr_auc': train_metrics['pr_auc'],
-                'test_loss': test_loss,
-                'test_accuracy': test_acc,
-                'test_precision': test_metrics['precision'],
-                'test_recall': test_metrics['recall'],
-                'test_roc_auc': test_metrics['roc_auc'],
-                'test_pr_auc': test_metrics['pr_auc']
-
-            })
+                'train_pr_auc': train_metrics['pr_auc']
+                  })
 
         if epoch % 10 == 0 or epoch == config.epochs - 1:
             print(f"Epoch {epoch:3d}/{config.epochs}: "
                   f"Train Loss={train_loss:.4f}, Acc={train_acc:.4f}, "
-                  f"Test Loss={test_loss:.4f}, Acc={test_acc:.4f}, "
                   f"LR={current_lr:.6f}")            
             # Print confusion matrix for debugging
             #print(f"Train Confusion Matrix:\n{train_metrics['confusion_matrix']}")
             #print(f"Test Confusion Matrix:\n{test_metrics['confusion_matrix']}")
 
- 
+    # Test
+        test_loss, test_acc, test_metrics = evaluate(model, test_loader, device, threshold=config.threshold, log_threshold_curves=config.log_threshold_curves)
+        
     if wandb.run is not None and config.log_threshold_curves and 'thresholds' in test_metrics:
         thresholds = test_metrics['thresholds']
         accs = test_metrics['accuracy_vs_threshold']
@@ -266,10 +250,9 @@ def train(config, train_dataset, test_dataset):
         wandb.finish()
 
     return {
-        'model_state': best_model_state,
+        'model_state': model.state_dict().copy(),
         'final_train_acc': train_acc,
-        'best_test_acc': best_test_acc,
-        'best_epoch': best_epoch,
+        'final_test_acc': test_acc,
         'final_train_roc_auc': train_metrics['roc_auc'],
         'final_train_pr_auc': train_metrics['pr_auc'],
         'final_test_roc_auc': test_metrics['roc_auc'],

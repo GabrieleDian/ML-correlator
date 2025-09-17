@@ -246,7 +246,7 @@ def main():
     
     # Print results
     print("\nTraining completed!")
-    print(f"Best test accuracy: {results['best_test_acc']:.4f} at epoch {results['best_epoch']}")
+    print(f"Final test accuracy: {results['final_test_acc']:.4f}")
     print(f"Final training accuracy: {results['final_train_acc']:.4f}")
     print(f"Final training ROC AUC: {results['final_train_roc_auc']:.4f}")
     print(f"Final training PR AUC: {results['final_train_pr_auc']:.4f}")
