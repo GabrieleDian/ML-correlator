@@ -227,7 +227,7 @@ SetAttributes[ProdToList,Listable]
 ProdToList[x_]:=Block[{Times=List,Power=Table},If[Head[x]===List,Flatten@x,{x}]]
 
 
-nn=8;
+nn=9;
 
 
 (* ::Subsubsection:: *)
@@ -240,7 +240,7 @@ nonZeroFgraph=Select[Thread[{amplitudeCoefficients[nn],fGraphListcan[nn]}],!(#[[
 result=parallelGenerateRungWithCoeff[nonZeroFgraph];
 
 
-Clear[nonZeroFgraph]
+test=PlanarGraphQ[Graph[List@@@(List@@Denominator[#[[2]]])]]&/@result;
 
 
 (*Save f-graph data*)
