@@ -1,0 +1,15 @@
+#!/bin/bash
+#SBATCH --time=1-01:00:00
+#SBATCH --nodes=1
+#SBATCH --partition=maxcpu
+#SBATCH --job-name=math_ward
+
+unset LD_PRELOAD
+source /etc/profile.d/modules.sh
+module purge
+module load mathematica
+
+
+math14.0 -noprompt -run '<<n_point_pipeline.wl'
+
+echo "Computation complete at $(date)" | mail -s "Math job done on Maxwell" gabriele.dian@desy.de
