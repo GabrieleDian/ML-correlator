@@ -1,7 +1,0 @@
-Traceback (most recent call last):
-  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple.py", line 226, in <module>
-    main()
-  File "/home/rigers/Documents/GitHub/ML-correlator/GNN/one_run_simple.py", line 62, in main
-    with open(config_file, 'r') as f:
-         ^^^^^^^^^^^^^^^^^^^^^^
-FileNotFoundError: [Errno 2] No such file or directory: 'config.yaml'

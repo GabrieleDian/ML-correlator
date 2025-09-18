@@ -133,13 +133,16 @@ def evaluate(model, test_loader, device, pos_weight=None, threshold=0.5, log_thr
     
     return avg_loss, accuracy, metrics
 
-
-
+# Count training time
+import time 
 
 def train(config, train_dataset, test_dataset):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
     
+
+    # Start clock
+    start_time = time.time()
     # Initialize Weights & Biases if configured
     if getattr(config, 'use_wandb', False):
         wandb.init(
@@ -229,7 +232,10 @@ def train(config, train_dataset, test_dataset):
 
     # Test
         test_loss, test_acc, test_metrics = evaluate(model, test_loader, device, threshold=config.threshold, log_threshold_curves=config.log_threshold_curves)
-        
+    # End timer
+    total_time = time.time() - start_time
+    print(f"Training completed in {total_time:.2f} seconds")    
+
     if wandb.run is not None and config.log_threshold_curves and 'thresholds' in test_metrics:
         thresholds = test_metrics['thresholds']
         accs = test_metrics['accuracy_vs_threshold']
@@ -255,6 +261,9 @@ def train(config, train_dataset, test_dataset):
         'final_test_acc': test_acc,
         'final_train_roc_auc': train_metrics['roc_auc'],
         'final_train_pr_auc': train_metrics['pr_auc'],
+        'final_train_recall': train_metrics['recall'],
         'final_test_roc_auc': test_metrics['roc_auc'],
-        'final_test_pr_auc': test_metrics['pr_auc']
+        'final_test_pr_auc': test_metrics['pr_auc'],
+        'final_test_recall': test_metrics['recall']
     }
+
