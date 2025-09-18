@@ -10,6 +10,6 @@ module purge
 module load mathematica
 
 
-math14.0 -noprompt -run '<<rung_rule_gen_Den.wl'
+math14.0 -noprompt -run '<<n_point_pipeline.wl'
 
 echo "Computation complete at $(date)" | mail -s "Math job done on Maxwell" gabriele.dian@desy.de

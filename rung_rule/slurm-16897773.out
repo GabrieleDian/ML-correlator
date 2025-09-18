@@ -1,0 +1,5 @@
+"The file directory is: ""/home/gdian/Desktop/ML-correlator/rung_rule"
+"The data directory is: ""/home/gdian/Desktop/ML-correlator/consolidated_data"
+
+Syntax::sntx: Invalid syntax in or before "amplitudeCoefficients[loop_]:=Block[{fileName=FileNameJoin[{fourPointDataDir,(("amplitudeCoefficients_"<>ToString[loop]<>".tex"))}]},If[FileExistsQ[fileName],Set[amplitudeCoefficients[loop],(<<(fileName))],{}]];" (line 38 of "rung_rule_gen_Den.wl").
+                                                                                                                                                                                                                                          ^
