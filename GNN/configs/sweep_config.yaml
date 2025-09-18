@@ -4,7 +4,7 @@
 program: one_run_simple.py
 method: random  # Random search is simple and effective
 metric:
-  name: test_accuracy
+  name: test_recall
   goal: maximize
 
 parameters:
@@ -13,17 +13,9 @@ parameters:
     value: configs/config.yaml
 
   # Hyperparameters to sweep
-  dropout:
-    distribution: uniform
-    min: 0.2
-    max: 0.5
-  learning_rate:
-    distribution: uniform
-    min : 0.0001
-    max : 0.001
-  
-  weight_decay:
-    distribution: uniform
-    min: 0.00001
-    max: 0.0001
-
+  hidden_channels:
+    values: [512, 1024]
+  num_layers:
+    values: [3, 4, 5]
+  batch_size:
+    values: [512, 1024]

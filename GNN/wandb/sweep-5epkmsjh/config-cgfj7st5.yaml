@@ -1,8 +1,0 @@
-wandb_version: 1
-
-config:
-  value: config_custom.yaml
-epochs:
-  value: 100
-learning_rate:
-  value: 0.006810928704770562

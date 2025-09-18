@@ -1,7 +1,0 @@
-{"time":"2025-08-14T12:56:25.079599847+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250814_125624-jspps2wg/logs/debug-core.log"}
-{"time":"2025-08-14T12:56:25.394793656+02:00","level":"INFO","msg":"stream: created new stream","id":"jspps2wg"}
-{"time":"2025-08-14T12:56:25.39481297+02:00","level":"INFO","msg":"stream: started","id":"jspps2wg"}
-{"time":"2025-08-14T12:56:25.394876775+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"jspps2wg"}
-{"time":"2025-08-14T12:56:25.394906725+02:00","level":"INFO","msg":"sender: started","stream_id":"jspps2wg"}
-{"time":"2025-08-14T12:56:25.394922278+02:00","level":"INFO","msg":"handler: started","stream_id":"jspps2wg"}
-{"time":"2025-08-14T12:56:25.749848864+02:00","level":"INFO","msg":"Starting system monitor"}

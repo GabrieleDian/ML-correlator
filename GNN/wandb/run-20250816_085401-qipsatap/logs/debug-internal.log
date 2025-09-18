@@ -1,7 +1,0 @@
-{"time":"2025-08-16T08:54:01.300028274+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_085401-qipsatap/logs/debug-core.log"}
-{"time":"2025-08-16T08:54:01.5876318+02:00","level":"INFO","msg":"stream: created new stream","id":"qipsatap"}
-{"time":"2025-08-16T08:54:01.587675824+02:00","level":"INFO","msg":"stream: started","id":"qipsatap"}
-{"time":"2025-08-16T08:54:01.587726481+02:00","level":"INFO","msg":"handler: started","stream_id":"qipsatap"}
-{"time":"2025-08-16T08:54:01.587717741+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"qipsatap"}
-{"time":"2025-08-16T08:54:01.587743198+02:00","level":"INFO","msg":"sender: started","stream_id":"qipsatap"}
-{"time":"2025-08-16T08:54:02.014891039+02:00","level":"INFO","msg":"Starting system monitor"}
