@@ -35,7 +35,7 @@ planarGraphEdges[loop_]:=Block[{fileName=FileNameJoin[{fourPointDataDir,(("fGrap
 fGraphNums[loop_]:=Block[{fileName=FileNameJoin[{fourPointDataDir,("fGraph_nums_"<>ToString[loop]<>".tex")}],raw,rule},If[FileExistsQ[fileName],(raw=ReadList[fileName];rule=Thread[Rule[Range[Binomial[4+loop,2]],Subsets[Range[4+loop],{2}]]];raw=Times@@@#&/@(x@@@#&/@#&/@(raw/.rule));Set[fGraphNums[loop],raw]),{{}}]];
 fGraphList[loop_]:=If[FileExistsQ[FileNameJoin[{fourPointDataDir,("fGraph_nums_"<>ToString[loop]<>".tex")}]],Set[fGraphList[loop],(Join@@(fGraphNums[loop](1/(Times@@@(x@@@#&/@planarGraphEdges[loop])))))],{{}}];
 
-amplitudeCoefficients[loop_]:=Block[{fileName=FileNameJoin[{fourPointDataDir,(("amplitudeCoefficients_"<>ToString[loop]<>".tex"))}]},If[FileExistsQ[fileName],Set[amplitudeCoefficients[loop],(<<(fileName))],{}]];
+amplitudeCoefficients[loop_]:=Block[{fileName=FileNameJoin[{fourPointDataDir,(("amplitudeCoefficients_"<>ToString[loop]<>".tex"))}]},If[FileExistsQ[fileName],Set[amplitudeCoefficients[loop],Get[fileName]],{}]];
 
 
 (* This takes you from the fnum list to the dialnumber list position *)
@@ -227,8 +227,8 @@ edgeListNX[edges_List]:=StringReplace[StringReplace[ StringReplace[ToString[edge
 
 
 
-nn=9;
-
+nn=10;
+Print["number of loops: ",nn]
 
 (* ::Subsubsection:: *)
 (*n+1 loop from n loops*)
@@ -256,6 +256,7 @@ Flatten[Extract[amplitudeCoefficients[7],%]]
 First/@result===%*)
 
 
+(*
 (* ::Subsubsection:: *)
 (*n+2 loop from n loops*)
 
@@ -310,4 +311,5 @@ First/@result===%*)
 
 Position[fGraphListcan[7],#[[2]]]&/@result;
 Flatten[Extract[amplitudeCoefficients[7],%]]===First/@result
+*)
 *)
