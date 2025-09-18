@@ -250,8 +250,10 @@ def main():
     print(f"Final training accuracy: {results['final_train_acc']:.4f}")
     print(f"Final training ROC AUC: {results['final_train_roc_auc']:.4f}")
     print(f"Final training PR AUC: {results['final_train_pr_auc']:.4f}")
+    print(f"Final training recall: {results['final_train_recall']:.4f}")
     print(f"Final test ROC AUC: {results['final_test_roc_auc']:.4f}")
     print(f"Final test PR AUC: {results['final_test_pr_auc']:.4f}")
+    print(f"Final test recall: {results['final_test_recall']:.4f}")
     
     # Save model if requested
     save_model = config_dict.get('experiment', {}).get('save_model', False)

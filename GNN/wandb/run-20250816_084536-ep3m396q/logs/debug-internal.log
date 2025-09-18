@@ -1,7 +1,0 @@
-{"time":"2025-08-16T08:45:37.050192722+02:00","level":"INFO","msg":"stream: starting","core version":"0.20.1","symlink path":"/home/rigers/Documents/GitHub/ML-correlator/GNN/wandb/run-20250816_084536-ep3m396q/logs/debug-core.log"}
-{"time":"2025-08-16T08:45:37.337461435+02:00","level":"INFO","msg":"stream: created new stream","id":"ep3m396q"}
-{"time":"2025-08-16T08:45:37.337516647+02:00","level":"INFO","msg":"stream: started","id":"ep3m396q"}
-{"time":"2025-08-16T08:45:37.337613988+02:00","level":"INFO","msg":"handler: started","stream_id":"ep3m396q"}
-{"time":"2025-08-16T08:45:37.337600446+02:00","level":"INFO","msg":"writer: Do: started","stream_id":"ep3m396q"}
-{"time":"2025-08-16T08:45:37.337668929+02:00","level":"INFO","msg":"sender: started","stream_id":"ep3m396q"}
-{"time":"2025-08-16T08:45:37.548042166+02:00","level":"INFO","msg":"Starting system monitor"}
