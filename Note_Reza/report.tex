@@ -5,6 +5,8 @@
 \usepackage{authblk}
 \usepackage{float}
 \usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{siunitx}
 
 \title{Predicting Vanishing Coefficients of Denominator Graphs: From $l$-loops to $(l+1)$-loops OR Zero and few shot learning}
 \author{}
@@ -179,7 +181,7 @@ Test [10]  & 0.699 \\
 \centering
 \includegraphics[width=1.0\textwidth]{assets/7_8910.png}
 \caption{Threshold plots}
-\label{fig:my_image}
+\label{fig:my_image1}
 \end{figure}
 
 Clearly - these are expectantly poor results.
@@ -345,6 +347,104 @@ Questions to ask ourselves in this work
 \end{enumerate}
 
 On the GNN approach - we should get graph representations that are far richer.
+
+
+\section{Tree Misclassification by inclusion of loop order}
+
+% Preamble
+
+\sisetup{
+  detect-all,
+  input-decimal-markers = {.},
+  group-separator = {,}
+}
+
+% ===== Table 1: Overall by combo =====
+\begin{table}[htbp]
+\centering
+\small
+\caption{Overall by combo}
+\label{tab:overall-by-combo-uniq}
+\begin{tabular}{
+  l % text column for train_loops
+  S[table-format=6.0]
+  S[table-format=1.6]
+  S[table-format=2.0]
+  S[table-format=1.6]
+}
+\toprule
+{train\_loops} & {n\_train} & {train\_auc\_overall} & {test\_loop} & {test\_auc} \\
+\midrule
+(9, 10)        & 167224 & 0.942495 & 11 & 0.869956 \\
+(7, 9, 10)     & 167388 & 0.943104 & 11 & 0.864540 \\
+(8, 9, 10)     & 168656 & 0.942171 & 11 & 0.862627 \\
+(7, 8, 9, 10)  & 168820 & 0.942916 & 11 & 0.856828 \\
+(8, 10)        & 154684 & 0.945206 & 11 & 0.840198 \\
+(7, 8, 10)     & 154848 & 0.945260 & 11 & 0.838728 \\
+(7, 8)         &   1596 & 1.000000 & 11 & 0.811331 \\
+(10,)          & 153252 & 0.945841 & 11 & 0.809871 \\
+(8,)           &   1432 & 1.000000 & 11 & 0.807204 \\
+(9,)           &  13972 & 0.997817 & 11 & 0.798707 \\
+(7, 9)         &  14136 & 0.998211 & 11 & 0.793281 \\
+(8, 9)         &  15404 & 0.996969 & 11 & 0.789976 \\
+(7, 10)        & 153416 & 0.946195 & 11 & 0.786496 \\
+(7, 8, 9)      &  15568 & 0.996618 & 11 & 0.779690 \\
+(7,)           &    164 & 1.000000 & 11 & 0.636116 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ===== Table 2: Training per-loop AUCs =====
+\begin{table}[htbp]
+\centering
+\small
+\caption{Training per-loop AUCs (long-form)}
+\label{tab:training-per-loop-uniq}
+\begin{tabular}{
+  l % text column for train_loops
+  S[table-format=2.0]
+  S[table-format=6.0]
+  S[table-format=1.6]
+}
+\toprule
+{train\_loops} & {loop\_id} & {n\_train\_loop} & {train\_auc\_loop} \\
+\midrule
+(7,)          &  7 &    164  & 1.000000 \\
+(7, 8)        &  7 &    164  & 1.000000 \\
+(7, 8)        &  8 &   1432  & 1.000000 \\
+(7, 8, 9)     &  7 &    164  & 1.000000 \\
+(7, 8, 9)     &  8 &   1432  & 0.999772 \\
+(7, 8, 9)     &  9 &  13972  & 0.996046 \\
+(7, 8, 9, 10) &  7 &    164  & 0.996557 \\
+(7, 8, 9, 10) &  8 &   1432  & 0.970624 \\
+(7, 8, 9, 10) &  9 &  13972  & 0.946507 \\
+(7, 8, 9, 10) & 10 & 153252  & 0.942077 \\
+(7, 8, 10)    &  7 &    164  & 0.986719 \\
+(7, 8, 10)    &  8 &   1432  & 0.970495 \\
+(7, 8, 10)    & 10 & 153252  & 0.944890 \\
+(7, 9)        &  7 &    164  & 1.000000 \\
+(7, 9)        &  9 &  13972  & 0.998165 \\
+(7, 9, 10)    &  7 &    164  & 0.971635 \\
+(7, 9, 10)    &  9 &  13972  & 0.952468 \\
+(7, 9, 10)    & 10 & 153252  & 0.942129 \\
+(7, 10)       &  7 &    164  & 0.999016 \\
+(7, 10)       & 10 & 153252  & 0.946104 \\
+(8,)          &  8 &   1432  & 1.000000 \\
+(8, 9)        &  8 &   1432  & 0.999653 \\
+(8, 9)        &  9 &  13972  & 0.996556 \\
+(8, 9, 10)    &  8 &   1432  & 0.962762 \\
+(8, 9, 10)    &  9 &  13972  & 0.944510 \\
+(8, 9, 10)    & 10 & 153252  & 0.941615 \\
+(8, 10)       &  8 &   1432  & 0.977820 \\
+(8, 10)       & 10 & 153252  & 0.944844 \\
+(9,)          &  9 &  13972  & 0.997817 \\
+(9, 10)       &  9 &  13972  & 0.953727 \\
+(9, 10)       & 10 & 153252  & 0.941386 \\
+(10,)         & 10 & 153252  & 0.945841 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 
 	
 \end{document}
