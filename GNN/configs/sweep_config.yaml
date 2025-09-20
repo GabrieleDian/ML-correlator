@@ -1,10 +1,10 @@
 # Simple WandB Sweep Configuration
 # Good starting point for hyperparameter search
-project: "test_11_sweep_architecture"
+project: "test"
 program: one_run_simple.py
 method: random  # Random search is simple and effective
 metric:
-  name: test_recall
+  name: train_recall
   goal: maximize
 
 parameters:
@@ -14,9 +14,9 @@ parameters:
 
   # Hyperparameters to sweep
   hidden_channels:
-    values: [512, 1024]
+    values: [64, 128]
   num_layers:
-    values: [3, 4, 5]
+    values: [1, 2, 3]
   batch_size:
-    values: [512, 1024]
+    values: [62, 128]
 

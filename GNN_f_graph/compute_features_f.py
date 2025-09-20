@@ -9,19 +9,26 @@ from joblib import Parallel, delayed
 from scipy.linalg import eigh
 
 
-def load_graph_edges(loop_order, data_path=None):
-    """Load graph edges with two types (denominator and numerator) from CSV file."""
-    if data_path is None:
-        base = BASE_DIR if 'BASE_DIR' in globals() else Path('../Graph_Edge_Data')
-        data_path = base / f'graph_data_{loop_order}.csv'
-    
-    df = pd.read_csv(data_path)
-    
+def load_graph_edges(file_ext='7', base_dir=None):
+    """
+    Load graph edges and labels from CSV file.
+    """
+    if base_dir is None:
+        base_dir = Path('../Graph_Edge_Data')
+
+    denom_edges = []
+    numer_edges = []
+    labels = []
+    # Only standard graphs
+    file_path = base_dir / f'graph_data_{file_ext}.csv'
+    df = pd.read_csv(file_path)
+   
     # Parse edge lists
     denom_edges = [ast.literal_eval(e) for e in df['DEN_EDGES']]
     numer_edges = [ast.literal_eval(e) for e in df['NUM_EDGES']]
     
-    labels = df['COEFFICIENTS'].tolist()
+    full_labels = df['COEFFICIENTS'].tolist()
+    labels = [1 if lbl != 0 else 0 for lbl in full_labels]  # binary classification
     
     # Combine with edge type info: 0 = denominator, 1 = numerator
     edge_lists = []
@@ -358,39 +365,34 @@ def pad_features(features_list, max_nodes):
 
 
 
-def compute_and_save_feature(feature_name, loop_order, chunk_size=1000, n_jobs=4):
-    """
-    Compute a single feature for all graphs in a loop order.
-    Saves as numpy array.
-    """
-    # Create output directory
-    base = BASE_DIR if 'BASE_DIR' in globals() else Path('../Graph_Edge_Data')
-    output_dir = base / f'f_features_loop_{loop_order}'
+def compute_and_save_feature(feature_name, file_ext='7', chunk_size=1000, n_jobs=4, base_dir=None):
+    if base_dir is None:
+        base_dir = Path('../Graph_Edge_Data')
+
+    # Folder naming
+    folder_name = f"f_features_loop_{file_ext}" 
+    output_dir = base_dir / folder_name
     output_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Check if already computed
+
     output_file = output_dir / f'{feature_name}.npy'
     if output_file.exists():
-        print(f"Feature {feature_name} already computed for loop {loop_order}. Skipping.")
+        print(f"Feature {feature_name} already computed for {folder_name}. Skipping.")
         return
-    
-    print(f"Computing {feature_name} for loop {loop_order}...")
+
+    print(f"Computing {feature_name} for {folder_name}...")
     
     # Load graph edges
-    edges_list, labels = load_graph_edges(loop_order)
+    edges_list, labels = load_graph_edges(file_ext)
     n_graphs = len(edges_list)
     
     # Find max nodes considering both types of edges for padding
     max_nodes = max(len(set([u for u,v,_ in edges] + [v for u,v,_ in edges])) for edges in edges_list)
     print(f"Max nodes in graphs: {max_nodes}")
     
-    # Get computation function
     if feature_name not in FEATURE_FUNCTIONS:
-        raise ValueError(f"Unknown feature: {feature_name}")
-    
+        print(f"Feature {feature_name} not recognized. Skipping.")
+        return
     compute_func = FEATURE_FUNCTIONS[feature_name]
-    
-    # Process in chunks
     all_features = []
     
     for i in tqdm(range(0, n_graphs, chunk_size)):
@@ -416,42 +418,39 @@ def compute_and_save_feature(feature_name, loop_order, chunk_size=1000, n_jobs=4
     # Save
     np.save(output_file, features_array)
     print(f"Saved {feature_name} features to {output_file}")
-    print(f"Shape: {features_array.shape}")
-    
-    # Update computed features list
-    computed_file = output_dir / 'computed_features.txt'
-    with open(computed_file, 'a') as f:
-        f.write(f"{feature_name}\n")
 
 
-def compute_all_features(loop_order, chunk_size=1000, n_jobs=4):
-    """Compute all available features for a loop order."""
-    print(f"Computing all features for loop {loop_order}...")
-    
+def compute_all_features(file_ext='7', chunk_size=1000, n_jobs=4, base_dir=None):
+    folder_name = f"f_features_loop_{file_ext}"
+    print(f"Computing all features for {folder_name}...")
+
     for feature_name in FEATURE_FUNCTIONS.keys():
-        compute_and_save_feature(feature_name, loop_order, chunk_size, n_jobs)
-    
-    print("All features computed!")
-
+        compute_and_save_feature(
+            feature_name,
+            file_ext=file_ext,
+            chunk_size=chunk_size,
+            n_jobs=n_jobs,
+            base_dir=base_dir
+        )
 
 if __name__ == "__main__":
-    # Example usage
     import argparse
     import yaml
-    
+    from pathlib import Path
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, default=None, help='Path to config file')
-    parser.add_argument('--loop', type=int, help='Loop order (overrides config)')
+    parser.add_argument('--file_ext', type=str, help='Loop order (overrides config)')
     parser.add_argument('--feature', type=str, help='Specific feature to compute')
     parser.add_argument('--chunk-size', type=int, help='Chunk size (overrides config)')
     parser.add_argument('--n-jobs', type=int, help='Number of jobs (overrides config)')
     args = parser.parse_args()
-    
+
+    # Default config
     config = {
         'data': {
-            'loop_order': None,
-            'base_dir': './data'
-        },
+            'file_ext': 7,
+            'base_dir': '../Graph_Edge_Data',        },
         'features': {
             'chunk_size': 100,
             'n_jobs': 1,
@@ -460,8 +459,8 @@ if __name__ == "__main__":
         }
     }
 
-    # Load config if provided
-    if args.config is not None:
+    # Load YAML config if provided
+    if args.config:
         with open(args.config, 'r') as f:
             user_config = yaml.safe_load(f)
         for section in user_config:
@@ -469,34 +468,28 @@ if __name__ == "__main__":
                 config[section].update(user_config[section])
             else:
                 config[section] = user_config[section]
-        
-           # Determine loop_order
-    if args.loop is not None:
-        loop_order_list = [args.loop]  # single integer from CLI
-    elif config['data'].get('loop_order') is not None:
-        loop_order_list = config['data']['loop_order']
-        if isinstance(loop_order_list, int):
-            loop_order_list = [loop_order_list]
+
+    # Set chunk_size, n_jobs, base_dir and file_ext
+    file_ext = args.file_ext if args.file_ext else config['data']['file_ext']
+    chunk_size = args.chunk_size if args.chunk_size else config['features']['chunk_size']
+    n_jobs = args.n_jobs if args.n_jobs else config['features']['n_jobs']
+    base_dir = Path(config['data'].get('base_dir', '../Graph_Edge_Data'))
+
+    
+            # Compute multiple or all features
+    if config['features']['compute_all']:
+        compute_all_features(
+            file_ext=file_ext,
+            chunk_size=chunk_size,
+            n_jobs=n_jobs,
+            base_dir=base_dir
+        )
     else:
-        # fallback to train_loop_order or test_loop_order from config
-        loop_order_list = config['data'].get('train_loop_order',
-                                             config['data'].get('test_loop_order', [1]))
-        if isinstance(loop_order_list, int):
-            loop_order_list = [loop_order_list]
-        
-        # Update data path to use base_dir from config
-        global BASE_DIR
-        BASE_DIR = Path(config['data']['base_dir'])
-    chunk_size = args.chunk_size if args.chunk_size is not None else config['features']['chunk_size']
-    n_jobs = args.n_jobs if args.n_jobs is not None else config['features']['n_jobs']    
-         # Iterate over all loops
-    for loop in loop_order_list:
-        if args.feature:
-            print(f"Computing feature {args.feature} for loop {loop}...")
-            compute_and_save_feature(args.feature, loop, chunk_size, n_jobs)
-        else:
-            if config['features']['compute_all']:
-                compute_all_features(loop, chunk_size, n_jobs)
-            else:
-                for feature in config['features']['features_to_compute']:
-                    compute_and_save_feature(feature, loop, chunk_size, n_jobs)
+        for feature_name in config['features']['features_to_compute']:
+            compute_and_save_feature(
+                feature_name,
+                file_ext=file_ext,
+                chunk_size=chunk_size,
+                n_jobs=n_jobs,
+                base_dir=base_dir
+                    )

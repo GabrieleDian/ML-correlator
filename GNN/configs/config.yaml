@@ -3,8 +3,8 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  train_loop_order: ['6','7','8','9','10','10to11']          # Which loop to use for training
-  test_loop_order: '11'   
+  train_loop_order: ['6','7']          # Which loop to use for training
+  test_loop_order: '8'   
 
 # Feature configuration
 features:
@@ -44,6 +44,7 @@ training:
 # Experiment configuration
 experiment:
   seed: 42
-  use_wandb: false
+  use_wandb: true
   model_dir: "models"
-  save_model: false
+  save_model: true
+

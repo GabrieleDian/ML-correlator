@@ -14,7 +14,7 @@ def load_graph_edges(file_ext='7', base_dir=None):
     Load graph edges and labels from CSV file.
     """
     if base_dir is None:
-        base_dir = BASE_DIR if 'BASE_DIR' in globals() else Path('../Graph_Edge_Data')
+        base_dir = Path('../Graph_Edge_Data')
 
     edges_list = []
     labels = []
@@ -308,8 +308,8 @@ def compute_and_save_feature(feature_name, file_ext='7',chunk_size=1000, n_jobs=
 
 
 
-def compute_all_features(file_ext=7, chunk_size=1000, n_jobs=4, base_dir=None):
-    folder_name = f"loop {file_ext}"
+def compute_all_features(file_ext='7', chunk_size=1000, n_jobs=4, base_dir=None):
+    folder_name = f"features_loop_{file_ext}"
     print(f"Computing all features for {folder_name}...")
 
     for feature_name in FEATURE_FUNCTIONS.keys():

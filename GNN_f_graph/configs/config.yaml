@@ -3,8 +3,8 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  train_loop_order: 7          # Which loop to use for training
-  test_loop_order: 7                 # Which loop to use for testing
+  train_loop_order: '7'          # Which loop to use for training
+  test_loop_order: '7'                 # Which loop to use for testing
   
 # Feature configuration
 features:
@@ -38,7 +38,7 @@ features:
 
 # Model configuration
 model:
-  name: "f-graph"              # Model architecture: gin, gat, hybrid, planar, simple
+  name: "rgcn"              # Model architecture: gin, gat, hybrid, planar, simple
   hidden_channels: 64
   num_layers: 2
   dropout: 0.3
@@ -56,8 +56,6 @@ training:
 # Experiment configuration
 experiment:
   seed: 42
-  use_wandb: true
-  wandb_project: "7_loop_all_scalar_W5_f_graph"
-  wandb_name: "f-graph"
+  use_wandb: false
   save_model: false
   model_dir: "models"

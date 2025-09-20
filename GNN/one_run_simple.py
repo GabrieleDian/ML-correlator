@@ -265,8 +265,13 @@ def main():
         torch.save(results['model_state'], model_path)
         print(f"Model saved to: {model_path}")
     
-    # Close wandb if it was initialized for sweep
+   # Close wandb if it was initialized for sweep
     if 'WANDB_SWEEP_ID' in os.environ:
+             # Sweep run
+        wandb.init(reinit=True, project=config.project, config=config.__dict__)
+    elif getattr(config, 'use_wandb', False):
+        # Regular run
+        wandb.init(project=config.project, config=config.__dict__, reinit=True)
         print("Finishing wandb sweep run")
         wandb.finish()
 

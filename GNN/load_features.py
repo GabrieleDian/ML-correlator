@@ -10,7 +10,7 @@ import ast
 data_dir = '../Graph_Edge_Data'
 
 
-def load_saved_features(file_ext, feature_names, data_dir=data_dir, extra_train=False):
+def load_saved_features(file_ext, feature_names, data_dir=data_dir):
     """
     Load pre-computed features for a given loop order.
 
