@@ -7,6 +7,7 @@ from sklearn.metrics import precision_score, recall_score, f1_score, confusion_m
 from GNN_architectures import create_gnn_model
 import numpy as np
 import matplotlib.pyplot as plt
+import os 
 
 def compute_metrics(y_true, y_pred):
     y_true = y_true.cpu().numpy()
@@ -144,11 +145,12 @@ def train(config, train_dataset, test_dataset):
     # Start clock
     start_time = time.time()
     # Initialize Weights & Biases if configured
-    if getattr(config, 'use_wandb', False):
+    if 'WANDB_SWEEP_ID' in os.environ or getattr(config, 'use_wandb', False):
         wandb.init(
             project=config.project,
             name=getattr(config, 'experiment_name', config.model_name),
-            config=config.__dict__
+            config=config.__dict__,
+            reinit=True
         )
     # Train and test loaders
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
@@ -204,7 +206,7 @@ def train(config, train_dataset, test_dataset):
         
         # Step plateau scheduler after epoch
         if scheduler_type == 'plateau' and scheduler is not None:
-            scheduler.step(test_loss)
+            scheduler.step(train_loss)
 
        
     
@@ -253,6 +255,7 @@ def train(config, train_dataset, test_dataset):
         plt.title(f"Threshold curves - train:{config.train_loop_order}, test:{config.test_loop_order}")
         wandb.log({"threshold_curves": wandb.Image(plt)})
         plt.close()
+    if wandb.run is not None:
         wandb.finish()
 
     return {
