@@ -6,6 +6,7 @@ import numpy as np
 from pathlib import Path
 import pandas as pd
 import ast
+from fractions import Fraction
 
 data_dir = '../Graph_Edge_Data'
 # Load features for multi-edge graphs
@@ -31,12 +32,7 @@ def load_saved_features(file_ext, feature_names, data_dir=data_dir):
     csv_path = Path(data_dir) / f'graph_data_{file_ext}.csv'
     df = pd.read_csv(csv_path)
     true_labels = df['COEFFICIENTS'].tolist()
-    labels = [1 if c != 0 else 0 for c in true_labels]  # Binary labels
-
-    # Debug
-    print(f"Looking for features in: {features_dir.resolve()}")
-    print("Existing files:", list(features_dir.glob("*.npy")))
-
+    labels = [1 if Fraction(c) != 0 else 0 for c in true_labels] # Binary labels
     # Load requested features
     features = {}
     for feature_name in feature_names:
@@ -113,6 +109,9 @@ def load_graph_structure(file_ext, data_dir=None):
             'edge_types': edge_types,
             'node_labels': nodes
         })
+    for idx, g in enumerate(graph_infos):
+        if len(g['edge_list']) != len(g['edge_types']):
+         print(f"Graph {idx}: {len(g['edge_list'])} edges vs {len(g['edge_types'])} types")
 
     return graph_infos
 

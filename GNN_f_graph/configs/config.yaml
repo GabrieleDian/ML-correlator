@@ -5,21 +5,6 @@ data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
   train_loop_order: '7'          # Which loop to use for training
   test_loop_order: '7'                 # Which loop to use for testing
-  
-# Feature configuration
-features:
-  # Features to compute (when running compute_features.py)
-  compute_all: true
-  features_to_compute:
-    - adjacency_columns
-    - eigen_1
-    - eigen_2
-    - eigen_3
-    - degree
-    - betweenness
-    - closeness
-    - face_count
-    - W5_indicator
 
   # Features to use for training
   selected_features:
@@ -29,7 +14,6 @@ features:
    - degree
    - betweenness
    - closeness
-   - face_count
    - W5_indicator
     
   # Computation settings
@@ -39,16 +23,16 @@ features:
 # Model configuration
 model:
   name: "rgcn"              # Model architecture: gin, gat, hybrid, planar, simple
-  hidden_channels: 64
-  num_layers: 2
-  dropout: 0.3
+  hidden_channels: 256
+  num_layers: 3
+  dropout: 0.4
 
 # Training configuration
 training:
   epochs: 100
-  batch_size: 64
-  learning_rate:   0.00028721941495727597
-  weight_decay:   0.00003060739988229477
+  batch_size: 128
+  learning_rate:   0.01
+  weight_decay:   0.001
   scheduler_type: "onecycle"  # Options: onecycle, plateau, none
   threshold: 0.5              # Decision threshold for classification
   log_threshold_curves: false   # Whether to log threshold sweep curves to WandB
@@ -56,6 +40,7 @@ training:
 # Experiment configuration
 experiment:
   seed: 42
-  use_wandb: false
+  use_wandb: true
   save_model: false
   model_dir: "models"
+  project_name: "f_graph_gnn_loop_7"

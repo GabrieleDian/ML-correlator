@@ -13,14 +13,11 @@ def compute_metrics(y_true, y_pred):
     y_true = y_true.cpu().numpy()
     y_pred = y_pred.cpu().numpy()
     
-    # Add confusion matrix for debugging
-    cm = confusion_matrix(y_true, y_pred)
-    
+ 
     return {
         'precision': precision_score(y_true, y_pred, pos_label=1, zero_division=0),
         'recall': recall_score(y_true, y_pred, pos_label=1,zero_division=0),
-        'f1': f1_score(y_true, y_pred, pos_label=1, zero_division=0),
-        'confusion_matrix': cm  
+        'f1': f1_score(y_true, y_pred, pos_label=1, zero_division=0) 
     }
 
 def train_epoch(model, train_loader, optimizer, device, scheduler=None, pos_weight= None, scheduler_type=None, threshold=0.5):
@@ -35,7 +32,7 @@ def train_epoch(model, train_loader, optimizer, device, scheduler=None, pos_weig
     for batch in train_loader:
         batch = batch.to(device)
         optimizer.zero_grad()
-        out = model(batch.x, batch.edge_index, batch.batch)
+        out = model(batch.x, batch.edge_index, batch.edge_type, batch.batch)
         loss = loss_fn(out.view(-1), batch.y.float())
 
         
@@ -50,7 +47,6 @@ def train_epoch(model, train_loader, optimizer, device, scheduler=None, pos_weig
         all_probs.append(probs.detach().cpu())
         all_preds.append(pred)
         all_labels.append(batch.y.float())
-
         correct += pred.eq(batch.y.float()).sum().item()
         total += batch.y.size(0)
         total_loss += loss.item() * batch.y.size(0)  # Weight by batch size
@@ -89,7 +85,7 @@ def evaluate(model, test_loader, device, pos_weight=None, threshold=0.5, log_thr
     with torch.no_grad():
         for batch in test_loader:
             batch = batch.to(device)
-            out = model(batch.x, batch.edge_index, batch.batch)
+            out = model(batch.x, batch.edge_index, batch.edge_type, batch.batch)
             loss = loss_fn(out.view(-1), batch.y.float())
             
             probs = torch.sigmoid(out.view(-1))
@@ -156,7 +152,7 @@ def train(config, train_dataset, test_dataset):
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=False)
     model = create_gnn_model(
-        config.model_name,
+        architecture=config.model_name,
         num_features=config.in_channels,
         hidden_dim=config.hidden_channels,
         num_classes=1,  # Binary classification
