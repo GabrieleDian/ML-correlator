@@ -3,22 +3,14 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  train_loop_order: ['6','7']          # Which loop to use for training
-  test_loop_order: '8'   
+  train_loop_order: ['6','7','8']          # Which loop to use for training
+  test_loop_order: '9'   
 
 # Feature configuration
 features:
   # Features to use for training
   selected_features:
-  - eigen_1
-  - eigen_2
-  - eigen_3
-  - degree
-  - betweenness
-  - pagerank
-  - closeness
-  - clustering
-  - face_count
+  - identity_columns
     
   # Computation settings
   chunk_size: 1000
@@ -44,7 +36,7 @@ training:
 # Experiment configuration
 experiment:
   seed: 42
-  use_wandb: true
+  use_wandb: false
   model_dir: "models"
-  save_model: true
+  save_model: false
 

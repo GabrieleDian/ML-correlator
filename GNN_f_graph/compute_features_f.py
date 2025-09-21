@@ -449,7 +449,7 @@ if __name__ == "__main__":
     # Default config
     config = {
         'data': {
-            'file_ext': 7,
+            'file_ext': '7',
             'base_dir': '../Graph_Edge_Data',        },
         'features': {
             'chunk_size': 100,
