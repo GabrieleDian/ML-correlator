@@ -212,6 +212,56 @@ def compute_face_count_features(graphs_batch):
     return features
 
 
+def compute_graphlet_features(graphs_batch, k=4, sizev=1, sizee=2, connect=True):
+    """
+    Compute local graphlet frequencies for the single-edge (k=2) graphlet using GEOMINE.
+    - Assumes one edge type (edge present=1, absent=0) → sizee=2.
+    - Returns, for each graph, a list of per-node counts (participation in single-edge graphlets).
+    - If GEOMINE is unavailable, the function prints an error and exits.
+
+    Args:
+        graphs_batch: list of graphs; each graph is a list of undirected edges [(u, v), ...]
+        k (int): graphlet number of nodes
+        sizev (int): number of vertex colors (1 if unused)
+        sizee (int): number of edge symbols INCLUDING 0 (no-edge). For one edge type use 2.
+        connect (bool): count only connected graphlets (True)
+
+    Returns:
+        List[List[int]]: per-graph list of per-node local counts
+    """
+    try:
+        import GEOMINE
+    except Exception as e:
+        import sys
+        print("[ERROR] GEOMINE is required for 'local_single_edge_graphlet' feature. "
+              "Install it via: pip install GEOMINE", file=sys.stderr)
+        print(f"Cause: {type(e).__name__}: {e}", file=sys.stderr)
+        raise SystemExit(1)
+
+    features = []
+    for edges in graphs_batch:
+        # Map node labels to contiguous indices [0..n-1]
+        nodes = sorted({u for u, v in edges} | {v for u, v in edges})
+        node_to_idx = {u: i for i, u in enumerate(nodes)}
+        n = len(nodes)
+
+        # Build GEOMINE adjacency: 
+        A = np.zeros((n, n), dtype=int)
+        for u, v in edges:
+            i, j = node_to_idx[u], node_to_idx[v]
+            A[i, j] = 1
+            A[j, i] = 1
+
+        # Per-node local counts via GEOMINE.Count
+        per_node = []
+        for ref in range(n):
+            vec = np.asarray(GEOMINE.Count(A, ref, k, sizev, sizee, connect), dtype=float)
+            # For k=2 & one edge type, vec has length 1; summing is robust.
+            per_node.append(vec)
+        features.append(per_node)
+
+    return features
+
 
     
 def compute_W5_features(graphs_batch):
