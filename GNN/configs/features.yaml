@@ -9,7 +9,7 @@ features:
   # Features to compute (when running compute_features.py)
   compute_all: false
   features_to_compute:
-    - identity_columns
+    - graphlet_2
 
   # Computation settings
   chunk_size: 1000

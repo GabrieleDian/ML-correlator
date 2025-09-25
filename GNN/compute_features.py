@@ -240,22 +240,12 @@ def compute_graphlet_features(graphs_batch, k=4, sizev=1, sizee=2, connect=True)
 
     features = []
     for edges in graphs_batch:
-        # Map node labels to contiguous indices [0..n-1]
-        nodes = sorted({u for u, v in edges} | {v for u, v in edges})
-        node_to_idx = {u: i for i, u in enumerate(nodes)}
-        n = len(nodes)
-
-        # Build GEOMINE adjacency: 
-        A = np.zeros((n, n), dtype=int)
-        for u, v in edges:
-            i, j = node_to_idx[u], node_to_idx[v]
-            A[i, j] = 1
-            A[j, i] = 1
-
-        # Per-node local counts via GEOMINE.Count
+        G, n = edges_to_networkx(edges)
+        adj_matrix = nx.adjacency_matrix(G, nodelist=range(n)).toarray()
+       # Per-node local counts via GEOMINE.Count
         per_node = []
         for ref in range(n):
-            vec = np.asarray(GEOMINE.Count(A, ref, k, sizev, sizee, connect), dtype=float)
+            vec = np.asarray(GEOMINE.Count(adj_matrix, ref, k, sizev, sizee, connect), dtype=float)
             # For k=2 & one edge type, vec has length 1; summing is robust.
             per_node.append(vec)
         features.append(per_node)
@@ -288,6 +278,7 @@ FEATURE_FUNCTIONS = {
     'closeness': compute_closeness_features,
     'pagerank': compute_pagerank_features,
     'face_count': compute_face_count_features,
+    'graphlet_2': compute_graphlet_features,
     'W5_indicator': compute_W5_features
 }
 
