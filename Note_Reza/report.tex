@@ -360,7 +360,7 @@ On the GNN approach - we should get graph representations that are far richer.
 }
 
 % ===== Table 1: Overall by combo =====
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \small
 \caption{Overall by combo}
@@ -445,6 +445,248 @@ On the GNN approach - we should get graph representations that are far richer.
 \end{tabular}
 \end{table}
 
+
+
+\section{Addition of new features}
+
+\subsection{Additional features}
+\section{Feature Engineering Update: From Classical Descriptors to Rich Graph Signatures}
+\label{sec:feature-update}
+
+\paragraph{Overview.}
+We extend the original feature set (degree statistics, connectivity, centrality, $k$-core, robustness, limited cycle counts, Laplacian spectral summaries, planarity, symmetry, and Kirchhoff index) with several new, orthogonal families that capture higher-order structure, multiscale diffusion, community organization, and topological signals. The goal is to (i) improve expressivity for small planar graphs, (ii) increase robustness across loop orders by controlling for graph size, and (iii) enable interpretable ablations by grouping features into coherent categories.
+
+\paragraph{Groups and motivations.}
+\begin{description}
+  \item[\textbf{(A) Classical structure (baseline).}]
+  \emph{Degree \& density, connectivity (components/diameter/radius/ASPL/Wiener), centralities (betweenness/ closeness/ eigenvector), $k$-core indices, articulation points \& bridges, limited cycle counts (5/6-cycles), Laplacian spectrum summaries (algebraic connectivity, spectral gap, moments, first 10 eigenvalues), planarity (faces, face sizes), symmetry (automorphism order, orbits), Kirchhoff index.}
+  These provide coarse geometry (how connected), flow/importance (centralities), and rigidity (algebraic connectivity, bridges).
+
+  \item[\textbf{(B) Motifs \& graphlets (new).}]
+  \emph{Triangles, wedges, 4-cycles, 4-cliques; induced 4-node graphlets (K$_{1,3}$, P$_4$, C$_4$, TailedTriangle, Diamond, K$_4$); triangle--edge embeddedness statistics (mean/std/median/q90, zero/ $\ge 2$ fractions).}
+  Motifs capture \emph{localized} wiring rules and are sensitive to small structural differences that the baseline may smooth over; induced graphlets disambiguate shapes with identical degree sequences.
+
+  \item[\textbf{(C) Adjacency-spectrum \& energy (new).}]
+  \emph{Graph energy, Estrada index, adjacency spectral moments (2/3/4).}
+  Complementary to Laplacian features: adjacency spectra reflect walk counts and subgraph densities; Estrada and energy summarize global communicability and overall “activity” of the network.
+
+  \item[\textbf{(D) Heat traces \& NetLSD (new).}]
+  \emph{Laplacian heat trace at multiple scales; NetLSD summary (mean/std/quantiles over $\log$-spaced times).}
+  These are \emph{multiscale} diffusion fingerprints invariant to node relabeling, providing stable comparisons across graphs and enhancing cross-loop generalization.
+
+  \item[\textbf{(E) Topological Data Analysis (new).}]
+  \emph{Vietoris--Rips persistent homology on shortest-path distances: H$_0$/H$_1$ counts, total/mean/max persistence, persistence entropy, mean birth/death; Betti numbers at distance quantiles.}
+  Persistence measures quantify the \emph{lifetimes} of connectivity and loop-like features as the metric thickens, offering robustness to small perturbations and complementary global shape information.
+
+  \item[\textbf{(F) Community structure (new).}]
+  \emph{Louvain modularity, community count/max size, community-size Gini, internal-edge fraction.}
+  Detects meso-scale organization; modular graphs can differ in coefficients even with similar local statistics.
+
+  \item[\textbf{(G) Distance/coverage \& local distributions (new).}]
+  \emph{Effective diameter (p90 of distances), eccentricity mean/q90, degree assortativity, clustering coefficient mean/quantiles, fractions at $0$ and $1$, degree Gini.}
+  Captures tail behavior and heterogeneity beyond means, which often governs extremal behaviors relevant to coefficients.
+
+  \item[\textbf{(H) Normalized/size-invariant variants (new).}]
+  \emph{Per-node/edge rates, divisions by combinatorial maxima ($\binom{n}{k}$), ratios over average degree or diameter, log-scaled automorphism size over $\log(n!)$, etc.}
+  These reduce confounding by graph size and facilitate \emph{cross-loop} transfer by aligning distributions across $n$.
+\end{description}
+
+\paragraph{Why these additions help.}
+(i) \emph{Higher-order locality:} Motifs and induced graphlets distinguish micro-patterns invisible to degree-based summaries.
+(ii) \emph{Multiscale sensitivity:} Heat traces/NetLSD encode diffusion at multiple time scales, bridging local and global structure.
+(iii) \emph{Global shape:} TDA summarizes how components and cycles persist across thresholds, complementing spectral views.
+(iv) \emph{Meso-scale organization:} Community features identify clustered vs.\ homogeneous wiring, often predictive in planar settings.
+(v) \emph{Stability and transfer:} Normalizations mitigate size effects and improve generalization when predicting at unseen loop orders.
+
+\paragraph{Practical notes.}
+All new groups are compatible with tree-based learners (nonlinear, interaction-aware) and support interpretable ablations: train with one group at a time, or remove a group from the full set and measure $\Delta$ performance. Normalized counterparts are recommended when mixing loop orders, while raw counts can be informative within a fixed $n$.
+
+
+
+
+
+\subsection{results}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c|c|ccccc|cc}
+\hline
+Pair & Loop & Fold 1 & Fold 2 & Fold 3 & Fold 4 & Fold 5 & Avg ROC AUC & Std Dev \\
+\hline
+\multicolumn{9}{c}{\textbf{Single Loops}} \\
+\hline
+-- & 7  & 0.905 & 0.876 & 0.798 & 0.813 & 0.840 & 0.846 & 0.040 \\
+-- & 8  & 0.896 & 0.915 & 0.905 & 0.947 & 0.886 & 0.910 & 0.021 \\
+-- & 9  & 0.940 & 0.936 & 0.935 & 0.941 & 0.937 & 0.938 & 0.002 \\
+-- & 10 & 0.944 & 0.945 & 0.943 & 0.945 & 0.946 & 0.945 & 0.001 \\
+\hline
+\multicolumn{9}{c}{\textbf{Mixed Loops}} \\
+\hline
+7 \& 8  & 7  & 0.967 & 0.971 & 0.841 & 0.964 & 0.866 & 0.922 & 0.056 \\
+        & 8  & 0.902 & 0.918 & 0.918 & 0.927 & 0.885 & 0.910 & 0.015 \\
+8 \& 9  & 8  & 0.908 & 0.927 & 0.927 & 0.943 & 0.906 & 0.922 & 0.014 \\
+        & 9  & 0.939 & 0.940 & 0.934 & 0.932 & 0.943 & 0.938 & 0.004 \\
+7 \& 9  & 7  & 0.926 & 0.893 & 0.806 & 0.790 & 0.801 & 0.843 & 0.055 \\
+        & 9  & 0.942 & 0.929 & 0.944 & 0.941 & 0.944 & 0.940 & 0.006 \\
+9 \& 10 & 9  & 0.940 & 0.935 & 0.936 & 0.940 & 0.937 & 0.938 & 0.002 \\
+        & 10 & 0.944 & 0.943 & 0.943 & 0.944 & 0.945 & 0.944 & 0.001 \\
+\hline
+\end{tabular}
+\caption{ROC AUC scores for single loops and mixed loop combinations across 5 folds, with mean and standard deviation.}
+\label{tab:roc_auc_subset}
+\end{table}
+
+\section{Tree Misclassification by Inclusion of Loop Order (Updated Results)}
+
+% Preamble
+\sisetup{
+  detect-all,
+  input-decimal-markers = {.},
+  group-separator = {,}
+}
+
+% ===== Table 1: Overall by combo =====
+\begin{table}[H]
+\centering
+\small
+\caption{Overall by combo (updated results)}
+\label{tab:overall-by-combo-updated}
+\begin{tabular}{
+  l % text column for train_loops
+  S[table-format=6.0]
+  S[table-format=1.6]
+  S[table-format=2.0]
+  S[table-format=1.6]
+  S[table-format=3.0]
+}
+\toprule
+{train\_loops} & {n\_train} & {train\_auc\_overall} & {test\_loop} & {test\_auc} & {best\_ntrees} \\
+\midrule
+(7, 8, 9, 10)  & 168820 & 0.968639 & 11 & 0.902108 & 600 \\
+(9, 10)        & 167224 & 0.968027 & 11 & 0.900879 & 600 \\
+(7, 10)        & 153416 & 0.970139 & 11 & 0.900487 & 600 \\
+(8, 9, 10)     & 168656 & 0.968276 & 11 & 0.899943 & 600 \\
+(7, 8, 10)     & 154848 & 0.970081 & 11 & 0.898898 & 600 \\
+(10,)          & 153252 & 0.970283 & 11 & 0.898484 & 600 \\
+(8, 10)        & 154684 & 0.970250 & 11 & 0.896242 & 600 \\
+(7, 9, 10)     & 167388 & 0.968272 & 11 & 0.891610 & 600 \\
+(7, 9)         &  14136 & 0.997864 & 11 & 0.869870 & 600 \\
+(9,)           &  13972 & 0.998239 & 11 & 0.868378 & 595 \\
+(7, 8, 9)      &  15568 & 0.998339 & 11 & 0.867978 & 600 \\
+(8, 9)         &  15404 & 0.998303 & 11 & 0.866817 & 600 \\
+(7, 8)         &   1596 & 0.990986 & 11 & 0.836198 & 103 \\
+(8,)           &   1432 & 0.993116 & 11 & 0.813402 & 127 \\
+(7,)           &    164 & 0.989179 & 11 & 0.699997 &  68 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ===== Table 2: Training per-loop AUCs =====
+\begin{table}[H]
+\centering
+\small
+\caption{Training per-loop AUCs (updated results, long-form)}
+\label{tab:training-per-loop-updated}
+\begin{tabular}{
+  l % text column for train_loops
+  S[table-format=2.0]
+  S[table-format=6.0]
+  S[table-format=1.6]
+}
+\toprule
+{train\_loops} & {loop\_id} & {n\_train\_loop} & {train\_auc\_loop} \\
+\midrule
+(7,)          &  7 &    164  & 0.989179 \\
+(7, 8)        &  7 &    164  & 0.987211 \\
+(7, 8)        &  8 &   1432  & 0.991405 \\
+(7, 8, 9)     &  7 &    164  & 1.000000 \\
+(7, 8, 9)     &  8 &   1432  & 0.999686 \\
+(7, 8, 9)     &  9 &  13972  & 0.998152 \\
+(7, 8, 9, 10) &  7 &    164  & 0.998196 \\
+(7, 8, 9, 10) &  8 &   1432  & 0.986078 \\
+(7, 8, 9, 10) &  9 &  13972  & 0.971860 \\
+(7, 8, 9, 10) & 10 & 153252  & 0.968128 \\
+(7, 8, 10)    &  7 &    164  & 0.998360 \\
+(7, 8, 10)    &  8 &   1432  & 0.986166 \\
+(7, 8, 10)    & 10 & 153252  & 0.969894 \\
+(7, 9)        &  7 &    164  & 0.988031 \\
+(7, 9)        &  9 &  13972  & 0.997944 \\
+(7, 9, 10)    &  7 &    164  & 0.999508 \\
+(7, 9, 10)    &  9 &  13972  & 0.973026 \\
+(7, 9, 10)    & 10 & 153252  & 0.967793 \\
+(7, 10)       &  7 &    164  & 0.998360 \\
+(7, 10)       & 10 & 153252  & 0.970093 \\
+(8,)          &  8 &   1432  & 0.993116 \\
+(8, 9)        &  8 &   1432  & 0.998997 \\
+(8, 9)        &  9 &  13972  & 0.998239 \\
+(8, 9, 10)    &  8 &   1432  & 0.989159 \\
+(8, 9, 10)    &  9 &  13972  & 0.971840 \\
+(8, 9, 10)    & 10 & 153252  & 0.967733 \\
+(8, 10)       &  8 &   1432  & 0.988593 \\
+(8, 10)       & 10 & 153252  & 0.970073 \\
+(9,)          &  9 &  13972  & 0.998239 \\
+(9, 10)       &  9 &  13972  & 0.974006 \\
+(9, 10)       & 10 & 153252  & 0.967488 \\
+(10,)         & 10 & 153252  & 0.970283 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{Per category Ablations}
+\begin{table}[H]
+\centering
+\caption{Ablation-style evaluation of feature categories. 
+Top block: models trained on a single category. 
+Middle: all-features baseline. 
+Bottom: minus-one ablations (more negative $\Delta$ vs.\ ALL = more important).}
+\label{tab:ablation}
+\scriptsize
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Category / Setting} & \textbf{\#Features} & \textbf{Test AUC} & \textbf{Best Trees} & $\Delta$ vs.\ ALL \\
+\midrule
+\multicolumn{5}{c}{\emph{Per-category models (higher AUC is better)}} \\
+Centrality                  & 14  & 0.877 & 600 & -- \\
+Spectral (Laplacian)        & 27  & 0.860 & 600 & -- \\
+Spectral (Adjacency/Energy) & 12  & 0.799 & 599 & -- \\
+Connectivity                & 13  & 0.796 & 291 & -- \\
+Assortativity/Clustering    &  8  & 0.765 & 600 & -- \\
+Community                   &  5  & 0.752 & 600 & -- \\
+Motifs (counts)             & 15  & 0.744 & 600 & -- \\
+Symmetry                    &  7  & 0.740 & 274 & -- \\
+Motifs (induced-4)          & 13  & 0.719 & 600 & -- \\
+Planarity                   &  5  & 0.638 &  92 & -- \\
+Basic                       & 12  & 0.630 &  94 & -- \\
+Cycle                       &  2  & 0.624 & 212 & -- \\
+TDA                         & 38  & 0.547 &  46 & -- \\
+Robustness                  &  4  & 0.500 & 229 & -- \\
+Core                        &  2  & 0.500 &  14 & -- \\
+(Other/Unassigned)          &  1  & 0.499 & 394 & -- \\
+\midrule
+\multicolumn{5}{c}{\emph{All-features baseline}} \\
+ALL features                & 178 & 0.902 & 600 & reference \\
+\midrule
+\multicolumn{5}{c}{\emph{Minus-one ablations (more negative $\Delta$ = more important)}} \\
+Assortativity/Clustering    & 170 & 0.882 & 600 & -0.020 \\
+Centrality                  & 164 & 0.887 & 600 & -0.015 \\
+Spectral (Laplacian)        & 151 & 0.887 & 600 & -0.015 \\
+Community                   & 173 & 0.893 & 600 & -0.009 \\
+Connectivity                & 165 & 0.894 & 600 & -0.008 \\
+Motifs (induced-4)          & 165 & 0.896 & 600 & -0.007 \\
+Symmetry                    & 171 & 0.896 & 600 & -0.006 \\
+Basic                       & 166 & 0.898 & 600 & -0.004 \\
+(Other/Unassigned)          & 177 & 0.899 & 600 & -0.003 \\
+Robustness                  & 174 & 0.899 & 600 & -0.003 \\
+Motifs (counts)             & 163 & 0.899 & 600 & -0.003 \\
+Cycle                       & 176 & 0.899 & 600 & -0.003 \\
+TDA                         & 140 & 0.900 & 600 & -0.002 \\
+Planarity                   & 173 & 0.901 & 600 & -0.001 \\
+Core                        & 176 & 0.901 & 600 & -0.001 \\
+Spectral (Adjacency/Energy) & 166 & 0.902 & 600 & -0.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 	
 \end{document}
