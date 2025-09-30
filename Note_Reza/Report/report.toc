@@ -1,0 +1,24 @@
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}%
+\contentsline {section}{\numberline {2}Tabular Features}{1}{section.2}%
+\contentsline {section}{\numberline {3}Methodology}{3}{section.3}%
+\contentsline {section}{\numberline {4}Results and conclusions}{4}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Intra-loop and mixed loops}{4}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Directionality: Zero-shot learning}{5}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}$[7]\rightarrow [8,9,10]$}{5}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2}$[7,8]\rightarrow [9,10]$}{7}{subsubsection.4.2.2}%
+\contentsline {subsubsection}{\numberline {4.2.3}$[7,8,9 ]\rightarrow [10]$}{7}{subsubsection.4.2.3}%
+\contentsline {subsubsection}{\numberline {4.2.4}$[7,8,9,10 ]\rightarrow [11]$}{8}{subsubsection.4.2.4}%
+\contentsline {subsection}{\numberline {4.3}Directionality + pieces of loop 10 needed to get intra-loop 10 level performance: Few-shot learning}{8}{subsection.4.3}%
+\contentsline {section}{\numberline {5}Uncertainty Quantification}{10}{section.5}%
+\contentsline {section}{\numberline {6}Next steps}{10}{section.6}%
+\contentsline {section}{\numberline {7}Tree Misclassification by inclusion of loop order}{10}{section.7}%
+\contentsline {section}{\numberline {8}Addition of new features}{11}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Additional features}{11}{subsection.8.1}%
+\contentsline {section}{\numberline {9}Feature Engineering Update: From Classical Descriptors to Rich Graph Signatures}{11}{section.9}%
+\contentsline {paragraph}{Overview.}{11}{section*.10}%
+\contentsline {paragraph}{Groups and motivations.}{11}{section*.11}%
+\contentsline {paragraph}{Why these additions help.}{13}{section*.12}%
+\contentsline {paragraph}{Practical notes.}{13}{section*.13}%
+\contentsline {subsection}{\numberline {9.1}results}{14}{subsection.9.1}%
+\contentsline {section}{\numberline {10}Tree Misclassification by Inclusion of Loop Order (Updated Results)}{15}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Per category Ablations}{17}{subsection.10.1}%
