@@ -51,6 +51,12 @@ try:
     warnings.filterwarnings("ignore", category=SettingWithCopyWarning)
 except Exception:
     pass
+# Silence scipy.stats ConstantInputWarning (pearsonr on constant arrays)
+try:
+    from scipy.stats import ConstantInputWarning as SciPyConstantInputWarning
+    warnings.filterwarnings("ignore", category=SciPyConstantInputWarning)
+except Exception:
+    pass
 
 # ---------- optional deps ----------
 try:
@@ -154,6 +160,19 @@ def _frac(arr, pred):
     if a.size == 0:
         return np.nan
     return float(np.mean(pred(a)))
+
+def _safe_degree_assortativity(G: nx.Graph) -> float:
+    """Return NaN (no warning) if degrees are constant or graph has no edges."""
+    try:
+        if G.number_of_edges() == 0:
+            return np.nan
+        degs = [d for _, d in G.degree()]
+        # If all degrees equal (or only one unique degree), Pearson r is undefined.
+        if len(set(degs)) <= 1:
+            return np.nan
+        return float(nx.degree_pearson_correlation_coefficient(G))
+    except Exception:
+        return np.nan
 
 def extract_faces(embedding: nx.PlanarEmbedding):
     seen = set()
@@ -543,7 +562,7 @@ def extract_features_single_graph(
             "Basic_degree_entropy": shannon_entropy(dh),
         })
         try:
-            feats["Assortativity_degree"] = float(nx.degree_pearson_correlation_coefficient(G))
+            feats["Assortativity_degree"] = _safe_degree_assortativity(G)
         except Exception:
             feats["Assortativity_degree"] = np.nan
         try:

@@ -1,0 +1,51 @@
+{
+  "mode": "single",
+  "input": "/Users/rezadoobary/Documents/MLCorrelator2/ML-correlator/Graph_Edge_Data/graph_data_5.csv",
+  "output": "/Users/rezadoobary/Documents/MLCorrelator2/ML-correlator/Tree_classifier_for_graphs/new_stuff/features/fgraphs/5loops.csv",
+  "out_format": "csv",
+  "rows_total": 7,
+  "settings": {
+    "groups": {
+      "basic": true,
+      "connectivity": true,
+      "centrality": true,
+      "core": true,
+      "robustness": true,
+      "cycles": true,
+      "spectral_laplacian": true,
+      "spectral_adjacency": true,
+      "netlsd": true,
+      "planarity": true,
+      "symmetry": true,
+      "community": true,
+      "motifs34": true,
+      "motifs5": true,
+      "induced4": true,
+      "induced5": true,
+      "tda": true
+    },
+    "workers": 0,
+    "backend": "loky",
+    "lap_eigs_k": 10,
+    "netlsd_points": 32,
+    "netlsd_tmin": 0.01,
+    "netlsd_tmax": 100.0,
+    "ind4_exact_nmax": 50,
+    "ind4_max_samples": 50000,
+    "ind5_sample_frac": 1.0,
+    "distance_max_sources": 200,
+    "distance_exact_if_leq": 500,
+    "seed": 42
+  },
+  "batches": [
+    {
+      "index": 1,
+      "rows": {
+        "start": 0,
+        "end": 6,
+        "count": 7
+      },
+      "file": "/Users/rezadoobary/Documents/MLCorrelator2/ML-correlator/Tree_classifier_for_graphs/new_stuff/features/fgraphs/5loops.csv"
+    }
+  ]
+}
