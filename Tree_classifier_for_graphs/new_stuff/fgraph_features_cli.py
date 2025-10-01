@@ -1,24 +1,21 @@
 #!/usr/bin/env python3
 # fgraph_features_cli.py
 # ----------------------
-# CLI-first feature extractor for single-layer (EDGES) or two-layer (DEN_EDGES + NUM_EDGES) graphs.
-# Supports streaming/batched processing for huge CSVs via --batch-size. Each batch is saved into
-# a directory as separate files. Non-batched mode writes a single output file.
+# Single- or two-layer graph feature extractor with:
+# - Graceful handling of missing/empty DEN/NUM layers
+# - Feature groups (toggle via --groups)
+# - Batched processing (--batch-size) with manifest JSON
+# - Progress bars (tqdm), warning cleanup
 #
 # Examples:
 #   python fgraph_features_cli.py --input edges.csv --output feats.csv
 #   python fgraph_features_cli.py --input multilayer.csv --output feats.parquet --out-format parquet
 #   python fgraph_features_cli.py --input huge.csv --output feats.csv --batch-size 10000 --batch-dir feats_batches
 #
-# Feature groups: --groups all (default) or comma list from:
-#   basic,connectivity,centrality,core,robustness,cycles,spectral_laplacian,spectral_adjacency,netlsd,
-#   planarity,symmetry,community,motifs34,motifs5,induced4,induced5,tda
-#
-# NEW:
-# - Emits a manifest JSON:
-#   * non-batched: <output>.manifest.json
-#   * batched:     <batch_dir>/manifest.json
-# - Adds tqdm progress bar over batches (and over rows inside each batch)
+# Groups: --groups all (default) or comma list from:
+#   basic,connectivity,centrality,core,robustness,cycles,
+#   spectral_laplacian,spectral_adjacency,netlsd,planarity,symmetry,
+#   community,motifs34,motifs5,induced4,induced5,tda
 
 import os, argparse, ast, warnings, math, random, json
 from collections import Counter, defaultdict
@@ -46,12 +43,7 @@ try:
     warnings.filterwarnings("ignore", category=ConstantInputWarning)
 except Exception:
     pass
-try:
-    from pandas.errors import SettingWithCopyWarning
-    warnings.filterwarnings("ignore", category=SettingWithCopyWarning)
-except Exception:
-    pass
-# Silence scipy.stats ConstantInputWarning (pearsonr on constant arrays)
+# Also silence scipy.stats ConstantInputWarning directly (pearsonr on constant arrays)
 try:
     from scipy.stats import ConstantInputWarning as SciPyConstantInputWarning
     warnings.filterwarnings("ignore", category=SciPyConstantInputWarning)
@@ -89,29 +81,17 @@ except Exception:
 
 # ========================= Feature groups =========================
 ALL_GROUPS = [
-    "basic",
-    "connectivity",
-    "centrality",
-    "core",
-    "robustness",
-    "cycles",
-    "spectral_laplacian",   # Laplacian eigs/stats/heat
-    "spectral_adjacency",   # Adjacency energy/Estrada/moments
-    "netlsd",               # summaries from Laplacian spectrum
-    "planarity",
-    "symmetry",             # heavy
-    "community",            # python-louvain
-    "motifs34",
-    "motifs5",
-    "induced4",
-    "induced5",             # heavy (WL hashing)
-    "tda",                  # heavy (ripser)
+    "basic","connectivity","centrality","core","robustness","cycles",
+    "spectral_laplacian","spectral_adjacency","netlsd","planarity","symmetry",
+    "community","motifs34","motifs5","induced4","induced5","tda",
 ]
-
 DEFAULT_ENABLED_GROUPS = {k: True for k in ALL_GROUPS}
 
 
 # ========================= Helpers =========================
+def _tqdm(it, **kwargs):
+    return tqdm(it, dynamic_ncols=True, mininterval=0.1, smoothing=0.1, leave=False, **kwargs)
+
 def shannon_entropy(counter: Counter) -> float:
     tot = sum(counter.values())
     return np.nan if tot == 0 else -sum((c / tot) * log2(c / tot) for c in counter.values())
@@ -161,19 +141,6 @@ def _frac(arr, pred):
         return np.nan
     return float(np.mean(pred(a)))
 
-def _safe_degree_assortativity(G: nx.Graph) -> float:
-    """Return NaN (no warning) if degrees are constant or graph has no edges."""
-    try:
-        if G.number_of_edges() == 0:
-            return np.nan
-        degs = [d for _, d in G.degree()]
-        # If all degrees equal (or only one unique degree), Pearson r is undefined.
-        if len(set(degs)) <= 1:
-            return np.nan
-        return float(nx.degree_pearson_correlation_coefficient(G))
-    except Exception:
-        return np.nan
-
 def extract_faces(embedding: nx.PlanarEmbedding):
     seen = set()
     faces = []
@@ -199,6 +166,18 @@ def compute_node_orbits(graph):
             seen.add(g_frozen)
             orbits.append(group)
     return orbits
+
+def _safe_degree_assortativity(G: nx.Graph) -> float:
+    """Return NaN (no warning) if degrees are constant or graph has no edges."""
+    try:
+        if G.number_of_edges() == 0:
+            return np.nan
+        degs = [d for _, d in G.degree()]
+        if len(set(degs)) <= 1:
+            return np.nan
+        return float(nx.degree_pearson_correlation_coefficient(G))
+    except Exception:
+        return np.nan
 
 
 # ========================= Motif helpers =========================
@@ -461,9 +440,8 @@ def _five_cycle_count(G):
                     if d in (a,b,c) or d <= a: continue
                     for e in sorted(nbrs[d]):
                         if e in (a,b,c,d) or e <= a: continue
-                        if a in nbrs[e]:
-                            if b < e:
-                                count += 1
+                        if a in nbrs[e] and b < e:
+                            count += 1
     return int(count)
 
 
@@ -561,10 +539,7 @@ def extract_features_single_graph(
             "Basic_edge_to_node_ratio": m / n if n else np.nan,
             "Basic_degree_entropy": shannon_entropy(dh),
         })
-        try:
-            feats["Assortativity_degree"] = _safe_degree_assortativity(G)
-        except Exception:
-            feats["Assortativity_degree"] = np.nan
+        feats["Assortativity_degree"] = _safe_degree_assortativity(G)
         try:
             cc = nx.clustering(G); cc_vals = list(cc.values())
         except Exception:
@@ -587,11 +562,8 @@ def extract_features_single_graph(
             "Connectivity_avg_shortest_path_length": try_or_nan(nx.average_shortest_path_length, G),
             "Connectivity_wiener_index": try_or_nan(nx.wiener_index, G),
         })
-
         eff_p90, ecc_mean, ecc_p90 = _distance_stats_sampled(
-            G,
-            max_sources=distance_max_sources,
-            exact_if_leq=distance_exact_if_leq
+            G, max_sources=distance_max_sources, exact_if_leq=distance_exact_if_leq
         )
         feats["Eff_diameter_p90"] = eff_p90
         feats["Ecc_mean"] = ecc_mean
@@ -664,7 +636,6 @@ def extract_features_single_graph(
                 **{f"Spectral_lap_eig_{i}": np.nan for i in range(max(1, int(lap_eigs_k)))},
                 "Kirchhoff_index": np.nan,
             })
-        # keep legacy 3 heat-trace columns
         feats.update(_laplacian_heat_traces(leigs, ts=(0.1, 1.0, 5.0)))
     else:
         feats.update({
@@ -795,6 +766,7 @@ def extract_features_single_graph(
     nf = float(n); mf = float(m)
     avgdeg = feats.get("Basic_avg_degree", np.nan)
 
+    # Basic / connectivity norms
     if enabled("basic") or enabled("connectivity"):
         feats["Basic_avg_degree_norm"]       = feats.get("Basic_avg_degree", np.nan) / max(nf-1, 1) if nf==nf else np.nan
         feats["Basic_degree_entropy_norm"]   = feats.get("Basic_degree_entropy", np.nan) / np.log2(max(nf-1, 2)) if nf==nf else np.nan
@@ -805,6 +777,7 @@ def extract_features_single_graph(
         wd = feats.get("Connectivity_wiener_index", np.nan)
         feats["Wiener_mean_distance"] = wd/pairs if (wd==wd and pairs and pairs==pairs) else np.nan
 
+    # Motif norms
     if enabled("motifs34") or enabled("motifs5") or enabled("induced4") or enabled("induced5"):
         Cn3 = safe_comb(int(nf),3); Cn4 = safe_comb(int(nf),4); Cn5 = safe_comb(int(nf),5)
         if enabled("motifs34"):
@@ -825,7 +798,7 @@ def extract_features_single_graph(
             k5 = feats.get("Motif_5_cliques", np.nan)
             feats["Motif_5_cycles_per_Cn5"]  = c5/Cn5 if Cn5 and Cn5==Cn5 else np.nan
             feats["Motif_5_cliques_per_Cn5"] = k5/Cn5 if Cn5 and Cn5==Cn5 else np.nan
-            max_c5 = (Cn5 * 12) if Cn5 and Cn5==Cn5 else np.nan  # upper-bound ref: 12 simple 5-cycles per 5-set in K_n
+            max_c5 = (Cn5 * 12) if Cn5 and Cn5==Cn5 else np.nan
             feats["Motif_5_cycles_per_Kn"]   = c5/max_c5 if (max_c5 and max_c5==max_c5) else np.nan
 
         if enabled("induced5") and Cn5 and Cn5==Cn5:
@@ -951,11 +924,16 @@ def _community_features(G):
 
 # ========================= Multi-layer wrappers =========================
 def parse_edge_list(x):
+    if x is None or (isinstance(x, float) and np.isnan(x)):
+        return []
     if isinstance(x, (list, tuple)):
         return [tuple(e) for e in x]
     if isinstance(x, str):
+        s = x.strip()
+        if s == "" or s.lower() in ("nan", "none", "null"):
+            return []
         try:
-            obj = ast.literal_eval(x)
+            obj = ast.literal_eval(s)
             if isinstance(obj, (list, tuple)):
                 return [tuple(e) for e in obj]
         except Exception:
@@ -963,16 +941,41 @@ def parse_edge_list(x):
     return []
 
 def build_graphs_from_row(row):
+    """
+    Returns one of:
+      {"SINGLE": G}                        -- if EDGES provided
+      {"DEN": G_DEN, "NUM": G_NUM, "TOTAL": G_DEN ∪ G_NUM}  -- if both non-empty
+      {"DEN": G_DEN}                       -- if only DEN non-empty
+      {"NUM": G_NUM}                       -- if only NUM non-empty
+      {"SINGLE": empty_graph}              -- if all empty/missing
+    """
     if "EDGES" in row and pd.notna(row["EDGES"]):
-        G = nx.Graph(); G.add_edges_from(parse_edge_list(row["EDGES"]))
+        E = parse_edge_list(row["EDGES"])
+        G = nx.Graph(); G.add_edges_from(E)
         return {"SINGLE": G}
-    if "DEN_EDGES" in row and "NUM_EDGES" in row:
-        D = parse_edge_list(row["DEN_EDGES"])
-        N = parse_edge_list(row["NUM_EDGES"])
+
+    den_list = parse_edge_list(row.get("DEN_EDGES")) if "DEN_EDGES" in row else []
+    num_list = parse_edge_list(row.get("NUM_EDGES")) if "NUM_EDGES" in row else []
+
+    has_den = len(den_list) > 0
+    has_num = len(num_list) > 0
+
+    if has_den and has_num:
         G_DEN, G_NUM, G_TOTAL = nx.Graph(), nx.Graph(), nx.Graph()
-        G_DEN.add_edges_from(D); G_NUM.add_edges_from(N); G_TOTAL.add_edges_from(D + N)
+        G_DEN.add_edges_from(den_list); G_NUM.add_edges_from(num_list)
+        G_TOTAL.add_edges_from(den_list + num_list)
         return {"DEN": G_DEN, "NUM": G_NUM, "TOTAL": G_TOTAL}
-    raise ValueError("Row must have EDGES or (DEN_EDGES and NUM_EDGES)")
+
+    if has_den:
+        G_DEN = nx.Graph(); G_DEN.add_edges_from(den_list)
+        return {"DEN": G_DEN}
+
+    if has_num:
+        G_NUM = nx.Graph(); G_NUM.add_edges_from(num_list)
+        return {"NUM": G_NUM}
+
+    # All empty -> return empty graph so we still produce a row
+    return {"SINGLE": nx.Graph()}
 
 def count_cross_layer_motifs(G_den, G_num, motif="triangle"):
     G_total = nx.compose(G_den, G_num)
@@ -1027,6 +1030,8 @@ def extract_features_row(
     seed: int,
 ) -> Dict[str, Any]:
     graphs = build_graphs_from_row(row)
+
+    # Single-graph path (EDGES or empty)
     if "SINGLE" in graphs:
         feats = extract_features_single_graph(
             graphs["SINGLE"], groups,
@@ -1041,57 +1046,63 @@ def extract_features_row(
         if "COEFFICIENTS" in row: feats["COEFFICIENTS"] = row["COEFFICIENTS"]
         return feats
 
+    # Layered path (DEN/NUM[/TOTAL]), but may be partial (only one layer)
     out: Dict[str, Any] = {}
-    for tag, G in graphs.items():
-        feats_tag = extract_features_single_graph(
-            G, groups,
-            lap_eigs_k=lap_eigs_k, netlsd_points=netlsd_points,
-            netlsd_tmin=netlsd_tmin, netlsd_tmax=netlsd_tmax,
-            ind4_exact_nmax=ind4_exact_nmax, ind4_max_samples=ind4_max_samples,
-            ind5_sample_frac=ind5_sample_frac,
-            distance_max_sources=distance_max_sources,
-            distance_exact_if_leq=distance_exact_if_leq,
-            seed=seed,
-        )
-        out.update({f"{k}_{tag}": v for k, v in feats_tag.items()})
 
-    # cross-layer extras
-    G_DEN, G_NUM, G_TOTAL = graphs["DEN"], graphs["NUM"], graphs["TOTAL"]
-    n = G_TOTAL.number_of_nodes()
-    e_den, e_num = G_DEN.number_of_edges(), G_NUM.number_of_edges()
-    union_edges = set(G_DEN.edges()) | set(G_NUM.edges())
-    inter_edges = set(G_DEN.edges()) & set(G_NUM.edges())
-    out["Edge_ratio_DEN_NUM"] = e_den / max(e_num, 1)
-    out["Edge_overlap_count"] = len(inter_edges)
-    out["Edge_jaccard"] = len(inter_edges) / max(len(union_edges), 1)
-    out["Edge_overlap_frac_DEN"] = len(inter_edges) / max(e_den, 1)
-    out["Edge_overlap_frac_NUM"] = len(inter_edges) / max(e_num, 1)
-    out["Node_overlap_frac"] = len(set(G_DEN.nodes()) & set(G_NUM.nodes())) / max(n, 1)
+    # Always compute for whichever layers exist
+    for tag in ("DEN","NUM","TOTAL"):
+        if tag in graphs:
+            feats_tag = extract_features_single_graph(
+                graphs[tag], groups,
+                lap_eigs_k=lap_eigs_k, netlsd_points=netlsd_points,
+                netlsd_tmin=netlsd_tmin, netlsd_tmax=netlsd_tmax,
+                ind4_exact_nmax=ind4_exact_nmax, ind4_max_samples=ind4_max_samples,
+                ind5_sample_frac=ind5_sample_frac,
+                distance_max_sources=distance_max_sources,
+                distance_exact_if_leq=distance_exact_if_leq,
+                seed=seed,
+            )
+            out.update({f"{k}_{tag}": v for k, v in feats_tag.items()})
 
-    cross_tri = count_cross_layer_motifs(G_DEN, G_NUM, "triangle")
-    cross_c4  = count_cross_layer_motifs(G_DEN, G_NUM, "4cycle")
-    cross_dia = count_cross_layer_motifs(G_DEN, G_NUM, "diamond")
-    cross_k4  = count_cross_layer_motifs(G_DEN, G_NUM, "4clique")
-    out["Cross_triangles_mixed"] = cross_tri
-    out["Cross_4cycles_mixed"]   = cross_c4
-    out["Cross_diamonds_mixed"]  = cross_dia
-    out["Cross_K4_mixed"]        = cross_k4
+    # Cross-layer metrics only if BOTH DEN and NUM exist
+    if ("DEN" in graphs) and ("NUM" in graphs):
+        G_DEN, G_NUM = graphs["DEN"], graphs["NUM"]
+        G_TOTAL = nx.compose(G_DEN, G_NUM)
+        n = G_TOTAL.number_of_nodes()
+        e_den, e_num = G_DEN.number_of_edges(), G_NUM.number_of_edges()
+        union_edges = set(G_DEN.edges()) | set(G_NUM.edges())
+        inter_edges = set(G_DEN.edges()) & set(G_NUM.edges())
+        out["Edge_ratio_DEN_NUM"] = e_den / max(e_num, 1)
+        out["Edge_overlap_count"] = len(inter_edges)
+        out["Edge_jaccard"] = len(inter_edges) / max(len(union_edges), 1)
+        out["Edge_overlap_frac_DEN"] = len(inter_edges) / max(e_den, 1)
+        out["Edge_overlap_frac_NUM"] = len(inter_edges) / max(e_num, 1)
+        out["Node_overlap_frac"] = len(set(G_DEN.nodes()) & set(G_NUM.nodes())) / max(n, 1)
 
-    tri_total = out.get("Motif_triangles_TOTAL", np.nan)
-    c4_total  = out.get("Motif_4_cycles_TOTAL", np.nan)
-    dia_total = out.get("Motif_induced_Diamond_TOTAL", np.nan)
-    k4_total  = out.get("Motif_induced_K4_TOTAL", np.nan)
-    out["Cross_triangles_mixed_frac"] = cross_tri / tri_total if tri_total and tri_total == tri_total else np.nan
-    out["Cross_4cycles_mixed_frac"]   = cross_c4  / c4_total  if c4_total  and c4_total  == c4_total  else np.nan
-    out["Cross_diamonds_mixed_frac"]  = cross_dia / dia_total if dia_total and dia_total == dia_total else np.nan
-    out["Cross_K4_mixed_frac"]        = cross_k4  / k4_total  if k4_total  and k4_total  == k4_total  else np.nan
+        cross_tri = count_cross_layer_motifs(G_DEN, G_NUM, "triangle")
+        cross_c4  = count_cross_layer_motifs(G_DEN, G_NUM, "4cycle")
+        cross_dia = count_cross_layer_motifs(G_DEN, G_NUM, "diamond")
+        cross_k4  = count_cross_layer_motifs(G_DEN, G_NUM, "4clique")
+        out["Cross_triangles_mixed"] = cross_tri
+        out["Cross_4cycles_mixed"]   = cross_c4
+        out["Cross_diamonds_mixed"]  = cross_dia
+        out["Cross_K4_mixed"]        = cross_k4
 
-    Cn3 = math.comb(n, 3) if n >= 3 else np.nan
-    Cn4 = math.comb(n, 4) if n >= 4 else np.nan
-    out["Cross_triangles_mixed_per_Cn3"] = cross_tri / Cn3 if Cn3 and Cn3 == Cn3 else np.nan
-    out["Cross_4cycles_mixed_per_Cn4"]   = cross_c4  / Cn4 if Cn4 and Cn4 == Cn4 else np.nan
-    out["Cross_diamonds_mixed_per_Cn4"]  = cross_dia / Cn4 if Cn4 and Cn4 == Cn4 else np.nan
-    out["Cross_K4_mixed_per_Cn4"]        = cross_k4  / Cn4 if Cn4 and Cn4 == Cn4 else np.nan
+        tri_total = out.get("Motif_triangles_TOTAL", np.nan)
+        c4_total  = out.get("Motif_4_cycles_TOTAL", np.nan)
+        dia_total = out.get("Motif_induced_Diamond_TOTAL", np.nan)
+        k4_total  = out.get("Motif_induced_K4_TOTAL", np.nan)
+        out["Cross_triangles_mixed_frac"] = cross_tri / tri_total if tri_total and tri_total == tri_total else np.nan
+        out["Cross_4cycles_mixed_frac"]   = cross_c4  / c4_total  if c4_total  and c4_total  == c4_total  else np.nan
+        out["Cross_diamonds_mixed_frac"]  = cross_dia / dia_total if dia_total and dia_total == dia_total else np.nan
+        out["Cross_K4_mixed_frac"]        = cross_k4  / k4_total  if k4_total  and k4_total  == k4_total  else np.nan
+
+        Cn3 = math.comb(n, 3) if n >= 3 else np.nan
+        Cn4 = math.comb(n, 4) if n >= 4 else np.nan
+        out["Cross_triangles_mixed_per_Cn3"] = cross_tri / Cn3 if Cn3 and Cn3 == Cn3 else np.nan
+        out["Cross_4cycles_mixed_per_Cn4"]   = cross_c4  / Cn4 if Cn4 and Cn4 == Cn4 else np.nan
+        out["Cross_diamonds_mixed_per_Cn4"]  = cross_dia / Cn4 if Cn4 and Cn4 == Cn4 else np.nan
+        out["Cross_K4_mixed_per_Cn4"]        = cross_k4  / Cn4 if Cn4 and Cn4 == Cn4 else np.nan
 
     if "COEFFICIENTS" in row: out["COEFFICIENTS"] = row["COEFFICIENTS"]
     return out
@@ -1126,7 +1137,7 @@ def compute_batch_df(
     if workers is None or workers <= 0 or not _HAS_JOBLIB:
         rows = []
         it = df.iterrows()
-        it = tqdm(it, total=len(df), desc="Rows") if progress else it
+        it = _tqdm(it, total=len(df), desc="Rows") if progress else it
         for _, r in it:
             rows.append(_safe_extract_row(
                 r,
@@ -1162,7 +1173,7 @@ def compute_batch_df(
         for _, r in df.iterrows()
     )
     if progress and _HAS_TQDM_JOBLIB:
-        with tqdm_joblib(tqdm(total=len(df), desc="Rows (parallel)")):
+        with tqdm_joblib(_tqdm(total=len(df), desc="Rows (parallel)")):
             results = Parallel(n_jobs=workers, backend=backend)(
                 delayed(lambda x: x)(x) for x in iterator
             )
@@ -1196,7 +1207,6 @@ def write_frame(df: pd.DataFrame, path: str, fmt: str):
         df.to_parquet(path, index=False)
 
 def count_data_rows(csv_path: str) -> int:
-    # Count lines - 1 for header; robust to huge files
     with open(csv_path, "r", encoding="utf-8", errors="ignore") as f:
         total_lines = sum(1 for _ in f)
     return max(total_lines - 1, 0)
@@ -1208,10 +1218,10 @@ def save_manifest(path: str, manifest: dict):
 
 def main():
     ap = argparse.ArgumentParser(
-        description="Graph feature extractor (single- or two-layer) with full CLI knobs, batching, tqdm, and manifest."
+        description="Graph feature extractor (single- or two-layer) with full CLI knobs, batching, tqdm, manifest, and robust empty-layer handling."
     )
     ap.add_argument("--input", required=True, help="Input CSV with EDGES or DEN_EDGES+NUM_EDGES.")
-    ap.add_argument("--output", required=True, help="Output file path (csv or parquet). In batched mode, only used to infer format unless --batch-dir omitted.")
+    ap.add_argument("--output", required=True, help="Output file path (csv or parquet). In batched mode, used for format inference.")
     ap.add_argument("--out-format", choices=["csv","parquet"], default=None,
                     help="Override output format (default inferred from --output extension).")
 
@@ -1356,8 +1366,12 @@ def main():
     batch_idx = 1
     chunk_iter = pd.read_csv(args.input, chunksize=args.batch_size)
 
-    batch_pbar = tqdm(total=n_batches, desc="Batches") if progress else None
-    for chunk in chunk_iter:
+    batch_pbar = _tqdm(range(n_batches), total=n_batches, desc="Batches") if progress else None
+    for _ in (range(n_batches) if progress else [None]*n_batches):
+        try:
+            chunk = next(chunk_iter)
+        except StopIteration:
+            break
         start_idx = total_rows_seen
         end_idx = total_rows_seen + len(chunk) - 1
 
