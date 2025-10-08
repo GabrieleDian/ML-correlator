@@ -283,55 +283,46 @@ def compute_face_count_features(graphs_batch):
         features.append(face_counts)
     
     return features
-# W5 subgraph indicator feature with further check on numerator edges
-import networkx as nx
-from networkx.algorithms import isomorphism
 
-def compute_W5_features(graphs_batch):
-    W5 = nx.wheel_graph(5)
-    results = []
+def compute_graphlet_features(graphs_batch, k=4, sizev=1, sizee=3, connect=True):
+    """
+    Compute local graphlet frequencies for the single-edge (k=2) graphlet using GEOMINE.
+    - Assumes one edge type (edge present=1, absent=0) → sizee=2.
+    - Returns, for each graph, a list of per-node counts (participation in single-edge graphlets).
+    - If GEOMINE is unavailable, the function prints an error and exits.
 
+    Args:
+        graphs_batch: list of graphs; each graph is a list of undirected edges [(u, v), ...]
+        k (int): graphlet number of nodes
+        sizev (int): number of vertex colors (1 if unused)
+        sizee (int): number of edge symbols INCLUDING 0 (no-edge). For one edge type use 2.
+        connect (bool): count only connected graphlets (True)
+
+    Returns:
+        List[List[int]]: per-graph list of per-node local counts
+    """
+    try:
+        import GEOMINE
+    except Exception as e:
+        import sys
+        print("[ERROR] GEOMINE is required for 'local_single_edge_graphlet' feature. "
+              "Install it via: pip install GEOMINE", file=sys.stderr)
+        print(f"Cause: {type(e).__name__}: {e}", file=sys.stderr)
+        raise SystemExit(1)
+
+    features = []
     for edges in graphs_batch:
-        # Build denominator-only graph
-        nodes = sorted(set([u for u,v,_ in edges] + [v for u,v,_ in edges]))
-        node_to_idx = {node: j for j, node in enumerate(nodes)}
-        n = len(nodes)
-        G_den = nx.Graph()
-        G_den.add_nodes_from(range(n))
-        for u, v, etype in edges:
-            if etype == 0:
-                G_den.add_edge(node_to_idx[u], node_to_idx[v])
+        G, n = edges_to_networkx(edges)
+        adj_matrix = nx.adjacency_matrix(G, nodelist=range(n)).toarray()
+       # Per-node local counts via GEOMINE.Count
+        per_node = []
+        for ref in range(n):
+            vec = np.asarray(GEOMINE.Count(adj_matrix, ref, k, sizev, sizee, connect), dtype=float)
+            # For k=2 & one edge type, vec has length 1; summing is robust.
+            per_node.append(vec)
+        features.append(per_node)
 
-        # Collect numerator edges
-        num_edges = set()
-        for u, v, etype in edges:
-            if etype == 1:
-                i, j = node_to_idx[u], node_to_idx[v]
-                num_edges.add((min(i,j), max(i,j)))
-
-        feature_value = 0
-        matcher = isomorphism.GraphMatcher(G_den, W5)
-
-        for mapping in matcher.subgraph_isomorphisms_iter():
-            # Check that all W5 cycle nodes are present in mapping
-            cycle_nodes = [0,1,2,3]
-            if not all(n in mapping for n in cycle_nodes):
-                continue
-
-            mapped = [mapping[n] for n in cycle_nodes]
-
-            # Opposite pairs
-            opp_pairs = [(mapped[0], mapped[2]), (mapped[1], mapped[3])]
-
-            # If none of the opposite pairs have numerator edges → feature=1
-            if not any((min(u,v), max(u,v)) in num_edges for u,v in opp_pairs):
-                feature_value = 1
-                break  # one valid W5 is enough
-
-        results.append([feature_value]*n)
-
-    return results
-
+    return features
 
 
 
@@ -347,7 +338,7 @@ FEATURE_FUNCTIONS = {
     'closeness': compute_closeness_features,
     'pagerank': compute_pagerank_features,
     'face_count': compute_face_count_features,
-    'W5_indicator': compute_W5_features
+    'graphlet_2': compute_graphlet_features
 }
 # Combine features of different dimensions
 def pad_features(features_list, max_nodes):

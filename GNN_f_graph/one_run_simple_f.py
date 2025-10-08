@@ -166,7 +166,7 @@ def main():
     # Extract parameters with safe defaults
     train_loop_orders = normalize_loop_order(config_dict.get('data', {}).get('train_loop_order', '7'))
     test_loop_orders = normalize_loop_order(config_dict.get('data', {}).get('test_loop_order', '8'))
-    selected_features = config_dict.get('features', {}).get('selected_features', ['degree'])
+    selected_features = config_dict.get('data', {}).get('selected_features', ['degree'])
     seed = config_dict.get('experiment', {}).get('seed', 42)
     base_dir = config_dict.get('data', {}).get('base_dir', 'Graph_Edge_Data')  # Use config path with fallback
     # Set random seeds

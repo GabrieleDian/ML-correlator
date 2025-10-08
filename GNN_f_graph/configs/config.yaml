@@ -3,8 +3,8 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  train_loop_order: '7'          # Which loop to use for training
-  test_loop_order: '7'                 # Which loop to use for testing
+  train_loop_order: '9'          # Which loop to use for training
+  test_loop_order: '9'                 # Which loop to use for testing
 
   # Features to use for training
   selected_features:
@@ -12,10 +12,7 @@ data:
    - eigen_2
    - eigen_3
    - degree
-   - betweenness
-   - closeness
-   - W5_indicator
-    
+   - graphlet_2
   # Computation settings
   chunk_size: 1000
   n_jobs: 4
@@ -40,7 +37,7 @@ training:
 # Experiment configuration
 experiment:
   seed: 42
-  use_wandb: true
+  use_wandb: false
   save_model: false
   model_dir: "models"
   project_name: "f_graph_gnn_loop_7"

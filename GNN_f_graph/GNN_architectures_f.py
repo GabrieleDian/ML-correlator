@@ -13,16 +13,18 @@ class GraphBinaryClassifier(torch.nn.Module):
     def __init__(self, num_features, num_relations, hidden_dim=64, dropout=0.2):
         super().__init__()
         self.conv1 = RGCNConv(num_features, hidden_dim, num_relations)
+        self.bn1 = torch.nn.BatchNorm1d(hidden_dim)
         self.conv2 = RGCNConv(hidden_dim, hidden_dim, num_relations)
+        self.bn2 = torch.nn.BatchNorm1d(hidden_dim)
         self.dropout = torch.nn.Dropout(dropout)
-        self.fc = torch.nn.Linear(hidden_dim, 1)  # binary output
+        self.fc = torch.nn.Linear(hidden_dim, 1)  # logits
 
     def forward(self, x, edge_index, edge_type, batch=None):
-        x = torch.relu(self.conv1(x, edge_index, edge_type))
-        x = torch.relu(self.conv2(x, edge_index, edge_type))
-        # Graph-level pooling
+        x = F.relu(self.bn1(self.conv1(x, edge_index, edge_type)))
+        x = F.relu(self.bn2(self.conv2(x, edge_index, edge_type)))
+        x = self.dropout(x)
         x = global_mean_pool(x, batch)
-        return torch.sigmoid(self.fc(x))   
+        return self.fc(x)
 
 class HeteroGraphBinaryClassifier(torch.nn.Module):
     def __init__(self, num_nodes, hidden_dim=64, dropout=0.2):

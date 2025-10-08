@@ -136,7 +136,6 @@ import time
 def train(config, train_dataset, test_dataset):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
-    
 
     # Start clock
     start_time = time.time()
@@ -151,7 +150,7 @@ def train(config, train_dataset, test_dataset):
     # Train and test loaders
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=False)
-    model = create_gnn_model(
+    model = model = create_gnn_model(
         architecture=config.model_name,
         num_features=config.in_channels,
         hidden_dim=config.hidden_channels,
@@ -159,7 +158,7 @@ def train(config, train_dataset, test_dataset):
         dropout=config.dropout,
         num_layers=getattr(config, 'num_layers', 3)
     ).to(device)
-
+    
 
     optimizer = torch.optim.Adam(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
 
@@ -189,6 +188,8 @@ def train(config, train_dataset, test_dataset):
     print(f"Hidden dim: {config.hidden_channels}, Layers: {getattr(config, 'num_layers', 3)}")
     print(f"Initial LR: {optimizer.param_groups[0]['lr']}")
     
+
+
     for epoch in range(config.epochs):
         # Training
         train_loss, train_acc, train_metrics = train_epoch(

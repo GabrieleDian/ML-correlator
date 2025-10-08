@@ -185,15 +185,17 @@ if __name__ == "__main__":
     n_jobs = args.n_jobs if args.n_jobs else config['features']['n_jobs']
     base_dir = Path(config['data'].get('base_dir', '../Graph_Edge_Data'))
 
-    # Check what features are available = 7
+    # Get the avalable features
     available = get_available_features(file_ext, data_dir=base_dir)
     print(f"\nAvailable features for loop {file_ext}: {available}")
-    
-    if available:
-        # Load some features
-        features, labels = load_saved_features(file_ext, ['degree'])
-        print(f"\nLoaded {len(labels)} graphs")
-        print(f"First graph degree features: {features['degree'][0]}")
-    
+
+    # Load selected features from config instead of hardcoded 'degree'
+    selected_features = config.get('data', {}).get('selected_features', ['degree'])
+    print(f"Loading features: {selected_features}")
+    features, labels = load_saved_features(file_ext, selected_features)
+
+    print(f"\nLoaded {len(labels)} graphs")
+    print(f"First graph degree features: {features['degree'][0]}")
+
     # Check consistency
     check_feature_consistency(file_ext)
