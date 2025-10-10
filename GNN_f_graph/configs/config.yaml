@@ -3,7 +3,7 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  train_loop_order: '9'          # Which loop to use for training
+  train_loop_order: '9'         # Which loop to use for training
   test_loop_order: '9'                 # Which loop to use for testing
 
   # Features to use for training
@@ -12,7 +12,9 @@ data:
    - eigen_2
    - eigen_3
    - degree
+   - closeness
    - graphlet_2
+
   # Computation settings
   chunk_size: 1000
   n_jobs: 4
@@ -22,14 +24,14 @@ model:
   name: "rgcn"              # Model architecture: gin, gat, hybrid, planar, simple
   hidden_channels: 256
   num_layers: 3
-  dropout: 0.4
+  dropout: 0.5
 
 # Training configuration
 training:
   epochs: 100
-  batch_size: 128
-  learning_rate:   0.01
-  weight_decay:   0.001
+  batch_size: 256
+  learning_rate:   0.00028721941495727597
+  weight_decay:  0.00003060739988229477
   scheduler_type: "onecycle"  # Options: onecycle, plateau, none
   threshold: 0.5              # Decision threshold for classification
   log_threshold_curves: false   # Whether to log threshold sweep curves to WandB
@@ -40,4 +42,4 @@ experiment:
   use_wandb: false
   save_model: false
   model_dir: "models"
-  project_name: "f_graph_gnn_loop_7"
+  wandb_project: "f_graph_gnn_loopto9graphlet"

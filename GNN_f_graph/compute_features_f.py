@@ -303,6 +303,8 @@ def compute_graphlet_features(graphs_batch, k=4, sizev=1, sizee=3, connect=True)
     """
     try:
         import GEOMINE
+        import importlib
+        importlib.reload(GEOMINE)
     except Exception as e:
         import sys
         print("[ERROR] GEOMINE is required for 'local_single_edge_graphlet' feature. "
@@ -323,6 +325,11 @@ def compute_graphlet_features(graphs_batch, k=4, sizev=1, sizee=3, connect=True)
         features.append(per_node)
 
     return features
+def graphlet_4(graphs_batch):
+    return compute_graphlet_features(graphs_batch, k=4)
+
+def graphlet_5(graphs_batch):
+    return compute_graphlet_features(graphs_batch, k=5)
 
 
 
@@ -338,7 +345,8 @@ FEATURE_FUNCTIONS = {
     'closeness': compute_closeness_features,
     'pagerank': compute_pagerank_features,
     'face_count': compute_face_count_features,
-    'graphlet_2': compute_graphlet_features
+    'graphlet_4': graphlet_4,
+    'graphlet_5': graphlet_5
 }
 # Combine features of different dimensions
 def pad_features(features_list, max_nodes):

@@ -1,6 +1,6 @@
 # Simple WandB Sweep Configuration
 # Good starting point for hyperparameter search
-project: "test"
+wandb_project: 'test_to_9_sweep_kurz'
 program: one_run_simple.py
 method: random  # Random search is simple and effective
 metric:
@@ -13,10 +13,14 @@ parameters:
     value: configs/config.yaml
 
   # Hyperparameters to sweep
-  hidden_channels:
-    values: [64, 128]
-  num_layers:
-    values: [1, 2, 3]
-  batch_size:
-    values: [62, 128]
+  learning_rate:
+    distribution: uniform
+    min : 0.00001
+    max : 0.05
+  
+  weight_decay:
+    distribution: uniform
+    min: 0.000001
+    max: 0.005
+
 
