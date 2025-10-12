@@ -84,6 +84,39 @@ def create_eigen_function(i):
 # Create a dictionary of functions for each eigenvector
 eigenvector_functions = {f'eigen_{i}': create_eigen_function(i) for i in range(1, k+1)}
 
+
+from scipy.sparse.linalg import eigsh # More efficient function
+
+def compute_lowest_k_eigenvectors(graphs_batch, k=3):
+    """Compute k smallest non-zero Laplacian eigenvectors for each graph."""
+    feats = []
+    for edges in graphs_batch:
+        G, n = edges_to_networkx(edges)
+        L = nx.laplacian_matrix(G).astype(float)
+        try:
+            vals, vecs = eigsh(L, k=min(k+1, n-1), which='SM')
+        except Exception:
+            vals, vecs = eigh(L.toarray())
+        idx = np.argsort(vals)
+        vals, vecs = vals[idx], vecs[:, idx]
+        nz = np.where(vals > 1e-10)[0][:k]
+        if len(nz) == 0:
+            feats.append(np.zeros((n, k)))
+        else:
+            V = np.zeros((n, k))
+            V[:, :len(nz)] = np.real(vecs[:, nz])
+            feats.append(np.round(V, 8))
+    return feats
+
+# Wrap each column into its own feature function
+def create_lowest_eigen_function(i, k=3):
+    def f(batch): 
+        return [v[:, i-1].tolist() for v in compute_lowest_k_eigenvectors(batch, k=k)]
+    return f
+
+lowest_eigenvector_functions = {f'low_eigen_{i}': create_lowest_eigen_function(i) for i in range(1, 4)}
+
+
 # Compute degree features for a batch of graphs
 def compute_degree_features(graphs_batch):
     """Compute degree for a batch of graphs."""
@@ -270,6 +303,7 @@ def compute_W5_features(graphs_batch):
 # Dictionary mapping feature names to their computation functions
 FEATURE_FUNCTIONS = {
     **eigenvector_functions,  # Add eigenvector functions 
+    **lowest_eigenvector_functions
     'identity_columns': identity_column_features,
     'adjacency_columns': adjacency_column_features,
     'degree': compute_degree_features,
