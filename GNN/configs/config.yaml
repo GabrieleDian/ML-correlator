@@ -13,10 +13,9 @@ features:
   - eigen_1
   - eigen_2
   - eigen_3
-  - betweenness
-  - closeness
-  - degree
-  - clustering
+  - low_eigen_1
+  - low_eigen_2
+  - low_eigen_3
     
   # Computation settings
   chunk_size: 1000
@@ -25,16 +24,16 @@ features:
 # Model configuration
 model:
   name: "gin"              # Model architecture: gin, gat, hybrid, planar, simple
-  hidden_channels: 64
+  hidden_channels: 128
   num_layers: 3
   dropout: 0.5
 
 # Training configuration
 training:
-  epochs: 15
-  batch_size: 64
-  learning_rate:   0.00028721941495727597
-  weight_decay:   0.00003060739988229477
+  epochs: 100
+  batch_size: 128
+  learning_rate:   0.0007204222817559234
+  weight_decay:   0.00001991678677743643
   scheduler_type: "none"  # Options: onecycle, plateau, none
   threshold: 0.5              # Decision threshold for classification
   log_threshold_curves: false   # Whether to log threshold sweep curves to WandB

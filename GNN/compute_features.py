@@ -303,7 +303,7 @@ def compute_W5_features(graphs_batch):
 # Dictionary mapping feature names to their computation functions
 FEATURE_FUNCTIONS = {
     **eigenvector_functions,  # Add eigenvector functions 
-    **lowest_eigenvector_functions
+    **lowest_eigenvector_functions,
     'identity_columns': identity_column_features,
     'adjacency_columns': adjacency_column_features,
     'degree': compute_degree_features,

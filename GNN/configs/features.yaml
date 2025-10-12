@@ -3,14 +3,15 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  file_ext: '11'           # Which loop to use for training  
+  file_ext: '9'           # Which loop to use for training  
 # Feature configuration
 features:
   # Features to compute (when running compute_features.py)
   compute_all: false
   features_to_compute:
-    - graphlet_2
-
+    - eigen_1
+    - eigen_2
+    - eigen_3
   # Computation settings
   chunk_size: 1000
   n_jobs: 4
