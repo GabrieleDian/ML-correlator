@@ -3,7 +3,7 @@ many_loop_paper/
 my_tree_class
 .venv/
 test_graphlets/
-Graph_Edge_Data/den_graph_data_11.csv/
+Graph_Edge_Data/
 Maxwell/
 gdian/
 inversecusprule.nb
@@ -14,8 +14,5 @@ __pycache__/
 *.pyc
 *.log
 wandb/
-/Graph_Edge_Data/graph_data_10.csv
-/Graph_Edge_Data/graph_data_11.csv
-/Graph_Edge_Data/den_graphs_data_12/*
 /Tree_classifier_for_graphs/mixed_loops/features/features_tabular
 /Tree_classifier_for_graphs/new_stuff/features/
