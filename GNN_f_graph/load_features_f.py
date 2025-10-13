@@ -83,6 +83,9 @@ def load_graph_structure(file_ext, data_dir=None):
 
     graph_infos = []
     for d_edges, n_edges in zip(denom_edges_list, numer_edges_list):
+         # Force both to lists (tuple → list)
+        d_edges = list(d_edges)
+        n_edges = list(n_edges)
         nodes = sorted(set([u for u,v in d_edges+n_edges] + [v for u,v in d_edges+n_edges]))
         node_to_idx = {node: i for i, node in enumerate(nodes)}
 

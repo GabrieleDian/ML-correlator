@@ -1,16 +1,16 @@
 # Simple WandB Sweep Configuration
 # Good starting point for hyperparameter search
-wandb_project: 'test_to_9_sweep_kurz'
 program: one_run_simple.py
 method: random  # Random search is simple and effective
 metric:
-  name: train_recall
-  goal: maximize
+  name: train_loss
+  goal: minimize
 
 parameters:
   # Base config file
   config:
     value: configs/config.yaml
+
 
   # Hyperparameters to sweep
   learning_rate:
@@ -22,5 +22,14 @@ parameters:
     distribution: uniform
     min: 0.000001
     max: 0.005
+  hidden_channels:
+    values: [64, 128, 256]
+  num_layers:
+    values: [2, 3, 4]
+  dropout:
+    distribution: uniform
+    min : 0.3
+    max : 0.5
 
+run_cap: 10
 

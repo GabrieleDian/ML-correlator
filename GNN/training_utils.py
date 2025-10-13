@@ -137,7 +137,7 @@ def evaluate(model, test_loader, device, pos_weight=None, threshold=0.5, log_thr
 # Count training time
 import time 
 
-def train(config, train_dataset, test_dataset):
+def train(config, train_dataset, test_dataset,use_wandb=False):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
     
@@ -147,11 +147,12 @@ def train(config, train_dataset, test_dataset):
     # Initialize Weights & Biases if configured
     if 'WANDB_SWEEP_ID' in os.environ or getattr(config, 'use_wandb', False):
         wandb.init(
-            project=config.project,
+            project=getattr(config, 'wandb_project', getattr(config, 'project', 'cluster-7-loop')),
             name=getattr(config, 'experiment_name', config.model_name),
             config=config.__dict__,
             reinit=True
         )
+
     # Train and test loaders
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=False)
@@ -164,6 +165,8 @@ def train(config, train_dataset, test_dataset):
         dropout=config.dropout,
         num_layers=getattr(config, 'num_layers', 3)
     ).to(device)
+
+
     # Print the number of parameters of the model
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"Model has {num_params} trainable parameters")
@@ -214,17 +217,15 @@ def train(config, train_dataset, test_dataset):
         # Get current learning rate
         current_lr = optimizer.param_groups[0]['lr']
 
-        if wandb.run is not None:
+        if use_wandb:
             wandb.log({
-                'model parameters': num_params,
-                'epoch': epoch,
-                'train_loss': train_loss,
-                'train_accuracy': train_acc,
-                'train_precision': train_metrics['precision'],
-                'train_recall': train_metrics['recall'],
-                'train_roc_auc': train_metrics['roc_auc'],
-                'train_pr_auc': train_metrics['pr_auc']
-                  })
+                "epoch": epoch,
+                "train_loss": train_loss,
+                "train_acc": train_acc,
+                "train_precision": train_metrics['precision'],
+                "train_pr_auc": train_metrics['pr_auc'],
+                "lr": optimizer.param_groups[0]['lr']
+            }, step=epoch)
 
         if epoch % 10 == 0 or epoch == config.epochs - 1:
             print(f"Epoch {epoch:3d}/{config.epochs}: "
@@ -257,13 +258,13 @@ def train(config, train_dataset, test_dataset):
         plt.title(f"Threshold curves - train:{config.train_loop_order}, test:{config.test_loop_order}")
         wandb.log({"threshold_curves": wandb.Image(plt)})
         plt.close()
-    if wandb.run is not None:
-        wandb.finish()
 
     return {
         'model_state': model.state_dict().copy(),
         'final_train_acc': train_acc,
         'final_test_acc': test_acc,
+        'final_train_loss': train_loss,
+        'test_loss': test_loss,
         'final_train_roc_auc': train_metrics['roc_auc'],
         'final_train_pr_auc': train_metrics['pr_auc'],
         'final_train_recall': train_metrics['recall'],

@@ -284,18 +284,13 @@ def compute_graphlet_features(graphs_batch, k=4, sizev=1, sizee=2, connect=True)
         features.append(per_node)
 
     return features
+# Wrapper functions for specific graphlet sizes
+def graphlet_4(graphs_batch):
+    return compute_graphlet_features(graphs_batch, k=4)
 
+def graphlet_5(graphs_batch):
+    return compute_graphlet_features(graphs_batch, k=5)
 
-    
-def compute_W5_features(graphs_batch):
-    W5 = nx.wheel_graph(5)
-
-    results = []
-    for edges in graphs_batch:
-        G, n_nodes = edges_to_networkx(edges)
-        has_W5 = int(isomorphism.GraphMatcher(G, W5).subgraph_is_isomorphic())
-        results.append([has_W5] * n_nodes)
-    return results
 
 # Create a seperate dictionary for the eigenvector features
 #eigenvector_dict = {f'eigen_{i}': compute_top_k_eigenvector(k=k, i=i) for i in range(k)}
@@ -312,8 +307,8 @@ FEATURE_FUNCTIONS = {
     'closeness': compute_closeness_features,
     'pagerank': compute_pagerank_features,
     'face_count': compute_face_count_features,
-    'graphlet_2': compute_graphlet_features,
-    'W5_indicator': compute_W5_features
+    'graphlet_4': graphlet_4,
+    'graphlet_5': graphlet_5
 }
 
 import numpy as np

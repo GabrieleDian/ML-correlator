@@ -3,8 +3,8 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  train_loop_order: ['6','7','8']          # Which loop to use for training
-  test_loop_order: '9'   
+  train_loop_order: '7'          # Which loop to use for training
+  test_loop_order: '7'   
 
 # Feature configuration
 features:
@@ -16,6 +16,8 @@ features:
   - low_eigen_1
   - low_eigen_2
   - low_eigen_3
+  - graphlet_4
+  - graphlet_5
     
   # Computation settings
   chunk_size: 1000
@@ -24,14 +26,14 @@ features:
 # Model configuration
 model:
   name: "gin"              # Model architecture: gin, gat, hybrid, planar, simple
-  hidden_channels: 128
-  num_layers: 3
+  hidden_channels: 64
+  num_layers: 4
   dropout: 0.5
 
 # Training configuration
 training:
   epochs: 100
-  batch_size: 128
+  batch_size: 32
   learning_rate:   0.0007204222817559234
   weight_decay:   0.00001991678677743643
   scheduler_type: "none"  # Options: onecycle, plateau, none
@@ -44,5 +46,6 @@ experiment:
   use_wandb: true
   model_dir: "models"
   save_model: false
-  wandb_project: 'test_to_9_sweep_kurz'
+  wandb_project: fix_7_sweep
+
 

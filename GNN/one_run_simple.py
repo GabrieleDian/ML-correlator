@@ -14,8 +14,8 @@ from training_utils import train
 from types import SimpleNamespace
 
 
+"""Convert nested config dict to SimpleNamespace for compatibility."""
 def config_to_namespace(config_dict):
-    """Convert nested config dict to SimpleNamespace for compatibility."""
     return SimpleNamespace(
         # Data configuration
         base_dir=config_dict.get('data', {}).get('base_dir', '../Graph_Edge_Data'),
@@ -35,8 +35,8 @@ def config_to_namespace(config_dict):
         batch_size=config_dict.get('training', {}).get('batch_size', 32),
         scheduler_type=config_dict.get('training', {}).get('scheduler_type', 'onecycle'),
         threshold=config_dict.get('training', {}).get('threshold', 0.5),
-        log_threshold_curves=config_dict.get('training', {}).get('log_threshold_curves', False),  # NEW
-        
+        log_threshold_curves=config_dict.get('training', {}).get('log_threshold_curves', False),
+
         # WandB configuration
         use_wandb=config_dict.get('experiment', {}).get('use_wandb', True),
         project=config_dict.get('experiment', {}).get('wandb_project', 'cluster-7-loop'),
@@ -44,125 +44,141 @@ def config_to_namespace(config_dict):
     )
 
 
+# Handle properly list of values for training and testing.
+import ast
+def normalize_loop_order(value):
+    """
+    Normalize loop order input into a list of strings.
+    Accepts: str ("7", "7to8", "7,8,9", "['7','8']")
+            or list
+    Returns: list[str]
+    """
+    if isinstance(value, list):
+        return [str(v) for v in value]
+
+    if isinstance(value, str):
+        # Try to parse a Python list string
+        try:
+            parsed = ast.literal_eval(value)
+            if isinstance(parsed, list):
+                return [str(v) for v in parsed]
+        except Exception:
+            pass
+        # Handle comma-separated case
+        if "," in value:
+            return [v.strip() for v in value.split(",")]
+        return [value.strip()]
+    raise ValueError(f"Unsupported loop order format: {value}")
+
 def main():
-    """Main function to run training with pre-computed features."""
-    
-    # Check if running as part of wandb sweep
-    if 'WANDB_SWEEP_ID' in os.environ:
-        print("Running as part of wandb sweep")
-        
-        # Initialize wandb for sweep
+    print("\n=== Starting GNN training run ===")
+
+    is_sweep = 'WANDB_SWEEP_ID' in os.environ
+    config_dict = {}
+
+    # ---------------------------------------------------------
+    # 1. Load configuration
+    # ---------------------------------------------------------
+    if is_sweep:
+        print("[INFO] Running as part of a WandB sweep")
+
+        # Initialize first, so wandb.config is populated
         wandb.init()
         sweep_config = wandb.config
-        
-        # Load base config file (from sweep parameters)
-        config_file = sweep_config.get('config', 'config.yaml')
-        with open(config_file, 'r') as f:
+
+        # Get project name (safe default if missing)
+        project_from_sweep = getattr(sweep_config, "project", "cluster-7-loop")
+
+        # Optional: you can also let sweep define a name
+        name_from_sweep = getattr(sweep_config, "wandb_name", None)
+
+        config_file = sweep_config.get("config", "config.yaml")
+        with open(config_file, "r") as f:
             config_dict = yaml.safe_load(f)
-        
-        print(f"Loaded config structure: {list(config_dict.keys())}")
-        
-        # Override with sweep parameters (with safe key access)
-        if hasattr(sweep_config, 'hidden_channels') and 'model' in config_dict:
-            config_dict['model']['hidden_channels'] = sweep_config.hidden_channels
-        if hasattr(sweep_config, 'num_layers') and 'model' in config_dict:
-            config_dict['model']['num_layers'] = sweep_config.num_layers
-        if hasattr(sweep_config, 'dropout') and 'model' in config_dict:
-            config_dict['model']['dropout'] = sweep_config.dropout
-        if hasattr(sweep_config, 'learning_rate') and 'training' in config_dict:
-            config_dict['training']['learning_rate'] = sweep_config.learning_rate
-        if hasattr(sweep_config, 'batch_size') and 'training' in config_dict:
-            config_dict['training']['batch_size'] = sweep_config.batch_size
-        if hasattr(sweep_config, 'features') and 'features' in config_dict:
-            config_dict['features']['selected_features'] = sweep_config.features
-        if hasattr(sweep_config, 'train_loop') and 'data' in config_dict:
-            config_dict['data']['train_loop_order'] = sweep_config.train_loop
-        if hasattr(sweep_config, 'test_loop') and 'data' in config_dict:
-            config_dict['data']['test_loop_order'] = sweep_config.test_loop
-        if hasattr(sweep_config, 'epochs') and 'training' in config_dict:
-            config_dict['training']['epochs'] = sweep_config.epochs
-        if hasattr(sweep_config, 'threshold') and 'training' in config_dict:
-            config_dict['training']['threshold'] = sweep_config.threshold
-            
-        print(f"Sweep parameters: {dict(sweep_config)}")
-        
+
+        # Inject project info into runtime config
+        config_dict.setdefault("experiment", {})["wandb_project"] = project_from_sweep
+        if name_from_sweep:
+            config_dict["experiment"]["wandb_name"] = name_from_sweep
+
+        raw_use_wandb = True
+
+
+
+        # Override sweep parameters
+        for section, key in [
+            ('model', 'hidden_channels'),
+            ('model', 'num_layers'),
+            ('model', 'dropout'),
+            ('training', 'learning_rate'),
+            ('training', 'batch_size'),
+            ('features', 'selected_features'),
+            ('data', 'train_loop_order'),
+            ('data', 'test_loop_order'),
+            ('training', 'epochs'),
+            ('training', 'threshold'),
+        ]:
+            if hasattr(sweep_config, key) and section in config_dict:
+                config_dict[section][key] = getattr(sweep_config, key)
+
+        raw_use_wandb = True
+
     else:
-        print("Running normal command line mode")
-        
-
-
-        # Normal run - parse command line arguments
+        print(" Running in normal mode")
         parser = argparse.ArgumentParser(description='Train GNN with pre-computed features')
         parser.add_argument('--config', type=str, default='config.yaml', help='Path to config file')
-        parser.add_argument('--train_loop', type=str, 
-                   help='Train Loop order(s) - single string "7" , comma-separated list (7,8,9) or  "(7to8","7to9","7to1")')
-        parser.add_argument('--test_loop', type=str, default=None,
-                   help='Test Loop order(s) - single string "7" , comma-separated list (7,8,9) or  "(7to8","7to9","7to1")')
-        parser.add_argument('--features', nargs='+', help='Features to use (overrides config)')
-        parser.add_argument('--epochs', type=int, help='Number of epochs (overrides config)')
-        parser.add_argument('--seed', type=int, help='Random seed (overrides config)')
-        
+        parser.add_argument('--train_loop', type=str)
+        parser.add_argument('--test_loop', type=str, default=None)
+        parser.add_argument('--features', nargs='+')
+        parser.add_argument('--epochs', type=int)
+        parser.add_argument('--seed', type=int)
         args = parser.parse_args()
-        
-        # Load config
+
         with open(args.config, 'r') as f:
             config_dict = yaml.safe_load(f)
-        
-        # Debug: print config structure
-        print(f"Loaded config structure: {list(config_dict.keys())}")
-        print(f"Config dict: {config_dict}")
-        
-        # Apply command line overrides with safe key access
-        if args.train_loop is not None:
-            if 'data' not in config_dict:
-                config_dict['data'] = {}
-            config_dict['data']['train_loop_order'] = args.train_loop
-        
-        if args.test_loop is not None:
-            if 'data' not in config_dict:
-                config_dict['data'] = {}
-            config_dict['data']['test_loop_order'] = args.test_loop
-            
-        if args.features is not None:
-            if 'features' not in config_dict:
-                config_dict['features'] = {}
-            config_dict['features']['selected_features'] = args.features
-            
-        if args.epochs is not None:
-            if 'training' not in config_dict:
-                config_dict['training'] = {}
-            config_dict['training']['epochs'] = args.epochs
-            
-        if args.seed is not None:
-            if 'experiment' not in config_dict:
-                config_dict['experiment'] = {}
-            config_dict['experiment']['seed'] = args.seed
-    
-    # Handle properly list of values for training and testing.
-    import ast
-    def normalize_loop_order(value):
-        """
-        Normalize loop order input into a list of strings.
-        Accepts: str ("7", "7to8", "7,8,9", "['7','8']")
-                or list
-        Returns: list[str]
-        """
-        if isinstance(value, list):
-            return [str(v) for v in value]
 
-        if isinstance(value, str):
-            # Try to parse a Python list string
-            try:
-                parsed = ast.literal_eval(value)
-                if isinstance(parsed, list):
-                    return [str(v) for v in parsed]
-            except Exception:
-                pass
-            # Handle comma-separated case
-            if "," in value:
-                return [v.strip() for v in value.split(",")]
-            return [value.strip()]
-        raise ValueError(f"Unsupported loop order format: {value}")
+        # CLI overrides
+        if args.train_loop is not None:
+            config_dict.setdefault('data', {})['train_loop_order'] = args.train_loop
+        if args.test_loop is not None:
+            config_dict.setdefault('data', {})['test_loop_order'] = args.test_loop
+        if args.features is not None:
+            config_dict.setdefault('features', {})['selected_features'] = args.features
+        if args.epochs is not None:
+            config_dict.setdefault('training', {})['epochs'] = args.epochs
+        if args.seed is not None:
+            config_dict.setdefault('experiment', {})['seed'] = args.seed
+
+        raw_use_wandb = config_dict.get('experiment', {}).get('use_wandb', False)
+
+    # ---------------------------------------------------------
+    # 2. WandB initialization (for both sweeps and single runs)
+    # ---------------------------------------------------------
+    use_wandb = is_sweep or str(raw_use_wandb).lower() in ['1', 'true', 'yes']
+
+    if use_wandb:
+        if is_sweep:
+            print(" WandB initialized automatically by sweep")
+        else:
+            print("Initializing WandB for single run...")
+            wandb.init(
+                project=config_dict.get('experiment', {}).get('wandb_project', 'cluster-7-loop'),
+                name=config_dict.get('experiment', {}).get('wandb_name', 'gin_simple'),
+                config=config_dict,
+                reinit=True
+            )
+    else:
+        print(" WandB disabled in config.")
+
+    print("\n--- W&B DEBUG CHECK ---")
+    print(f"is_sweep: {is_sweep}")
+    print(f"raw_use_wandb: {raw_use_wandb}")
+    print(f"use_wandb: {use_wandb}")
+    print(f"wandb.run: {wandb.run}")
+    print("-----------------------\n")
+
+    # ---------------------------------------------------------
+    # 3. Data preparation
     # Extract parameters with safe defaults
     train_loop_orders = normalize_loop_order(config_dict.get('data', {}).get('train_loop_order', '7'))
     test_loop_orders = normalize_loop_order(config_dict.get('data', {}).get('test_loop_order', '8'))
@@ -240,9 +256,10 @@ def main():
     print(f"  Hidden channels: {config.hidden_channels}")
     print(f"  Epochs: {config.epochs}")
     
+
     # Train model
     print("\nStarting training...")
-    results = train(config, train_dataset, test_dataset)
+    results = train(config, train_dataset, test_dataset, use_wandb=use_wandb)
     
     # Print results
     print("\nTraining completed!")
@@ -254,7 +271,29 @@ def main():
     print(f"Final test ROC AUC: {results['final_test_roc_auc']:.4f}")
     print(f"Final test PR AUC: {results['final_test_pr_auc']:.4f}")
     print(f"Final test recall: {results['final_test_recall']:.4f}")
-    
+
+
+    if use_wandb and wandb.run is not None:
+        print(" Logging final metrics to WandB...")
+        wandb.log({
+            "final_test_acc": results.get("final_test_acc", 0),
+            "final_train_acc": results.get("final_train_acc", 0),
+            "final_test_roc_auc": results.get("final_test_roc_auc", 0),
+            "final_train_roc_auc": results.get("final_train_roc_auc", 0),
+            "final_test_pr_auc": results.get("final_test_pr_auc", 0),
+            "final_train_pr_auc": results.get("final_train_pr_auc", 0),
+            "final_test_recall": results.get("final_test_recall", 0),
+            "final_train_recall": results.get("final_train_recall", 0),
+        })
+        wandb.finish()
+        print(" WandB metrics logged and run closed successfully.")
+    else:
+        print(" WandB active flag mismatch — skipping final logging.")
+        if wandb.run is None:
+            print(" wandb.run is None; likely reinit=False or wandb disabled mid-run.")
+
+
+
     # Save model if requested
     save_model = config_dict.get('experiment', {}).get('save_model', False)
     if save_model:
@@ -265,15 +304,6 @@ def main():
         torch.save(results['model_state'], model_path)
         print(f"Model saved to: {model_path}")
     
-   # Close wandb if it was initialized for sweep
-    if 'WANDB_SWEEP_ID' in os.environ:
-             # Sweep run
-        wandb.init(reinit=True, project=config.project, config=config.__dict__)
-    elif getattr(config, 'use_wandb', False):
-        # Regular run
-        wandb.init(project=config.project, config=config.__dict__, reinit=True)
-        print("Finishing wandb sweep run")
-        wandb.finish()
 
 
 if __name__ == "__main__":

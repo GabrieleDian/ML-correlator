@@ -45,8 +45,8 @@ This computes the node degrees for all graphs stored in
 | Spectral | `low_eigen_1`–`low_eigen_3` | Lowest non-zero Laplacian eigenvectors (smoothest modes) |
 | Structural | `degree`, `closeness`, `betweenness`, `clustering`, `pagerank` | Classical centrality measures |
 | Planar | `face_count` | Counts of faces per node (for planar graphs) |
-| Graphlet | `graphlet_2` | Node participation in 2-node graphlets (via GEOMINE) |
-| Motif | `W5_indicator` | Detects subgraphs isomorphic to a 5-wheel |
+| Graphlet | `graphlet_4` | Node participation in 4-node graphlets (via GEOMINE) |
+| Graphlet | `graphlet_5` | Node participation in 5-node graphlets (via GEOMINE) |
 | Matrix-based | `identity_columns`, `adjacency_columns` | Identity / adjacency columns per node |
 
 Features are automatically padded to the largest node count across graphs.
