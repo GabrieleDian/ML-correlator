@@ -1,6 +1,6 @@
 program: one_run_simple.py
 method: random
-count: 50  # Total number of runs to try
+
 metric:
   name: final_test_acc
   goal: maximize
@@ -28,7 +28,9 @@ parameters:
     min: 0.0
     max: 0.5
   batch_size:
-    values: [16, 32, 64]
+    value: 64
+  epochs:
+    value: 10
   scheduler_type:
     value: "none"
 
