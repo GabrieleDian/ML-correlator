@@ -1,0 +1,36 @@
+data:
+  base_dir: "../Graph_Edge_Data"     # adjust path if needed
+  train_loop_order: ["6","7","8"]    # train on <9
+  test_loop_order: ["9"]            # test on 10
+
+features:
+  selected_features:
+    - graphlet_2
+    - eigen_1
+    - eigen_2
+    - eigen_3
+    - low_eigen_1
+    - low_eigen_2
+    - low_eigen_3
+
+model:
+  name: gin
+  hidden_channels: 64
+  num_layers: 3
+  dropout: 0.2
+
+training:
+  learning_rate: 0.001
+  weight_decay: 0.0005
+  epochs: 10              # ← your desired 10 epochs here
+  batch_size: 32
+  scheduler_type: none    # or "plateau"
+  threshold: 0.5
+  log_threshold_curves: false
+
+experiment:
+  use_wandb: true
+  wandb_project: "Gabriele_CoarseSweep_Spectral_Graphlets"
+  wandb_name: "train678_test9"
+  seed: 42
+  save_model: false
