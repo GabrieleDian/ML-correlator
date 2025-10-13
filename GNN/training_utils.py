@@ -164,8 +164,9 @@ def train(config, train_dataset, test_dataset):
         dropout=config.dropout,
         num_layers=getattr(config, 'num_layers', 3)
     ).to(device)
-
-
+    # Print the number of parameters of the model
+    num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"Model has {num_params} trainable parameters")
     optimizer = torch.optim.Adam(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
 
     
@@ -215,6 +216,7 @@ def train(config, train_dataset, test_dataset):
 
         if wandb.run is not None:
             wandb.log({
+                'model parameters': num_params,
                 'epoch': epoch,
                 'train_loss': train_loss,
                 'train_accuracy': train_acc,
