@@ -29,7 +29,7 @@ def config_to_namespace(config_dict):
         dropout=config_dict.get('model', {}).get('dropout', 0.2),
         
         # Training configuration
-        lr=config_dict.get('training', {}).get('learning_rate', 0.0005),
+        learning_rate=config_dict.get('training', {}).get('learning_rate', 0.0005),
         weight_decay=config_dict.get('training', {}).get('weight_decay', 0.001),
         epochs=config_dict.get('training', {}).get('epochs', 100),
         batch_size=config_dict.get('training', {}).get('batch_size', 32),

@@ -169,7 +169,7 @@ def train(config, train_dataset, test_dataset,use_wandb=False):
     # Print the number of parameters of the model
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"Model has {num_params} trainable parameters")
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
+    optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay)
 
     
     # Configure scheduler
@@ -177,7 +177,7 @@ def train(config, train_dataset, test_dataset,use_wandb=False):
     if scheduler_type == 'onecycle':
         scheduler = torch.optim.lr_scheduler.OneCycleLR(
             optimizer, 
-            max_lr=config.lr * 3,  # Peak at 3x base lr
+            max_lr=config.learning_rate* 3,  # Peak at 3x base lr
             epochs=config.epochs,
             steps_per_epoch=len(train_loader),
             pct_start=0.3,  # Spend 30% of time in warmup
