@@ -16,4 +16,4 @@ __pycache__/
 *.log
 wandb/
 /Tree_classifier_for_graphs/mixed_loops/features/features_tabular
-/Tree_classifier_for_graphs/new_stuff/features/
+/Tree_classifier_for_graphs/new_stuff/features/GNN/models/
