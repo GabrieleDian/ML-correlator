@@ -12,24 +12,25 @@ parameters:
     value: configs/config.yaml
 
 
-  # Hyperparameters to sweep
+ # Flat names only; these map to override hooks in one_run_simple.py
   learning_rate:
-    distribution: uniform
-    min : 0.00001
-    max : 0.05
-  
-  weight_decay:
-    distribution: uniform
+    distribution: log_uniform_values
     min: 0.000001
-    max: 0.005
+    max: 0.01
+  weight_decay:
+    distribution: log_uniform_values
+    min: 0.000001
+    max: 0.01
   hidden_channels:
-    values: [64, 128, 256]
+    values: [32, 64, 128, 256]
   num_layers:
-    values: [2, 3, 4]
+    values: [2, 3, 4, 5]
   dropout:
     distribution: uniform
-    min : 0.3
-    max : 0.5
+    min: 0.3
+    max: 0.5
+  scheduler_type:
+    value: "none"
 
-run_cap: 10
+run_cap: 300
 

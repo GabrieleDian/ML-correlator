@@ -3,6 +3,7 @@ many_loop_paper/
 my_tree_class
 .venv/
 test_graphlets/
+GNN/configs/
 Graph_Edge_Data/
 Maxwell/
 gdian/
