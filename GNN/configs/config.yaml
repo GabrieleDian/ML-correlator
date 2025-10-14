@@ -27,7 +27,7 @@ features:
 # Model configuration
 model:
   name: "gin"              # Model architecture: gin, gat, hybrid, planar, simple
-  hidden_channels: 64
+  hidden_channels: 256
   num_layers: 4
   dropout: 0.5
 

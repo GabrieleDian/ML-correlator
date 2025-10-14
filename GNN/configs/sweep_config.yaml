@@ -15,22 +15,22 @@ parameters:
  # Flat names only; these map to override hooks in one_run_simple.py
   learning_rate:
     distribution: log_uniform_values
-    min: 0.000001
-    max: 0.01
+    min: 0.0001
+    max: 0.001
   weight_decay:
     distribution: log_uniform_values
     min: 0.000001
-    max: 0.01
-  hidden_channels:
-    values: [32, 64, 128, 256]
+    max: 0.0005
   num_layers:
-    values: [2, 3, 4, 5]
+    values: [2, 3, 4]
   dropout:
     distribution: uniform
     min: 0.3
-    max: 0.5
+    max: 0.35
+  batch_size:
+    values: [64, 128, 256]
   scheduler_type:
     value: "none"
 
-run_cap: 3
+run_cap: 100
 
