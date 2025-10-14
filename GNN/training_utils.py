@@ -185,6 +185,11 @@ def train(config, train_dataset, test_dataset,use_wandb=False):
             div_factor=25.0,  # Start at lr/25
             final_div_factor=1000.0  # End at lr/1000
         )
+        # Add CosineAnnealingLR as well whenever scheduler_type is 'cosine'
+    elif scheduler_type == 'cosine':
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=config.epochs, eta_min=1e-6
+        )
     elif scheduler_type == 'plateau':
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer, mode='min', factor=0.5, patience=10, min_lr=1e-5
