@@ -32,5 +32,5 @@ parameters:
   scheduler_type:
     value: "none"
 
-run_cap: 300
+run_cap: 3
 
