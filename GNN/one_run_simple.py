@@ -156,6 +156,7 @@ def main():
     # ---------------------------------------------------------
     use_wandb = is_sweep or str(raw_use_wandb).lower() in ['1', 'true', 'yes']
 
+
     if use_wandb:
         if is_sweep:
             print(" WandB initialized automatically by sweep")
@@ -163,19 +164,12 @@ def main():
             print("Initializing WandB for single run...")
             wandb.init(
                 project=config_dict.get('experiment', {}).get('wandb_project', 'cluster-7-loop'),
-                name=config_dict.get('experiment', {}).get('wandb_name', 'gin_simple'),
                 config=config_dict,
                 reinit=True
             )
     else:
         print(" WandB disabled in config.")
 
-    print("\n--- W&B DEBUG CHECK ---")
-    print(f"is_sweep: {is_sweep}")
-    print(f"raw_use_wandb: {raw_use_wandb}")
-    print(f"use_wandb: {use_wandb}")
-    print(f"wandb.run: {wandb.run}")
-    print("-----------------------\n")
 
     # ---------------------------------------------------------
     # 3. Data preparation
@@ -272,7 +266,9 @@ def main():
     print(f"Final test PR AUC: {results['final_test_pr_auc']:.4f}")
     print(f"Final test recall: {results['final_test_recall']:.4f}")
 
-
+    # Final WandB logging and cleanup
+    import contextlib
+    import io
     if use_wandb and wandb.run is not None:
         print(" Logging final metrics to WandB...")
         wandb.log({
@@ -285,8 +281,8 @@ def main():
             "final_test_recall": results.get("final_test_recall", 0),
             "final_train_recall": results.get("final_train_recall", 0),
         })
-        wandb.finish()
-        print(" WandB metrics logged and run closed successfully.")
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            wandb.finish()
     else:
         print(" WandB active flag mismatch — skipping final logging.")
         if wandb.run is None:

@@ -31,5 +31,5 @@ parameters:
     min : 0.3
     max : 0.5
 
-run_cap: 10
+run_cap: 3
 

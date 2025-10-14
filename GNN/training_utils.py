@@ -148,7 +148,6 @@ def train(config, train_dataset, test_dataset,use_wandb=False):
     if 'WANDB_SWEEP_ID' in os.environ or getattr(config, 'use_wandb', False):
         wandb.init(
             project=getattr(config, 'wandb_project', getattr(config, 'project', 'cluster-7-loop')),
-            name=getattr(config, 'experiment_name', config.model_name),
             config=config.__dict__,
             reinit=True
         )
