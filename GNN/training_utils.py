@@ -75,10 +75,13 @@ def train_epoch(model, train_loader, optimizer, device,
     all_labels = torch.cat(all_labels)
 
     metrics = compute_metrics(all_labels, all_preds)
-    metrics["roc_auc"] = roc_auc_score(all_labels.numpy(), all_probs.numpy())
-    prec, rec, _ = precision_recall_curve(all_labels.numpy(), all_probs.numpy())
-    metrics["pr_auc"] = auc(rec, prec)
+   # Move to CPU before converting to numpy
+    labels_np = all_labels.detach().cpu().numpy()
+    probs_np = all_probs.detach().cpu().numpy()
 
+    metrics["roc_auc"] = roc_auc_score(labels_np, probs_np)
+    prec, rec, _ = precision_recall_curve(labels_np, probs_np)
+    metrics["pr_auc"] = auc(rec, prec)
     return avg_loss, accuracy, metrics
 
 
