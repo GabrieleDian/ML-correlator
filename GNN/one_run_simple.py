@@ -172,20 +172,19 @@ def main():
 
 
     # ---------------------------------------------------------
-    # 3. Data preparation
-    # Extract parameters with safe defaults
+    # 3. Data preparation (size-aware split, 70–30 on largest train loop)
     train_loop_orders = normalize_loop_order(config_dict.get('data', {}).get('train_loop_order', '7'))
     test_loop_orders = normalize_loop_order(config_dict.get('data', {}).get('test_loop_order', '8'))
     selected_features = config_dict.get('features', {}).get('selected_features', ['degree'])
     seed = config_dict.get('experiment', {}).get('seed', 42)
-    base_dir = config_dict.get('data', {}).get('base_dir', 'Graph_Edge_Data')  # Use config path with fallback
-    # Set random seeds
+    base_dir = config_dict.get('data', {}).get('base_dir', 'Graph_Edge_Data')
+
     torch.manual_seed(seed)
     np.random.seed(seed)
-    
+
     print(f"Training on loop orders {train_loop_orders}, testing on loop orders {test_loop_orders} with features: {selected_features}")
-    
-        # Build training dataset
+
+    # --- Load all training datasets ---
     train_datasets = []
     train_scaler = None
     max_features = None
@@ -201,38 +200,56 @@ def main():
         )
         train_datasets.append(ds)
 
-        # Capture scaler/max_features from the first dataset
         if train_scaler is None:
             train_scaler = scaler
         if max_features is None:
             max_features = feats
 
-    # Concatenate into a single training dataset
-    train_dataset = torch.utils.data.ConcatDataset(train_datasets)
+    # --- Ensure we have at least 2 training loop orders ---
+    if len(train_datasets) == 1:
+        raise ValueError("At least two training loop orders are required for size-aware splitting.")
 
-    # Build test dataset
-    if test_loop_orders == train_loop_orders:
-        # Do 80-20 split on training data
-        train_size = int(0.8 * len(train_dataset))
-        test_size = len(train_dataset) - train_size
-        train_dataset, test_dataset = torch.utils.data.random_split(
-            train_dataset, [train_size, test_size],
-            generator=torch.Generator().manual_seed(42)
+    # --- Use 100% of smaller sizes for training ---
+    train_datasets_except_last = train_datasets[:-1]
+    train_dataset_small = torch.utils.data.ConcatDataset(train_datasets_except_last)
+
+    # --- Split largest size (last in train_loop_orders) 70–30 for train/val ---
+    last_train_ds = train_datasets[-1]
+    n_total = len(last_train_ds)
+    n_train_last = int(0.70 * n_total)
+    n_val_last = n_total - n_train_last
+
+    train_last, val_last = torch.utils.data.random_split(
+        last_train_ds,
+        [n_train_last, n_val_last],
+        generator=torch.Generator().manual_seed(seed)
+    )
+
+    # --- Combine final train and validation datasets ---
+    train_dataset = torch.utils.data.ConcatDataset([train_dataset_small, train_last])
+    val_dataset = val_last
+
+    # --- Build test dataset ---
+    test_datasets = []
+    for file_ext in test_loop_orders:
+        ds, _, _ = create_simple_dataset(
+            file_ext=file_ext,
+            selected_features=selected_features,
+            normalize=True,
+            scaler=train_scaler,
+            max_features=max_features,
+            data_dir=base_dir
         )
-    else:
-        test_datasets = []
-        for file_ext in test_loop_orders:
-            ds, _, _ = create_simple_dataset(
-                file_ext=file_ext,
-                selected_features=selected_features,
-                normalize=True,
-                scaler=train_scaler,
-                max_features=max_features,
-                data_dir=base_dir
-            )
-            test_datasets.append(ds)
+        test_datasets.append(ds)
 
-        test_dataset = torch.utils.data.ConcatDataset(test_datasets)
+    test_dataset = torch.utils.data.ConcatDataset(test_datasets)
+
+    # --- Print summary ---
+    print(f"\nDataset Summary:")
+    print(f"  • Train: {len(train_dataset)} samples "
+        f"(includes 100% of {train_loop_orders[:-1]} + 70% of {train_loop_orders[-1]})")
+    print(f"  • Val:   {len(val_dataset)} samples (30% of {train_loop_orders[-1]})")
+    print(f"  • Test:  {len(test_dataset)} samples (loop orders {test_loop_orders})")
     
     # Print dataset statistics
     quick_dataset_stats(train_dataset)
@@ -253,18 +270,28 @@ def main():
 
     # Train model
     print("\nStarting training...")
-    results = train(config, train_dataset, test_dataset, use_wandb=use_wandb)
+    results = train(config, train_dataset, val_dataset, test_dataset, use_wandb=use_wandb)
+
     
-    # Print results
+    # ---------------------------------------------------------
+    # Print final results
+    # ---------------------------------------------------------
     print("\nTraining completed!")
-    print(f"Final test accuracy: {results['final_test_acc']:.4f}")
-    print(f"Final training accuracy: {results['final_train_acc']:.4f}")
-    print(f"Final training ROC AUC: {results['final_train_roc_auc']:.4f}")
-    print(f"Final training PR AUC: {results['final_train_pr_auc']:.4f}")
-    print(f"Final training recall: {results['final_train_recall']:.4f}")
+    print(f"Final train accuracy: {results['final_train_acc']:.4f}")
+    print(f"Final val accuracy:   {results['final_val_acc']:.4f}")
+    print(f"Final test accuracy:  {results['final_test_acc']:.4f}\n")
+    print(f"Final train PR AUC: {results['final_train_pr_auc']:.4f}")
+    print(f"Final val PR AUC:   {results['final_val_pr_auc']:.4f}")
+    print(f"Final test PR AUC:  {results['final_test_pr_auc']:.4f}")
     print(f"Final test ROC AUC: {results['final_test_roc_auc']:.4f}")
-    print(f"Final test PR AUC: {results['final_test_pr_auc']:.4f}")
-    print(f"Final test recall: {results['final_test_recall']:.4f}")
+    print(f"Final val ROC AUC:  {results['final_val_roc_auc']:.4f}")
+    print(f"Final test ROC AUC:  {results['final_test_roc_auc']:.4f}")
+    print(f"Final train recall: {results['final_train_recall']:.4f}")
+    print(f"Final val recall:   {results['final_val_recall']:.4f}")
+    print(f"Final test recall:  {results['final_test_recall']:.4f}")
+
+
+
 
     # Final WandB logging and cleanup
     import contextlib
@@ -272,14 +299,19 @@ def main():
     if use_wandb and wandb.run is not None:
         print(" Logging final metrics to WandB...")
         wandb.log({
-            "final_test_acc": results.get("final_test_acc", 0),
             "final_train_acc": results.get("final_train_acc", 0),
-            "final_test_roc_auc": results.get("final_test_roc_auc", 0),
+            "final_val_acc": results.get("final_val_acc", 0),
+            "final_test_acc": results.get("final_test_acc", 0),
             "final_train_roc_auc": results.get("final_train_roc_auc", 0),
-            "final_test_pr_auc": results.get("final_test_pr_auc", 0),
+            "final_val_roc_auc": results.get("final_val_roc_auc", 0),
+            "final_test_roc_auc": results.get("final_test_roc_auc", 0),
             "final_train_pr_auc": results.get("final_train_pr_auc", 0),
+            "final_val_pr_auc": results.get("final_val_pr_auc", 0),
+            "final_test_pr_auc": results.get("final_test_pr_auc", 0),
             "final_test_recall": results.get("final_test_recall", 0),
+            "final_val_recall": results.get("final_val_recall", 0),
             "final_train_recall": results.get("final_train_recall", 0),
+
         })
         with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
             wandb.finish()

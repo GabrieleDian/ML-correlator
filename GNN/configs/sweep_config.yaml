@@ -3,7 +3,7 @@
 program: one_run_simple.py
 method: random  # Random search is simple and effective
 metric:
-  name: train_loss
+  name: val_loss
   goal: minimize
 
 parameters:
@@ -32,5 +32,5 @@ parameters:
   scheduler_type:
     value: "none"
 
-run_cap: 100
+run_cap: 10
 
