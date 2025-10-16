@@ -62,8 +62,9 @@ def train_epoch(model, train_loader, optimizer, device,
         all_preds.append(preds.detach().cpu())
         all_labels.append(batch.y.detach().cpu().float())
 
-        correct += preds.eq(batch.y.cpu().float()).sum().item()
+        correct += preds.eq(batch.y.float()).sum().item()
         total += batch.y.size(0)
+
         total_loss += loss.item() * batch.y.size(0)
 
     avg_loss = total_loss / total
@@ -102,9 +103,9 @@ def evaluate(model, loader, device, pos_weight=None,
 
             all_probs.append(probs.cpu())
             all_preds.append(preds.cpu())
-            all_labels.append(batch.y.cpu().float())
+            all_labels.append(batch.y.float())
 
-            correct += preds.eq(batch.y.cpu().float()).sum().item()
+            correct += preds.eq(batch.y.float()).sum().item()
             total += batch.y.size(0)
             total_loss += loss.item() * batch.y.size(0)
 
