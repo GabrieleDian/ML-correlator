@@ -22,3 +22,15 @@
 \contentsline {subsection}{\numberline {9.1}results}{15}{subsection.9.1}%
 \contentsline {section}{\numberline {10}Tree Misclassification by Inclusion of Loop Order (Updated Results)}{16}{section.10}%
 \contentsline {subsection}{\numberline {10.1}Per category Ablations}{18}{subsection.10.1}%
+\contentsline {section}{\numberline {11}adding in 5 motifs}{18}{section.11}%
+\contentsline {paragraph}{5-cycle (\texttt {Motif\_5\_cycles})}{19}{section*.15}%
+\contentsline {paragraph}{Normalized 5-cycle counts}{19}{section*.16}%
+\contentsline {paragraph}{5-clique (\texttt {Motif\_5\_cliques})}{19}{section*.17}%
+\contentsline {paragraph}{Induced 5-node motifs (\texttt {Motif\_induced5\_*})}{19}{section*.18}%
+\contentsline {paragraph}{Connected 5-sets fraction}{20}{section*.19}%
+\contentsline {paragraph}{Why ``induced'' matters}{20}{section*.20}%
+\contentsline {paragraph}{Sampling and performance}{20}{section*.21}%
+\contentsline {paragraph}{How to read the numbers}{20}{section*.22}%
+\contentsline {section}{\numberline {12}f-graphs}{21}{section.12}%
+\contentsline {subsection}{\numberline {12.1}TODO: feature explanation}{21}{subsection.12.1}%
+\contentsline {subsection}{\numberline {12.2}Results}{21}{subsection.12.2}%

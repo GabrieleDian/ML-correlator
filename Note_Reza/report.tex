@@ -688,6 +688,161 @@ Spectral (Adjacency/Energy) & 166 & 0.902 & 600 & -0.000 \\
 \end{tabular}
 \end{table}
 
-	
+
+
+\section{adding in 5 motifs}
+In this next section we add a selection of new features surroounding the 5 motifs.
+
+\section*{5-node / 5-cycle Motif Features}
+
+\paragraph{5-cycle (\texttt{Motif\_5\_cycles})}
+A \emph{5-cycle} is a simple ring of five distinct nodes:
+\[
+A \!-\! B \!-\! C \!-\! D \!-\! E \!-\! A,
+\]
+with each node connected to exactly its two neighbors and \emph{no chords} (no shortcuts across the ring).
+The code counts how many such rings appear in the graph.
+
+\paragraph{Normalized 5-cycle counts}
+To compare graphs of different sizes, the raw count is normalized by the number of 5-node choices:
+\[
+\texttt{Motif\_5\_cycles\_per\_Cn5} \;=\; \frac{\texttt{Motif\_5\_cycles}}{\binom{n}{5}}.
+\]
+There is also a density-style normalization against (theoretical) maximum in a complete graph:
+\[
+\texttt{Motif\_5\_cycles\_per\_Kn}.
+\]
+
+\paragraph{5-clique (\texttt{Motif\_5\_cliques})}
+A \emph{5-clique} is a fully connected set of five nodes (every pair has an edge). The code counts how many such fully interlinked 5-node groups exist. A size-normalized version is:
+\[
+\texttt{Motif\_5\_cliques\_per\_Cn5} \;=\; \frac{\texttt{Motif\_5\_cliques}}{\binom{n}{5}}.
+\]
+
+\paragraph{Induced 5-node motifs (\texttt{Motif\_induced5\_*})}
+Beyond cycles and cliques, there are many possible \emph{connected} shapes on five nodes (e.g., a square with a tail, a ``house'' shape, etc.). For each 5-node subset, the code forms the \emph{induced} subgraph (include exactly those edges that exist among the five nodes in the original graph). If that induced subgraph is connected, it is classified (via Weisfeiler--Lehman hashing) into a canonical type labeled
+\[
+\texttt{G5\_00}, \texttt{G5\_01}, \ldots
+\]
+and counted in columns like \texttt{Motif\_induced5\_G5\_xx}. Each also has a normalized version:
+\[
+\texttt{Motif\_induced5\_G5\_xx\_per\_Cn5} \;=\; \frac{\texttt{Motif\_induced5\_G5\_xx}}{\binom{n}{5}}.
+\]
+
+\paragraph{Connected 5-sets fraction}
+The script also records how often a random 5-node choice yields a connected induced subgraph:
+\[
+\texttt{Motif\_induced\_connected\_per\_5set} \;=\; \frac{\#\{\text{connected induced 5-node subgraphs}\}}{\binom{n}{5}}.
+\]
+
+\paragraph{Why ``induced'' matters}
+``Induced'' means the pattern must match \emph{exactly} the edges among the five nodes---no missing and no extra edges. For example, a clean 5-cycle differs from a 5-cycle with a chord; these are counted as different motifs.
+
+\paragraph{Sampling and performance}
+Enumerating all 5-node subsets is combinatorial. The flag \texttt{--ind5-sample-frac} (default $1.0$) allows sampling a fraction of 5-sets. Use the normalized columns (``\texttt{\_per\_Cn5}'') to compare across graphs or runs when sampling is used.
+
+\paragraph{How to read the numbers}
+\begin{itemize}
+  \item High \texttt{Motif\_5\_cycles}: many chordless 5-node loops (``loopy'' structure).
+  \item High \texttt{Motif\_5\_cliques}: many very dense 5-node pockets (tight communities).
+  \item Specific \texttt{Motif\_induced5\_G5\_xx} high: that exact 5-node shape is common; compare via the normalized \texttt{\_per\_Cn5} versions.
+\end{itemize}
+
+
+
+\begin{table}[H]
+\centering
+\resizebox{0.95\textwidth}{!}{%
+\begin{tabular}{c|c|ccccc|cc}
+\hline
+Pair & Loop & Fold 1 & Fold 2 & Fold 3 & Fold 4 & Fold 5 & Avg ROC AUC & Std Dev \\
+\hline
+\multicolumn{9}{c}{\textbf{Single Loops}} \\
+\hline
+-- & 6  & 0.850 & 0.100 & 1.000 & 1.000 & 1.000 & 0.790 & 0.350 \\
+-- & 7  & 0.897 & 0.868 & 0.794 & 0.817 & 0.823 & 0.840 & 0.037 \\
+-- & 8  & 0.931 & 0.937 & 0.922 & 0.942 & 0.904 & 0.927 & 0.014 \\
+-- & 9  & 0.955 & 0.954 & 0.952 & 0.953 & 0.955 & 0.954 & 0.001 \\
+-- & 10 & 0.956 & 0.957 & 0.955 & 0.956 & 0.958 & 0.957 & 0.001 \\
+\hline
+\multicolumn{9}{c}{\textbf{Mixed Loops}} \\
+\hline
+6 \& 7  & 6  & 1.000 & 0.600 & 1.000 & 1.000 & 1.000 & 0.920 & 0.160 \\
+        & 7  & 0.909 & 0.884 & 0.764 & 0.881 & 0.734 & 0.835 & 0.071 \\
+7 \& 8  & 7  & 0.983 & 0.967 & 0.849 & 0.952 & 0.922 & 0.935 & 0.047 \\
+        & 8  & 0.933 & 0.925 & 0.927 & 0.937 & 0.923 & 0.929 & 0.005 \\
+8 \& 9  & 8  & 0.956 & 0.963 & 0.951 & 0.969 & 0.926 & 0.953 & 0.015 \\
+        & 9  & 0.957 & 0.956 & 0.952 & 0.952 & 0.959 & 0.955 & 0.003 \\
+9 \& 10 & 9  & 0.954 & 0.949 & 0.954 & 0.956 & 0.955 & 0.953 & 0.002 \\
+        & 10 & 0.957 & 0.955 & 0.956 & 0.956 & 0.957 & 0.956 & 0.001 \\
+\hline
+\multicolumn{9}{c}{\textbf{Progressive Training / Transfer Tests}} \\
+\hline
+5,6 $\rightarrow$ 7       & Train     & \multicolumn{5}{c|}{1.000} & 1.000 & -- \\
+                          & Test (7)  & \multicolumn{5}{c|}{--}    & 0.831 & -- \\
+5,6,7 $\rightarrow$ 8     & Train     & \multicolumn{5}{c|}{1.000} & 1.000 & -- \\
+                          & Test (8)  & \multicolumn{5}{c|}{--}    & 0.800 & -- \\
+5,6,7,8 $\rightarrow$ 9   & Train     & \multicolumn{5}{c|}{1.000} & 1.000 & -- \\
+                          & Test (9)  & \multicolumn{5}{c|}{--}    & 0.828 & -- \\
+5,6,7,8,9 $\rightarrow$ 10 & Train     & \multicolumn{5}{c|}{1.000} & 1.000 & -- \\
+                          & Test (10) & \multicolumn{5}{c|}{--}    & 0.852 & -- \\
+\hline
+\end{tabular}
+}
+\caption{ROC AUC scores for single loops, mixed loop combinations, and progressive training-transfer tests across folds, with mean and standard deviation.}
+\label{tab:roc_auc_updated}
+\end{table}
+
+
+
+\section{f-graphs}
+\subsection{TODO: feature explanation}
+
+\subsection{Results}
+
+TODO: parameter search
+
+\begin{table}[H]
+\centering
+\resizebox{0.95\textwidth}{!}{%
+\begin{tabular}{c|c|ccccc|cc}
+\hline
+Pair & Loop & Fold 1 & Fold 2 & Fold 3 & Fold 4 & Fold 5 & Avg ROC AUC & Std Dev \\
+\hline
+\multicolumn{9}{c}{\textbf{Single Loops (F-Graphs)}} \\
+\hline
+-- & 6  & 1.000 & 1.000 & 0.700 & 0.900 & 1.000 & 0.920 & 0.117 \\
+-- & 7  & 0.853 & 0.882 & 0.796 & 0.813 & 0.920 & 0.853 & 0.045 \\
+-- & 8  & 0.956 & 0.952 & 0.953 & 0.948 & 0.953 & 0.953 & 0.002 \\
+-- & 9  & 0.968 & 0.970 & 0.967 & 0.970 & 0.967 & 0.968 & 0.001 \\
+\hline
+\multicolumn{9}{c}{\textbf{Mixed Loops (F-Graphs)}} \\
+\hline
+6 \& 7  & 6  & 1.000 & 1.000 & 0.900 & 0.900 & 1.000 & 0.960 & 0.049 \\
+        & 7  & 0.901 & 0.835 & 0.991 & 0.848 & 0.829 & 0.881 & 0.061 \\
+7 \& 8  & 7  & 0.936 & 0.981 & 0.966 & 0.914 & 0.996 & 0.958 & 0.030 \\
+        & 8  & 0.949 & 0.953 & 0.953 & 0.948 & 0.960 & 0.953 & 0.004 \\
+8 \& 9  & 8  & 0.973 & 0.979 & 0.974 & 0.968 & 0.974 & 0.973 & 0.003 \\
+        & 9  & 0.969 & 0.970 & 0.969 & 0.967 & 0.968 & 0.969 & 0.001 \\
+\hline
+\multicolumn{9}{c}{\textbf{Progressive Training / Transfer Tests (F-Graphs)}} \\
+\hline
+5,6 $\rightarrow$ 7       & Train     & \multicolumn{5}{c|}{1.000} & 1.000 & -- \\
+                          & Test (7)  & \multicolumn{5}{c|}{--}    & 0.820 & -- \\
+5,6,7 $\rightarrow$ 8     & Train     & \multicolumn{5}{c|}{1.000} & 1.000 & -- \\
+                          & Test (8)  & \multicolumn{5}{c|}{--}    & 0.860 & -- \\
+5,6,7,8 $\rightarrow$ 9   & Train     & \multicolumn{5}{c|}{1.000} & 1.000 & -- \\
+                          & Test (9)  & \multicolumn{5}{c|}{--}    & 0.910 & -- \\
+\hline
+\end{tabular}
+}
+\caption{ROC AUC scores for f-graph single loops, mixed loop combinations, and progressive training-transfer tests across folds, with mean and standard deviation.}
+\label{tab:roc_auc_fgraphs}
+\end{table}
+
+
+
+
+
 \end{document}
 	
