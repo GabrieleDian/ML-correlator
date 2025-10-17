@@ -297,7 +297,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         "final_train_pr_auc": train_metrics["pr_auc"],
         "final_val_pr_auc": val_metrics["pr_auc"],
         "final_test_pr_auc": test_metrics["pr_auc"],
-        "final_rain_roc_auc": test_metrics["roc_auc"],
+        "final_train_roc_auc": test_metrics["roc_auc"],
         "final_val_roc_auc": val_metrics["roc_auc"],
         "final_test_roc_auc": test_metrics["roc_auc"],
         "final_train_recall": train_metrics["recall"],

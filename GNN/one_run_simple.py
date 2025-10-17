@@ -283,7 +283,7 @@ def main():
     print(f"Final train PR AUC: {results['final_train_pr_auc']:.4f}")
     print(f"Final val PR AUC:   {results['final_val_pr_auc']:.4f}")
     print(f"Final test PR AUC:  {results['final_test_pr_auc']:.4f}")
-    print(f"Final test ROC AUC: {results['final_test_roc_auc']:.4f}")
+    print(f"Final train ROC AUC: {results['final_train_roc_auc']:.4f}")
     print(f"Final val ROC AUC:  {results['final_val_roc_auc']:.4f}")
     print(f"Final test ROC AUC:  {results['final_test_roc_auc']:.4f}")
     print(f"Final train recall: {results['final_train_recall']:.4f}")
