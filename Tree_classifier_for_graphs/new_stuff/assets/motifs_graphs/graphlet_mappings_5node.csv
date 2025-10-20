@@ -1,0 +1,22 @@
+ID,Graphlet Notation,Structural Name,Description
+G5_00,g_0^5,4-leaf star,Center node connected to 4 leaves
+G5_01,g_1^5,3-leaf star + extra edge,One branch extended by an extra node
+G5_02,g_2^5,Path on 5 nodes (P5),Simple chain of 4 edges
+G5_03,g_3^5,Tailed triangle,Triangle with a 2-node tail
+G5_04,g_4^5,Triangle with a branch,Triangle with a 2-edge branch
+G5_05,g_5^5,Tailed diamond,Diamond (K4−e) plus one leaf
+G5_06,g_6^5,House graph,4-cycle + roof node
+G5_07,g_7^5,5-cycle (C5),Pentagon-shaped 5-cycle (C5 / g4^5)
+G5_08,g_8^5,Triangle + chord,Triangle with an extra edge forming overlap
+G5_09,g_9^5,Diamond + tail,K4−e with one attached node
+G5_10,g_10^5,4-cycle + diagonal,Square with one diagonal
+G5_11,g_11^5,House + diagonal,House graph with extra cross edge
+G5_12,g_12^5,Double-triangle,Two triangles sharing one vertex
+G5_13,g_13^5,Diamond + branch,K4−e plus one extra neighbor
+G5_14,g_14^5,Kite graph,Triangle + extra edge between leaves
+G5_15,g_15^5,Triangular prism-like,Two triangles joined by edge
+G5_16,g_16^5,4-cycle + central hub,Square with one central node connected to two
+G5_17,g_17^5,5-node almost-complete,K5 missing one edge
+G5_18,g_18^5,Bowtie + extra node,"Two triangles joined at one node, plus extra"
+G5_19,g_19^5,Wheel W5,5-cycle with a central hub
+G5_20,g_20^5,Complete graph K5,All nodes interconnected
