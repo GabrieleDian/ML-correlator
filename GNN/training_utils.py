@@ -169,7 +169,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
 
     # Data loaders
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
-    val_loader   = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False)
+    val_loader   = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False) if val_dataset is not None else None
     test_loader  = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=False)
 
     # Model
@@ -218,53 +218,95 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
     best_val_loss = float("inf")
     best_state = None
 
+    # --------------------------------------------------
+    # TRAINING LOOP
+    # --------------------------------------------------
     for epoch in range(config.epochs):
         # ---- Training ----
         train_loss, train_acc, train_metrics = train_epoch(
             model, train_loader, optimizer, device,
             scheduler=scheduler, scheduler_type=scheduler_type,
-            threshold=config.threshold)
-
-        # Step scheduler (plateau only after validation)
-        if scheduler_type != "onecycle":
-            optimizer.zero_grad()
-
-        # ---- Validation ----
-        val_loss, val_acc, val_metrics = evaluate(
-            model, val_loader, device,
-            threshold=config.threshold,
-            log_threshold_curves=False,
-            split_name="val"
+            threshold=config.threshold
         )
 
-        if scheduler_type == "plateau" and scheduler is not None:
-            scheduler.step(val_loss)
+        # ---- Validation (only if val_dataset exists) ----
+        if val_dataset is not None:
+            val_loss, val_acc, val_metrics = evaluate(
+                model, val_loader, device,
+                threshold=config.threshold,
+                log_threshold_curves=False,
+                split_name="val"
+            )
 
-        # ---- W&B logging ----
-        if use_wandb:
-            wandb.log({
-                "epoch": epoch,
-                "train_loss": train_loss,
-                "val_loss": val_loss,
-                "train_acc": train_acc,
-                "val_acc": val_acc,
-                "train_pr_auc": train_metrics["pr_auc"],
-                "val_pr_auc": val_metrics["pr_auc"],
-                "lr": optimizer.param_groups[0]["lr"]
-            }, step=epoch)
+            # Step LR scheduler (plateau only after val)
+            if scheduler_type == "plateau" and scheduler is not None:
+                scheduler.step(val_loss)
 
-        # ---- Track best model ----
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            best_state = model.state_dict().copy()
+            # Track best model based on validation loss
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                best_state = model.state_dict().copy()
 
-        if epoch % 10 == 0 or epoch == config.epochs - 1:
-            print(f"Epoch {epoch:3d}/{config.epochs}: "
-                  f"Train Loss={train_loss:.4f}, Val Loss={val_loss:.4f}, "
-                  f"Train Acc={train_acc:.4f}, Val Acc={val_acc:.4f}")
+            if epoch % 10 == 0 or epoch == config.epochs - 1:
+                print(f"Epoch {epoch:3d}/{config.epochs}: "
+                      f"Train Loss={train_loss:.4f}, Val Loss={val_loss:.4f}, "
+                      f"Train Acc={train_acc:.4f}, Val Acc={val_acc:.4f}")
 
-    # ---- Testing on best model ----
+            # ---- W&B logging ----
+            if use_wandb:
+                log_dict = {
+                    "epoch": epoch,
+                    "train_loss": train_loss,
+                    "train_acc": train_acc,
+                    "train_pr_auc": train_metrics.get("pr_auc"),
+                    "train_roc_auc": train_metrics.get("roc_auc"),
+                    "train_recall": train_metrics.get("recall"),
+                    "lr": optimizer.param_groups[0]["lr"],
+                }
+
+                if val_dataset is not None:
+                    log_dict.update({
+                        "val_loss": val_loss,
+                        "val_acc": val_acc,
+                        "val_pr_auc": val_metrics.get("pr_auc"),
+                        "val_roc_auc": val_metrics.get("roc_auc"),
+                        "val_recall": val_metrics.get("recall"),
+                    })
+
+                wandb.log(log_dict, step=epoch)
+
+
+        # ---- No validation case ----
+        else:
+            # If no validation set, just step scheduler (if not OneCycle)
+            if scheduler_type == "plateau" and scheduler is not None:
+                scheduler.step(train_loss)
+
+            if epoch % 10 == 0 or epoch == config.epochs - 1:
+                print(f"Epoch {epoch:3d}/{config.epochs}: "
+                      f"Train Loss={train_loss:.4f}, Train Acc={train_acc:.4f}")
+
+            # Track best model by training loss only
+            if train_loss < best_val_loss:
+                best_val_loss = train_loss
+                best_state = model.state_dict().copy()
+
+            # W&B logging
+            if use_wandb:
+                wandb.log({
+                    "epoch": epoch,
+                    "train_loss": train_loss,
+                    "train_acc": train_acc,
+                    "train_pr_auc": train_metrics["pr_auc"],
+                    "lr": optimizer.param_groups[0]["lr"]
+                }, step=epoch)
+
+    # --------------------------------------------------
+    # AFTER TRAINING: restore best model
+    # --------------------------------------------------
     model.load_state_dict(best_state)
+
+    # Evaluate on test set
     test_loss, test_acc, test_metrics = evaluate(
         model, test_loader, device,
         threshold=config.threshold,
@@ -274,6 +316,18 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
 
     total_time = time.time() - start_time
     print(f"Training completed in {total_time:.1f}s.")
+
+    # Final Test metrics logging
+    if use_wandb and wandb.run is not None:
+        wandb.log({
+            "test_loss": test_loss,
+            "test_acc": test_acc,
+            "test_pr_auc": test_metrics.get("pr_auc"),
+            "test_roc_auc": test_metrics.get("roc_auc"),
+            "test_recall": test_metrics.get("recall"),
+            "total_time": total_time,
+            "number of parameters": num_params
+        })
 
     # Optional W&B threshold curves
     if wandb.run is not None and config.log_threshold_curves and "thresholds" in test_metrics:
@@ -286,22 +340,34 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         wandb.log({"threshold_curves": wandb.Image(plt)})
         plt.close()
 
-    return {
+    results = {
         "model_state": model.state_dict().copy(),
-        "final_train_loss": train_loss,
-        "final_val_loss": val_loss,
-        "final_test_loss": test_loss,
-        "final_train_acc": train_acc,
-        "final_val_acc": val_acc,
-        "final_test_acc": test_acc,
-        "final_train_pr_auc": train_metrics["pr_auc"],
-        "final_val_pr_auc": val_metrics["pr_auc"],
-        "final_test_pr_auc": test_metrics["pr_auc"],
-        "final_train_roc_auc": test_metrics["roc_auc"],
-        "final_val_roc_auc": val_metrics["roc_auc"],
-        "final_test_roc_auc": test_metrics["roc_auc"],
-        "final_train_recall": train_metrics["recall"],
-        "final_val_recall": val_metrics["recall"],
-        "final_test_recall": test_metrics["recall"],
+
+        # --- TRAIN metrics ---
+        "train_loss": train_loss,
+        "train_acc": train_acc,
+        "train_pr_auc": train_metrics.get("pr_auc"),
+        "train_roc_auc": train_metrics.get("roc_auc"),
+        "train_recall": train_metrics.get("recall"),
+
+        # --- VAL metrics (if available) ---
+        "val_loss": val_loss if val_dataset is not None else None,
+        "val_acc": val_acc if val_dataset is not None else None,
+        "val_pr_auc": val_metrics.get("pr_auc") if val_dataset is not None else None,
+        "val_roc_auc": val_metrics.get("roc_auc") if val_dataset is not None else None,
+        "val_recall": val_metrics.get("recall") if val_dataset is not None else None,
+
+        # --- TEST metrics ---
+        "test_loss": test_loss,
+        "test_acc": test_acc,
+        "test_pr_auc": test_metrics.get("pr_auc"),
+        "test_roc_auc": test_metrics.get("roc_auc"),
+        "test_recall": test_metrics.get("recall"),
+
+        # --- Runtime ---
         "total_time": total_time
-    }
+        }
+
+
+    return results
+

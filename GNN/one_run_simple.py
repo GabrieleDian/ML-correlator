@@ -171,20 +171,22 @@ def main():
         print(" WandB disabled in config.")
 
 
-    # ---------------------------------------------------------
-    # 3. Data preparation (size-aware split, 70–30 on largest train loop)
+   # ---------------------------------------------------------
+    # 3. Data preparation (configurable validation split)
     train_loop_orders = normalize_loop_order(config_dict.get('data', {}).get('train_loop_order', '7'))
     test_loop_orders = normalize_loop_order(config_dict.get('data', {}).get('test_loop_order', '8'))
     selected_features = config_dict.get('features', {}).get('selected_features', ['degree'])
     seed = config_dict.get('experiment', {}).get('seed', 42)
     base_dir = config_dict.get('data', {}).get('base_dir', 'Graph_Edge_Data')
+    use_val = config_dict.get('data', {}).get('val', False)   # <---- NEW FLAG
 
     torch.manual_seed(seed)
     np.random.seed(seed)
 
     print(f"Training on loop orders {train_loop_orders}, testing on loop orders {test_loop_orders} with features: {selected_features}")
+    print(f"Validation enabled: {use_val}")
 
-    # --- Load all training datasets ---
+    # --- Load datasets ---
     train_datasets = []
     train_scaler = None
     max_features = None
@@ -205,31 +207,54 @@ def main():
         if max_features is None:
             max_features = feats
 
-    # --- Ensure we have at least 2 training loop orders ---
-    if len(train_datasets) == 1:
-        raise ValueError("At least two training loop orders are required for size-aware splitting.")
+    val_dataset = None  # default
 
-    # --- Use 100% of smaller sizes for training ---
-    train_datasets_except_last = train_datasets[:-1]
-    train_dataset_small = torch.utils.data.ConcatDataset(train_datasets_except_last)
+    # =========================================================
+    # CASE 1: VALIDATION ENABLED
+    # =========================================================
+    if use_val:
+        if len(train_datasets) < 1:
+            raise ValueError("Need at least one training loop order to create a validation set.")
 
-    # --- Split largest size (last in train_loop_orders) 70–30 for train/val ---
-    last_train_ds = train_datasets[-1]
-    n_total = len(last_train_ds)
-    n_train_last = int(0.70 * n_total)
-    n_val_last = n_total - n_train_last
+        # Use only the last training loop for validation
+        last_train_ds = train_datasets[-1]
+        n_total = len(last_train_ds)
+        n_val = int(0.30 * n_total)
+        n_discard = n_total - n_val
 
-    train_last, val_last = torch.utils.data.random_split(
-        last_train_ds,
-        [n_train_last, n_val_last],
-        generator=torch.Generator().manual_seed(seed)
-    )
+        # Split: discard 70%, keep 30% for validation
+        discard_ds, val_ds = torch.utils.data.random_split(
+            last_train_ds,
+            [n_discard, n_val],
+            generator=torch.Generator().manual_seed(seed)
+        )
 
-    # --- Combine final train and validation datasets ---
-    train_dataset = torch.utils.data.ConcatDataset([train_dataset_small, train_last])
-    val_dataset = val_last
+        val_dataset = val_ds  # keep 30% validation subset
 
-    # --- Build test dataset ---
+        # Remove last loop entirely from training (discard its 70% too)
+        train_datasets = train_datasets[:-1]
+
+        # Combine all earlier loops (excluding the last one)
+        train_dataset = torch.utils.data.ConcatDataset(train_datasets) if train_datasets else None
+
+        print(f"Validation ENABLED: Using 30% of {train_loop_orders[-1]} for validation.")
+        print(f"Discarded 70% of {train_loop_orders[-1]} from training.")
+        if train_dataset:
+            print(f"Training on {len(train_dataset)} samples from {train_loop_orders[:-1]}")
+        print(f"Validation set size: {len(val_dataset)} samples from {train_loop_orders[-1]}")
+
+    # =========================================================
+    # CASE 2: VALIDATION DISABLED
+    # =========================================================
+    else:
+        # Train on ALL training loops, including the last one
+        train_dataset = torch.utils.data.ConcatDataset(train_datasets)
+        print("Validation DISABLED: Training on all training loops.")
+        print(f"Total training samples: {len(train_dataset)}")
+
+    # =========================================================
+    # TEST SET
+    # =========================================================
     test_datasets = []
     for file_ext in test_loop_orders:
         ds, _, _ = create_simple_dataset(
@@ -244,11 +269,14 @@ def main():
 
     test_dataset = torch.utils.data.ConcatDataset(test_datasets)
 
+    print(f"Test set: {len(test_dataset)} samples (loop orders {test_loop_orders})")
+
+
     # --- Print summary ---
     print(f"\nDataset Summary:")
     print(f"  • Train: {len(train_dataset)} samples "
-        f"(includes 100% of {train_loop_orders[:-1]} + 70% of {train_loop_orders[-1]})")
-    print(f"  • Val:   {len(val_dataset)} samples (30% of {train_loop_orders[-1]})")
+        f"(includes 100% of {train_loop_orders} )")
+    print(f"  • Val:   No validation dataset")
     print(f"  • Test:  {len(test_dataset)} samples (loop orders {test_loop_orders})")
     
     # Print dataset statistics
@@ -276,49 +304,58 @@ def main():
     # ---------------------------------------------------------
     # Print final results
     # ---------------------------------------------------------
-    print("\nTraining completed!")
-    print(f"Final train accuracy: {results['final_train_acc']:.4f}")
-    print(f"Final val accuracy:   {results['final_val_acc']:.4f}")
-    print(f"Final test accuracy:  {results['final_test_acc']:.4f}\n")
-    print(f"Final train PR AUC: {results['final_train_pr_auc']:.4f}")
-    print(f"Final val PR AUC:   {results['final_val_pr_auc']:.4f}")
-    print(f"Final test PR AUC:  {results['final_test_pr_auc']:.4f}")
-    print(f"Final train ROC AUC: {results['final_train_roc_auc']:.4f}")
-    print(f"Final val ROC AUC:  {results['final_val_roc_auc']:.4f}")
-    print(f"Final test ROC AUC:  {results['final_test_roc_auc']:.4f}")
-    print(f"Final train recall: {results['final_train_recall']:.4f}")
-    print(f"Final val recall:   {results['final_val_recall']:.4f}")
-    print(f"Final test recall:  {results['final_test_recall']:.4f}")
+    print("\nTraining completed!\n")
+
+    def safe_fmt(value):
+        return f"{value:.4f}" if isinstance(value, (int, float)) and value is not None else "N/A"
+
+    # Helper flag
+    has_val = results.get("val_acc") is not None
+
+    print("=== Accuracy ===")
+    print(f"  Train: {safe_fmt(results.get('train_acc'))}")
+    if has_val:
+        print(f"  Val:   {safe_fmt(results.get('val_acc'))}")
+    print(f"  Test:  {safe_fmt(results.get('test_acc'))}\n")
+
+    print("=== PR AUC ===")
+    print(f"  Train: {safe_fmt(results.get('train_pr_auc'))}")
+    if has_val:
+        print(f"  Val:   {safe_fmt(results.get('val_pr_auc'))}")
+    print(f"  Test:  {safe_fmt(results.get('test_pr_auc'))}\n")
+
+    print("=== ROC AUC ===")
+    print(f"  Train: {safe_fmt(results.get('train_roc_auc'))}")
+    if has_val:
+        print(f"  Val:   {safe_fmt(results.get('val_roc_auc'))}")
+    print(f"  Test:  {safe_fmt(results.get('test_roc_auc'))}\n")
+
+    print("=== Recall ===")
+    print(f"  Train: {safe_fmt(results.get('train_recall'))}")
+    if has_val:
+        print(f"  Val:   {safe_fmt(results.get('val_recall'))}")
+    print(f"  Test:  {safe_fmt(results.get('test_recall'))}\n")
 
 
+    # ---------------------------------------------------------
+    # Final WandB logging — ONLY test summary (no duplicates)
+    # ---------------------------------------------------------
+    import contextlib, io
 
-
-    # Final WandB logging and cleanup
-    import contextlib
-    import io
     if use_wandb and wandb.run is not None:
-        print(" Logging final metrics to WandB...")
+        print("Logging final TEST metrics to WandB...")
         wandb.log({
-            "final_train_acc": results.get("final_train_acc", 0),
-            "final_val_acc": results.get("final_val_acc", 0),
-            "final_test_acc": results.get("final_test_acc", 0),
-            "final_train_roc_auc": results.get("final_train_roc_auc", 0),
-            "final_val_roc_auc": results.get("final_val_roc_auc", 0),
-            "final_test_roc_auc": results.get("final_test_roc_auc", 0),
-            "final_train_pr_auc": results.get("final_train_pr_auc", 0),
-            "final_val_pr_auc": results.get("final_val_pr_auc", 0),
-            "final_test_pr_auc": results.get("final_test_pr_auc", 0),
-            "final_test_recall": results.get("final_test_recall", 0),
-            "final_val_recall": results.get("final_val_recall", 0),
-            "final_train_recall": results.get("final_train_recall", 0),
-
+            "test_loss": results.get("test_loss", 0),
+            "test_acc": results.get("test_acc", 0),
+            "test_pr_auc": results.get("test_pr_auc", 0),
+            "test_roc_auc": results.get("test_roc_auc", 0),
+            "test_recall": results.get("test_recall", 0),
+            "total_time": results.get("total_time", 0)
         })
         with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
             wandb.finish()
     else:
-        print(" WandB active flag mismatch — skipping final logging.")
-        if wandb.run is None:
-            print(" wandb.run is None; likely reinit=False or wandb disabled mid-run.")
+        print("WandB inactive or run missing — skipping final logging.")
 
 
 
