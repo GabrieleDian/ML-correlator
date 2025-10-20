@@ -272,12 +272,8 @@ def main():
     print(f"Test set: {len(test_dataset)} samples (loop orders {test_loop_orders})")
 
 
-    # --- Print summary ---
-    print(f"\nDataset Summary:")
-    print(f"  • Train: {len(train_dataset)} samples "
-        f"(includes 100% of {train_loop_orders} )")
-    print(f"  • Val:   No validation dataset")
-    print(f"  • Test:  {len(test_dataset)} samples (loop orders {test_loop_orders})")
+    # --- Print dataset statistics ---
+    print("\nDataset statistics:")
     
     # Print dataset statistics
     quick_dataset_stats(train_dataset)
