@@ -161,7 +161,8 @@ def _frac(vals, pred):
     """
     if not vals or len(vals) == 0:
         return np.nan
-    return float(sum(1 for v in vals if pred(v)) / len(vals))
+    count = sum(1 for v in vals if pred(v))
+    return float(count / len(vals)) if len(vals) > 0 else np.nan
 
 def try_or_nan(fn, *args, **kwargs):
     """Execute function with given arguments, returning NaN on any exception.
@@ -959,7 +960,7 @@ def extract_features_single_graph(
         total_4sets = math.comb(n, 4) if n >= 4 else 0  # C(n,4) = n!/(4!(n-4)!)
         for k, v in ind4.items():
             feats[f"Motif_induced_{k}"] = float(v)  # Raw counts for each 4-node graphlet type
-        feats["Motif_induced_connected_per_4set"] = float(sum(ind4.values()) / total_4sets) if (total_4sets and total_4sets==total_4sets) else np.nan  # Fraction of 4-sets that are connected
+        feats["Motif_induced_connected_per_4set"] = float(sum(ind4.values()) / total_4sets) if (total_4sets and total_4sets > 0 and total_4sets==total_4sets) else np.nan  # Fraction of 4-sets that are connected
 
     # ========================= INDUCED 5-NODE SUBGRAPHS =========================
     # Enumerate 5-node subsets with sampling for large graphs
@@ -968,7 +969,7 @@ def extract_features_single_graph(
         total_5sets = math.comb(n, 5) if n >= 5 else 0  # C(n,5) = n!/(5!(n-5)!)
         for name, val in ind5.items():
             feats[f"Motif_induced5_{name}"] = float(val)  # Raw counts for each 5-node graphlet type
-        feats["Motif_induced_connected_per_5set"] = (connected5 / total_5sets) if (total_5sets and total_5sets==total_5sets and connected5==connected5) else np.nan  # Fraction of 5-sets that are connected
+        feats["Motif_induced_connected_per_5set"] = (connected5 / total_5sets) if (total_5sets and total_5sets > 0 and total_5sets==total_5sets and connected5==connected5) else np.nan  # Fraction of 5-sets that are connected
 
     # ========================= NORMALIZED MOTIF COUNTS =========================
     # Compute ratios relative to maximum possible counts (graph-size independent measures)
@@ -984,24 +985,24 @@ def extract_features_single_graph(
             c4  = feats.get("Motif_4_cycles", np.nan)
             k4  = feats.get("Motif_4_cliques", np.nan)
             w   = feats.get("Motif_wedges", np.nan)
-            feats["Motif_triangles_per_Cn3"] = tri/Cn3 if Cn3 and Cn3==Cn3 else np.nan  # Triangles / max possible triangles
-            feats["Motif_4_cycles_per_Cn4"]  = c4/Cn4  if Cn4 and Cn4==Cn4 else np.nan  # 4-cycles / max possible 4-cycles
-            feats["Motif_4_cliques_per_Cn4"] = k4/Cn4  if Cn4 and Cn4==Cn4 else np.nan  # 4-cliques / max possible 4-cliques
-            feats["Motif_wedges_per_max"]    = w/max_wedges if (max_wedges and max_wedges==max_wedges) else np.nan  # Wedges / theoretical max
+            feats["Motif_triangles_per_Cn3"] = tri/Cn3 if Cn3 and Cn3 > 0 and Cn3==Cn3 else np.nan  # Triangles / max possible triangles
+            feats["Motif_4_cycles_per_Cn4"]  = c4/Cn4  if Cn4 and Cn4 > 0 and Cn4==Cn4 else np.nan  # 4-cycles / max possible 4-cycles
+            feats["Motif_4_cliques_per_Cn4"] = k4/Cn4  if Cn4 and Cn4 > 0 and Cn4==Cn4 else np.nan  # 4-cliques / max possible 4-cliques
+            feats["Motif_wedges_per_max"]    = w/max_wedges if (max_wedges and max_wedges > 0 and max_wedges==max_wedges) else np.nan  # Wedges / theoretical max
         if enabled("induced4"):
             for key in ["g_1_4", "g_2_4", "g_3_4", "g_4_4", "g_5_4", "g_6_4"]:  # Path4, Star4, Cycle4, TailedTriangle, Diamond, Clique4
                 raw = feats.get(f"Motif_induced_{key}", np.nan)
-                feats[f"Motif_induced_{key}_per_Cn4"] = raw/Cn4 if Cn4 and Cn4==Cn4 else np.nan  # Graphlet count / max possible 4-sets
+                feats[f"Motif_induced_{key}_per_Cn4"] = raw/Cn4 if Cn4 and Cn4 > 0 and Cn4==Cn4 else np.nan  # Graphlet count / max possible 4-sets
         if enabled("motifs5"):
             c5 = feats.get("Motif_5_cycles", np.nan)
             k5 = feats.get("Motif_5_cliques", np.nan)
-            feats["Motif_5_cycles_per_Cn5"]  = c5/Cn5 if Cn5 and Cn5==Cn5 else np.nan  # 5-cycles / max possible 5-cycles
-            feats["Motif_5_cliques_per_Cn5"] = k5/Cn5 if Cn5 and Cn5==Cn5 else np.nan  # 5-cliques / max possible 5-cliques
-            feats["Motif_5_cycles_per_Kn"]   = c5/max_c5 if (max_c5 and max_c5==max_c5) else np.nan  # 5-cycles / theoretical max
+            feats["Motif_5_cycles_per_Cn5"]  = c5/Cn5 if Cn5 and Cn5 > 0 and Cn5==Cn5 else np.nan  # 5-cycles / max possible 5-cycles
+            feats["Motif_5_cliques_per_Cn5"] = k5/Cn5 if Cn5 and Cn5 > 0 and Cn5==Cn5 else np.nan  # 5-cliques / max possible 5-cliques
+            feats["Motif_5_cycles_per_Kn"]   = c5/max_c5 if (max_c5 and max_c5 > 0 and max_c5==max_c5) else np.nan  # 5-cycles / theoretical max
         if enabled("induced5"):
             for name in _G5_NAMES:
                 raw5 = feats.get(f"Motif_induced5_{name}", np.nan)
-                feats[f"Motif_induced5_{name}_per_Cn5"] = raw5 / Cn5 if raw5 == raw5 else np.nan  # Graphlet count / max possible 5-sets
+                feats[f"Motif_induced5_{name}_per_Cn5"] = raw5 / Cn5 if (Cn5 and Cn5 > 0 and raw5 == raw5) else np.nan  # Graphlet count / max possible 5-sets
 
     # ========================= SPECTRAL FEATURES =========================
     # Laplacian eigenvalues and adjacency spectrum features
@@ -1129,10 +1130,10 @@ def extract_features_row(
         dia_total = out.get("Motif_induced_g_5_4_TOTAL", np.nan)  # Diamond
         k4_total  = out.get("Motif_induced_g_6_4_TOTAL", np.nan)  # Clique4
         
-        out["Cross_layer_triangle_ratio"] = cross_tri / tri_total if tri_total and tri_total == tri_total else np.nan
-        out["Cross_layer_4cycle_ratio"]  = cross_c4 / c4_total if c4_total and c4_total == c4_total else np.nan
-        out["Cross_layer_diamond_ratio"]  = cross_dia / dia_total if dia_total and dia_total == dia_total else np.nan
-        out["Cross_layer_4clique_ratio"]  = cross_k4 / k4_total if k4_total and k4_total == k4_total else np.nan
+        out["Cross_layer_triangle_ratio"] = cross_tri / tri_total if (tri_total and tri_total > 0 and tri_total == tri_total) else np.nan
+        out["Cross_layer_4cycle_ratio"]  = cross_c4 / c4_total if (c4_total and c4_total > 0 and c4_total == c4_total) else np.nan
+        out["Cross_layer_diamond_ratio"]  = cross_dia / dia_total if (dia_total and dia_total > 0 and dia_total == dia_total) else np.nan
+        out["Cross_layer_4clique_ratio"]  = cross_k4 / k4_total if (k4_total and k4_total > 0 and k4_total == k4_total) else np.nan
 
     if "COEFFICIENTS" in row: out["COEFFICIENTS"] = row["COEFFICIENTS"]
     return out
