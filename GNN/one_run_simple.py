@@ -171,32 +171,32 @@ def main():
         print(" WandB disabled in config.")
 
     # --- Auto-tune data loading parameters based on node specs ---
-        import psutil
+    import psutil
 
-        n_cpus = psutil.cpu_count(logical=True)
-        mem_gb = psutil.virtual_memory().total / 1e9
+    n_cpus = psutil.cpu_count(logical=True)
+    mem_gb = psutil.virtual_memory().total / 1e9
 
-        # Use ~75 % of CPUs for n_jobs
-        auto_n_jobs = int(0.75 * n_cpus)
+    # Use ~75 % of CPUs for n_jobs
+    auto_n_jobs = int(0.75 * n_cpus)
 
-        # Scale chunk_size based on available memory
-        if mem_gb < 128:
-            auto_chunk_size = 2000
-        elif mem_gb < 256:
-            auto_chunk_size = 5000
-        elif mem_gb < 512:
-            auto_chunk_size = 10000
-        elif mem_gb < 768:
-            auto_chunk_size = 20000
-        else:
-            auto_chunk_size = 30000  # >= 700 GB, use high-performance setting
+    # Scale chunk_size based on available memory
+    if mem_gb < 128:
+        auto_chunk_size = 2000
+    elif mem_gb < 256:
+        auto_chunk_size = 5000
+    elif mem_gb < 512:
+        auto_chunk_size = 10000
+    elif mem_gb < 768:
+        auto_chunk_size = 20000
+    else:
+        auto_chunk_size = 30000  # >= 700 GB, use high-performance setting
 
 
-        config_dict.setdefault("data", {})
-        config_dict["data"]["n_jobs"] = auto_n_jobs
-        config_dict["data"]["chunk_size"] = auto_chunk_size
+    config_dict.setdefault("data", {})
+    config_dict["data"]["n_jobs"] = auto_n_jobs
+    config_dict["data"]["chunk_size"] = auto_chunk_size
 
-        print(f"[INFO] Auto-set n_jobs={auto_n_jobs}, chunk_size={auto_chunk_size} for {mem_gb:.1f} GB RAM")
+    print(f"[INFO] Auto-set n_jobs={auto_n_jobs}, chunk_size={auto_chunk_size} for {mem_gb:.1f} GB RAM")
 
    # ---------------------------------------------------------
     # 3. Data preparation (configurable validation split)
