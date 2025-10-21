@@ -1,0 +1,10 @@
+=========================================
+ Job ID: 17641855  |  Array Task: 12
+ Host: max-wn174.desy.de
+ Processing loop order: 12
+ Using 32 CPUs
+=========================================
+Output format: parquet
+Enabled groups: ['motifs34', 'motifs5', 'induced4', 'induced5']
+Loading ../../Graph_Edge_Data/den_graph_data_12.csv...
+Loaded 19212886 rows
