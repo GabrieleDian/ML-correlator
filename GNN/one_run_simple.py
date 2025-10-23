@@ -120,7 +120,9 @@ def main():
         ]:
             if hasattr(sweep_config, key) and section in config_dict:
                 config_dict[section][key] = getattr(sweep_config, key)
-
+             #  override model_name if present in sweep
+            if hasattr(sweep_config, "model_name"):
+                config_dict.setdefault("model", {})["name"] = getattr(sweep_config, "model_name")
         raw_use_wandb = True
 
     else:

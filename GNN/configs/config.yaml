@@ -45,5 +45,5 @@ experiment:
   use_wandb: false
   model_dir: "models"
   save_model: false
-  wandb_project: train678_test9_big_sweep_val
+  wandb_project: train678_test9_big_sweep_models_test
 
