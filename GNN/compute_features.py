@@ -8,6 +8,41 @@ from tqdm import tqdm
 from joblib import Parallel, delayed
 from scipy.linalg import eigh
 
+# Optimize chunk_size and n_jobs based on system resources
+import psutil
+
+def autotune_resources(chunk_size_default=100, n_jobs_default=1):
+    """
+    Auto-adjust chunk_size and n_jobs based on node CPU and memory specs.
+    Returns (chunk_size, n_jobs) optimized for current environment.
+    """
+    n_cpus = psutil.cpu_count(logical=True)
+    mem_gb = psutil.virtual_memory().total / 1e9
+
+    # Use ~75% of available CPUs
+    n_jobs = max(1, int(0.75 * n_cpus))
+
+    # Adaptive chunk_size scaling based on memory
+    if mem_gb < 128:
+        chunk_size = 2000
+    elif mem_gb < 256:
+        chunk_size = 5000
+    elif mem_gb < 512:
+        chunk_size = 10000
+    elif mem_gb < 768:
+        chunk_size = 20000
+    else:
+        chunk_size = 30000  # ≥700 GB nodes
+
+    # Fall back to defaults if machine is tiny
+    chunk_size = max(chunk_size, chunk_size_default)
+    n_jobs = max(n_jobs, n_jobs_default)
+
+    print(f"[AUTOTUNE] Detected {n_cpus} CPUs, {mem_gb:.1f} GB RAM → "
+          f"n_jobs={n_jobs}, chunk_size={chunk_size}")
+
+    return chunk_size, n_jobs
+
 
 def load_graph_edges(file_ext='7', base_dir=None):
     """
@@ -432,8 +467,18 @@ if __name__ == "__main__":
 
     # Set chunk_size, n_jobs, base_dir and file_ext
     file_ext = args.file_ext if args.file_ext else config['data']['file_ext']
-    chunk_size = args.chunk_size if args.chunk_size else config['features']['chunk_size']
-    n_jobs = args.n_jobs if args.n_jobs else config['features']['n_jobs']
+    # --- Auto-tune if user didn't override from command line ---
+    if args.chunk_size or args.n_jobs:
+        # Respect explicit user settings
+        chunk_size = args.chunk_size or config['features']['chunk_size']
+        n_jobs = args.n_jobs or config['features']['n_jobs']
+    else:
+        # Auto-detect based on hardware
+        chunk_size, n_jobs = autotune_resources(
+            chunk_size_default=config['features']['chunk_size'],
+            n_jobs_default=config['features']['n_jobs']
+        )
+
     base_dir = Path(config['data'].get('base_dir', '../Graph_Edge_Data'))
 
     
