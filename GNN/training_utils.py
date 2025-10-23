@@ -298,6 +298,8 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                     "train_loss": train_loss,
                     "train_acc": train_acc,
                     "train_pr_auc": train_metrics["pr_auc"],
+                    "train_roc_auc": train_metrics["roc_auc"],
+                    "train_recall": train_metrics["recall"],
                     "lr": optimizer.param_groups[0]["lr"]
                 }, step=epoch)
 
