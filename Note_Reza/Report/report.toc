@@ -1,12 +1,14 @@
 \contentsline {section}{\numberline {1}Motivation}{3}{section.1}%
 \contentsline {section}{\numberline {2}Features}{3}{section.2}%
-\contentsline {section}{\numberline {3}Intra-loop modelling}{3}{section.3}%
-\contentsline {subsection}{\numberline {3.1}Feature reduction}{3}{subsection.3.1}%
-\contentsline {section}{\numberline {4}Predicting $l$ from $p < l$ loop orders}{3}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Approach 1: Timeseries approach}{3}{subsection.4.1}%
-\contentsline {subsubsection}{\numberline {4.1.1}Feature reduction}{3}{subsubsection.4.1.1}%
-\contentsline {subsubsection}{\numberline {4.1.2}Shap Analysis}{3}{subsubsection.4.1.2}%
-\contentsline {subsection}{\numberline {4.2}Approach 2: General $l$ learning}{3}{subsection.4.2}%
-\contentsline {subsubsection}{\numberline {4.2.1}Feature reduction}{3}{subsubsection.4.2.1}%
-\contentsline {subsubsection}{\numberline {4.2.2}Shap Analysis}{3}{subsubsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.3}Ensemble learning}{3}{subsection.4.3}%
+\contentsline {subsection}{\numberline {2.1}Feature Categories}{3}{subsection.2.1}%
+\contentsline {section}{\numberline {3}Intra-loop modelling}{4}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Feature reduction}{4}{subsection.3.1}%
+\contentsline {section}{\numberline {4}Predicting $l$ from $p < l$ loop orders}{4}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Approach 1: Timeseries approach}{4}{subsection.4.1}%
+\contentsline {subsubsection}{\numberline {4.1.1}Feature reduction}{4}{subsubsection.4.1.1}%
+\contentsline {subsubsection}{\numberline {4.1.2}Shap Analysis}{4}{subsubsection.4.1.2}%
+\contentsline {subsection}{\numberline {4.2}Approach 2: General $l$ learning}{4}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}Feature reduction}{4}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2}Shap Analysis}{4}{subsubsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.3}Ensemble learning}{4}{subsection.4.3}%
+\contentsline {section}{\numberline {A}Complete Feature Descriptions}{4}{appendix.A}%

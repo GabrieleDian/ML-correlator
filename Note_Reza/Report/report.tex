@@ -7,6 +7,7 @@
 \usepackage{enumitem}
 \usepackage{booktabs}
 \usepackage{siunitx}
+\usepackage{bookmark}
 
 \title{Predicting coefficients for graphs}
 \author{}
@@ -36,7 +37,34 @@
 
 
         \section{Features}
-
+        
+        This section provides a comprehensive overview of all graph features used in our analysis. The features are extracted using two main tools: \texttt{fgraph\_features\_cli2.py} for comprehensive graph analysis and \texttt{motif\_features\_cli.py} for motif-specific features.
+        
+        \subsection{Feature Categories}
+        
+        The features are organized into the following categories:
+        
+        \begin{itemize}
+        \item \textbf{Basic}: Fundamental graph properties (nodes, edges, degrees, density, clustering)
+        \item \textbf{Connectivity}: Path-based metrics (diameter, radius, shortest paths, components)
+        \item \textbf{Centrality}: Node importance measures (betweenness, closeness, eigenvector)
+        \item \textbf{Core}: K-core decomposition metrics
+        \item \textbf{Robustness}: Vulnerability measures (articulation points, bridges)
+        \item \textbf{Cycles}: Cycle counting features
+        \item \textbf{Spectral\_Laplacian}: Laplacian matrix eigenvalues and related metrics
+        \item \textbf{NetLSD}: Network Laplacian Spectral Descriptor features
+        \item \textbf{Planarity}: Planar embedding properties
+        \item \textbf{Symmetry}: Graph automorphism features
+        \item \textbf{Community}: Community detection metrics
+        \item \textbf{Motifs\_3\_4}: 3-node and 4-node motif counts
+        \item \textbf{Motifs\_5}: 5-node motif counts
+        \item \textbf{Motifs\_4}: 4-node induced subgraph counts
+        \item \textbf{Spectral\_Adjacency}: Adjacency matrix spectrum features
+        \item \textbf{TDA}: Topological Data Analysis features (persistent homology)
+        \item \textbf{Normalized variants}: Size-normalized versions of many features
+        \end{itemize}
+        
+        A complete list of all 179 features with their descriptions and interpretations can be found in Appendix \ref{app:features}.
 
         \section{Intra-loop modelling}
         \subsection{Feature reduction}
@@ -55,9 +83,653 @@
 
         \subsection{Ensemble learning}
 
-   
-	
+\appendix
 
-	
+\section{Complete Feature Descriptions}
+\label{app:features}
+
+This appendix provides a comprehensive list of all <> graph features with their descriptions and interpretations. Due to the large number of features, the table is split across multiple pages for readability.
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\tiny
+\begin{tabular}{p{3.5cm}p{2.5cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Feature Name} & \textbf{Group} & \textbf{Description} & \textbf{Interpretation} \\
+\midrule
+\textbf{Basic\_num\_nodes} & Basic & \textit{Total number of nodes in the graph} & The larger this number the bigger the graph is \\
+\midrule
+\textbf{Basic\_num\_edges} & Basic & \textit{Total number of edges in the graph} & The larger this number the more connected the graph is \\
+\midrule
+\textbf{Basic\_min\_degree} & Basic & \textit{Minimum degree among all nodes} & The larger this number the more connected the least connected node is \\
+\midrule
+\textbf{Basic\_max\_degree} & Basic & \textit{Maximum degree among all nodes} & The larger this number the more connected the most connected node is \\
+\midrule
+\textbf{Basic\_avg\_degree} & Basic & \textit{Average degree across all nodes} & The larger this number the more connected the graph is on average \\
+\midrule
+\textbf{Basic\_degree\_std} & Basic & \textit{Standard deviation of node degrees} & The larger this number the more unequal the node connections are \\
+\midrule
+\textbf{Basic\_degree\_skew} & Basic & \textit{Skewness of degree distribution} & Positive values mean more high-degree nodes; negative means more low-degree nodes \\
+\midrule
+\textbf{Basic\_density} & Basic & \textit{Graph density (edges/max\_possible\_edges)} & The larger this number the more densely connected the graph is \\
+\midrule
+\textbf{Basic\_edge\_to\_node\_ratio} & Basic & \textit{Ratio of edges to nodes} & The larger this number the more edges per node the graph has \\
+\midrule
+\textbf{Basic\_degree\_entropy} & Basic & \textit{Shannon entropy of degree distribution} & The larger this number the more diverse the node degrees are \\
+\midrule
+\textbf{Assortativity\_degree} & Basic & \textit{Degree assortativity coefficient} & Positive values mean similar-degree nodes connect; negative means opposite-degree nodes connect \\
+\midrule
+\textbf{Clustering\_mean} & Basic & \textit{Average local clustering coefficient} & The larger this number the more clustered/triangular the graph is \\
+\midrule
+\textbf{Clustering\_q10} & Basic & \textit{10th percentile of clustering coefficients} & The larger this number the more clustered the least clustered nodes are \\
+\midrule
+\textbf{Clustering\_q50} & Basic & \textit{50th percentile (median) of clustering coefficients} & The larger this number the more clustered the typical node is \\
+\midrule
+\textbf{Clustering\_q90} & Basic & \textit{90th percentile of clustering coefficients} & The larger this number the more clustered the most clustered nodes are \\
+\midrule
+\textbf{Clustering\_frac\_zero} & Basic & \textit{Fraction of nodes with zero clustering} & The larger this number the more tree-like the graph is \\
+\midrule
+\textbf{Clustering\_frac\_one} & Basic & \textit{Fraction of nodes with clustering = 1} & The larger this number the more clique-like the graph is \\
+\midrule
+\textbf{Degree\_gini} & Basic & \textit{Gini coefficient of degree distribution} & The larger this number the more unequal the node degrees are \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\tiny
+\begin{tabular}{p{3.5cm}p{2.5cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Feature Name} & \textbf{Group} & \textbf{Description} & \textbf{Interpretation} \\
+\midrule
+\textbf{Connectivity\_is\_connected} & Connectivity & \textit{Whether graph is connected (True/False)} & True means all nodes can reach each other; False means graph is fragmented \\
+\midrule
+\textbf{Connectivity\_num\_components} & Connectivity & \textit{Number of connected components} & The larger this number the more fragmented the graph is \\
+\midrule
+\textbf{Connectivity\_diameter} & Connectivity & \textit{Graph diameter (longest shortest path)} & The larger this number the more spread out the graph is \\
+\midrule
+\textbf{Connectivity\_radius} & Connectivity & \textit{Graph radius (minimum eccentricity)} & The larger this number the more spread out the graph is \\
+\midrule
+\textbf{Connectivity\_avg\_shortest\_path\_length} & Connectivity & \textit{Average shortest path length} & The larger this number the more spread out the graph is \\
+\midrule
+\textbf{Connectivity\_wiener\_index} & Connectivity & \textit{Sum of all shortest path lengths} & The larger this number the more spread out the graph is \\
+\midrule
+\textbf{Eff\_diameter\_p90} & Connectivity & \textit{90th percentile effective diameter} & The larger this number the more spread out the graph is \\
+\midrule
+\textbf{Ecc\_mean} & Connectivity & \textit{Mean eccentricity of nodes} & The larger this number the more spread out the graph is \\
+\midrule
+\textbf{Ecc\_q90} & Connectivity & \textit{90th percentile eccentricity} & The larger this number the more spread out the graph is \\
+\midrule
+\textbf{Centrality\_betweenness\_mean} & Centrality & \textit{Mean betweenness centrality} & The larger this number the more nodes act as bridges/connectors \\
+\midrule
+\textbf{Centrality\_betweenness\_max} & Centrality & \textit{Maximum betweenness centrality} & The larger this number the more important the most central node is \\
+\midrule
+\textbf{Centrality\_betweenness\_std} & Centrality & \textit{Standard deviation of betweenness centrality} & The larger this number the more unequal the node importance is \\
+\midrule
+\textbf{Centrality\_betweenness\_skew} & Centrality & \textit{Skewness of betweenness centrality distribution} & Positive values mean few very important nodes; negative means many moderately important nodes \\
+\midrule
+\textbf{Centrality\_closeness\_mean} & Centrality & \textit{Mean closeness centrality} & The larger this number the more centrally located nodes are on average \\
+\midrule
+\textbf{Centrality\_closeness\_max} & Centrality & \textit{Maximum closeness centrality} & The larger this number the more centrally located the most central node is \\
+\midrule
+\textbf{Centrality\_closeness\_std} & Centrality & \textit{Standard deviation of closeness centrality} & The larger this number the more unequal the node centrality is \\
+\midrule
+\textbf{Centrality\_closeness\_skew} & Centrality & \textit{Skewness of closeness centrality distribution} & Positive values mean few very central nodes; negative means many moderately central nodes \\
+\midrule
+\textbf{Centrality\_eigenvector\_mean} & Centrality & \textit{Mean eigenvector centrality} & The larger this number the more nodes are connected to important nodes \\
+\midrule
+\textbf{Centrality\_eigenvector\_max} & Centrality & \textit{Maximum eigenvector centrality} & The larger this number the more important the most influential node is \\
+\midrule
+\textbf{Centrality\_eigenvector\_std} & Centrality & \textit{Standard deviation of eigenvector centrality} & The larger this number the more unequal the node influence is \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\tiny
+\begin{tabular}{p{3.5cm}p{2.5cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Feature Name} & \textbf{Group} & \textbf{Description} & \textbf{Interpretation} \\
+\midrule
+\textbf{Centrality\_eigenvector\_skew} & Centrality & \textit{Skewness of eigenvector centrality distribution} & Positive values mean few very influential nodes; negative means many moderately influential nodes \\
+\midrule
+\textbf{Core\_max\_core\_index} & Core & \textit{Maximum k-core index} & The larger this number the more tightly connected the densest core is \\
+\midrule
+\textbf{Core\_core\_index\_mean} & Core & \textit{Mean k-core index} & The larger this number the more tightly connected nodes are on average \\
+\midrule
+\textbf{Robust\_articulation\_points} & Robustness & \textit{Number of articulation points (cut vertices)} & The larger this number the more vulnerable the graph is to fragmentation \\
+\midrule
+\textbf{Robust\_bridge\_count} & Robustness & \textit{Number of bridges (cut edges)} & The larger this number the more vulnerable the graph is to fragmentation \\
+\midrule
+\textbf{Cycle\_num\_cycles\_len\_5} & Cycles & \textit{Number of cycles of length 5} & The larger this number the more 5-cycles the graph contains \\
+\midrule
+\textbf{Cycle\_num\_cycles\_len\_6} & Cycles & \textit{Number of cycles of length 6} & The larger this number the more 6-cycles the graph contains \\
+\midrule
+\textbf{Spectral\_algebraic\_connectivity} & Spectral\_Laplacian & \textit{Second smallest Laplacian eigenvalue (Fiedler value)} & The larger this number the more connected the graph is \\
+\midrule
+\textbf{Spectral\_spectral\_gap} & Spectral\_Laplacian & \textit{Difference between first two Laplacian eigenvalues} & The larger this number the more well-connected the graph is \\
+\midrule
+\textbf{Spectral\_laplacian\_mean} & Spectral\_Laplacian & \textit{Mean of Laplacian eigenvalues} & The larger this number the more connected the graph is on average \\
+\midrule
+\textbf{Spectral\_laplacian\_std} & Spectral\_Laplacian & \textit{Standard deviation of Laplacian eigenvalues} & The larger this number the more varied the connectivity patterns are \\
+\midrule
+\textbf{Spectral\_laplacian\_skew} & Spectral\_Laplacian & \textit{Skewness of Laplacian eigenvalue distribution} & Positive values mean few highly connected components; negative means many moderately connected components \\
+\midrule
+\textbf{Spectral\_lap\_eig\_0} & Spectral\_Laplacian & \textit{Smallest Laplacian eigenvalue} & Always 0 for connected graphs; larger values indicate more disconnected components \\
+\midrule
+\textbf{Spectral\_lap\_eig\_1} & Spectral\_Laplacian & \textit{Second smallest Laplacian eigenvalue} & The larger this number the more connected the graph is \\
+\midrule
+\textbf{Spectral\_lap\_eig\_2} & Spectral\_Laplacian & \textit{Third smallest Laplacian eigenvalue} & The larger this number the more connected the graph is \\
+\midrule
+\textbf{Spectral\_lap\_eig\_3} & Spectral\_Laplacian & \textit{Fourth smallest Laplacian eigenvalue} & The larger this number the more connected the graph is \\
+\midrule
+\textbf{Spectral\_lap\_eig\_4} & Spectral\_Laplacian & \textit{Fifth smallest Laplacian eigenvalue} & The larger this number the more connected the graph is \\
+\midrule
+\textbf{Spectral\_lap\_eig\_5} & Spectral\_Laplacian & \textit{Sixth smallest Laplacian eigenvalue} & The larger this number the more connected the graph is \\
+\midrule
+\textbf{Spectral\_lap\_eig\_6} & Spectral\_Laplacian & \textit{Seventh smallest Laplacian eigenvalue} & The larger this number the more connected the graph is \\
+\midrule
+\textbf{Spectral\_lap\_eig\_7} & Spectral\_Laplacian & \textit{Eighth smallest Laplacian eigenvalue} & The larger this number the more connected the graph is \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\tiny
+\begin{tabular}{p{3.5cm}p{2.5cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Feature Name} & \textbf{Group} & \textbf{Description} & \textbf{Interpretation} \\
+\midrule
+\textbf{Spectral\_lap\_eig\_8} & Spectral\_Laplacian & \textit{Ninth smallest Laplacian eigenvalue} & The larger this number the more connected the graph is \\
+\midrule
+\textbf{Spectral\_lap\_eig\_9} & Spectral\_Laplacian & \textit{Tenth smallest Laplacian eigenvalue} & The larger this number the more connected the graph is \\
+\midrule
+\textbf{Kirchhoff\_index} & Spectral\_Laplacian & \textit{Kirchhoff index (sum of resistance distances)} & The larger this number the more spread out the graph is \\
+\midrule
+\textbf{NetLSD\_mean} & NetLSD & \textit{Mean NetLSD signature} & The larger this number the more complex the graph structure is \\
+\midrule
+\textbf{NetLSD\_std} & NetLSD & \textit{Standard deviation of NetLSD signature} & The larger this number the more varied the graph structure is \\
+\midrule
+\textbf{NetLSD\_q10} & NetLSD & \textit{10th percentile of NetLSD signature} & The larger this number the more complex the simplest parts are \\
+\midrule
+\textbf{NetLSD\_q90} & NetLSD & \textit{90th percentile of NetLSD signature} & The larger this number the more complex the most complex parts are \\
+\midrule
+\textbf{Planarity\_num\_faces} & Planarity & \textit{Number of faces in planar embedding} & The larger this number the more complex the planar structure is \\
+\midrule
+\textbf{Planarity\_face\_size\_mean} & Planarity & \textit{Mean face size in planar embedding} & The larger this number the larger the typical face is \\
+\midrule
+\textbf{Planarity\_face\_size\_max} & Planarity & \textit{Maximum face size in planar embedding} & The larger this number the larger the biggest face is \\
+\midrule
+\textbf{Symmetry\_automorphism\_group\_order} & Symmetry & \textit{Order of automorphism group} & The larger this number the more symmetric the graph is \\
+\midrule
+\textbf{Symmetry\_num\_orbits} & Symmetry & \textit{Number of node orbits under automorphisms} & The larger this number the more diverse the node roles are \\
+\midrule
+\textbf{Symmetry\_orbit\_size\_max} & Symmetry & \textit{Maximum orbit size} & The larger this number the more nodes share the same role \\
+\midrule
+\textbf{Comm\_modularity} & Community & \textit{Modularity of best community partition} & The larger this number the more clearly separated the communities are \\
+\midrule
+\textbf{Comm\_count} & Community & \textit{Number of communities found} & The larger this number the more fragmented the graph is \\
+\midrule
+\textbf{Comm\_size\_max} & Community & \textit{Size of largest community} & The larger this number the more dominant the largest community is \\
+\midrule
+\textbf{Comm\_size\_gini} & Community & \textit{Gini coefficient of community sizes} & The larger this number the more unequal the community sizes are \\
+\midrule
+\textbf{Comm\_internal\_edge\_frac} & Community & \textit{Fraction of edges within communities} & The larger this number the more internally connected communities are \\
+\midrule
+\textbf{Motif\_triangles} & Motifs\_3\_4 & \textit{Number of triangles (3-cliques)} & The larger this number the more triangular structures the graph has \\
+\midrule
+\textbf{Motif\_wedges} & Motifs\_3\_4 & \textit{Number of wedges (2-paths)} & The larger this number the more path-like structures the graph has \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\tiny
+\begin{tabular}{p{3.5cm}p{2.5cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Feature Name} & \textbf{Group} & \textbf{Description} & \textbf{Interpretation} \\
+\midrule
+\textbf{Motif\_4\_cycles} & Motifs\_3\_4 & \textit{Number of 4-cycles} & The larger this number the more square-like structures the graph has \\
+\midrule
+\textbf{Motif\_4\_cliques} & Motifs\_3\_4 & \textit{Number of 4-cliques (K4)} & The larger this number the more tightly connected 4-node groups the graph has \\
+\midrule
+\textbf{Motif\_triangle\_edge\_incidence\_mean} & Motifs\_3\_4 & \textit{Mean triangles per edge} & The larger this number the more triangles each edge participates in \\
+\midrule
+\textbf{Motif\_triangle\_edge\_incidence\_std} & Motifs\_3\_4 & \textit{Standard deviation of triangles per edge} & The larger this number the more varied edge participation in triangles is \\
+\midrule
+\textbf{Motif\_square\_clustering\_proxy} & Motifs\_3\_4 & \textit{Tendency to form 4-cycles relative to 2-paths} & The larger this number the more square-like the graph structure is \\
+\midrule
+\textbf{Motif\_triangle\_edge\_incidence\_median} & Motifs\_3\_4 & \textit{Median triangles per edge} & The larger this number the more triangles the typical edge participates in \\
+\midrule
+\textbf{Motif\_triangle\_edge\_incidence\_q90} & Motifs\_3\_4 & \textit{90th percentile triangles per edge} & The larger this number the more triangles the most triangular edges participate in \\
+\midrule
+\textbf{Motif\_triangle\_edge\_frac\_zero} & Motifs\_3\_4 & \textit{Fraction of edges with zero triangles} & The larger this number the more tree-like the graph is \\
+\midrule
+\textbf{Motif\_triangle\_edge\_frac\_ge2} & Motifs\_3\_4 & \textit{Fraction of edges with $\geq$2 triangles} & The larger this number the more clustered the graph is \\
+\midrule
+\textbf{Motif\_induced\_K1\_3} & Motifs\_3\_4 & \textit{Number of induced K1,3 (star) subgraphs} & The larger this number the more star-like structures the graph has \\
+\midrule
+\textbf{Motif\_induced\_P4} & Motifs\_3\_4 & \textit{Number of induced P4 (path) subgraphs} & The larger this number the more path-like structures the graph has \\
+\midrule
+\textbf{Motif\_induced\_C4} & Motifs\_3\_4 & \textit{Number of induced C4 (cycle) subgraphs} & The larger this number the more cycle-like structures the graph has \\
+\midrule
+\textbf{Motif\_induced\_TailedTriangle} & Motifs\_3\_4 & \textit{Number of induced tailed triangle subgraphs} & The larger this number the more tailed triangle structures the graph has \\
+\midrule
+\textbf{Motif\_induced\_Diamond} & Motifs\_3\_4 & \textit{Number of induced diamond subgraphs} & The larger this number the more diamond structures the graph has \\
+\midrule
+\textbf{Motif\_induced\_K4} & Motifs\_3\_4 & \textit{Number of induced K4 (clique) subgraphs} & The larger this number the more tightly connected 4-node groups the graph has \\
+\midrule
+\textbf{Motif\_induced\_connected\_per\_4set} & Motifs\_3\_4 & \textit{Fraction of 4-node subsets that are connected} & The larger this number the more connected 4-node groups are \\
+\midrule
+\textbf{Motif\_5\_cycles} & Motifs\_5 & \textit{Number of 5-cycles} & The larger this number the more 5-sided cycle structures the graph has \\
+\midrule
+\textbf{Motif\_5\_cliques} & Motifs\_5 & \textit{Number of 5-cliques (K5)} & The larger this number the more tightly connected 5-node groups the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_0\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_0} & The larger this number the more g\_0 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_1\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_1} & The larger this number the more g\_1 structures the graph has \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\tiny
+\begin{tabular}{p{3.5cm}p{2.5cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Feature Name} & \textbf{Group} & \textbf{Description} & \textbf{Interpretation} \\
+\midrule
+\textbf{Motif\_induced5\_g\_2\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_2} & The larger this number the more g\_2 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_3\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_3} & The larger this number the more g\_3 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_4\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_4} & The larger this number the more g\_4 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_5\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_5} & The larger this number the more g\_5 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_6\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_6} & The larger this number the more g\_6 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_7\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_7} & The larger this number the more g\_7 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_8\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_8} & The larger this number the more g\_8 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_9\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_9} & The larger this number the more g\_9 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_10\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_10} & The larger this number the more g\_10 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_11\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_11} & The larger this number the more g\_11 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_12\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_12} & The larger this number the more g\_12 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_13\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_13} & The larger this number the more g\_13 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_14\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_14} & The larger this number the more g\_14 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_15\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_15} & The larger this number the more g\_15 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_16\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_16} & The larger this number the more g\_16 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_17\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_17} & The larger this number the more g\_17 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_18\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_18} & The larger this number the more g\_18 structures the graph has \\
+\midrule
+\textbf{Motif\_induced5\_g\_20\_5} & Motifs\_5 & \textit{Number of induced 5-node graphlet g\_20} & The larger this number the more g\_20 structures the graph has \\
+\midrule
+\textbf{Motif\_induced\_connected\_per\_5set} & Motifs\_5 & \textit{Fraction of 5-node subsets that are connected} & The larger this number the more connected 5-node groups are \\
+\midrule
+\textbf{Adjacency\_energy} & Spectral\_Adjacency & \textit{Sum of absolute eigenvalues of adjacency matrix} & The larger this number the more energetic/vibrant the graph is \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\tiny
+\begin{tabular}{p{3.5cm}p{2.5cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Feature Name} & \textbf{Group} & \textbf{Description} & \textbf{Interpretation} \\
+\midrule
+\textbf{Adjacency\_estrada\_index} & Spectral\_Adjacency & \textit{Sum of exponentials of eigenvalues} & The larger this number the more communicable the graph is \\
+\midrule
+\textbf{Adjacency\_moment\_2} & Spectral\_Adjacency & \textit{Second moment of adjacency eigenvalues} & The larger this number the more spread out the adjacency spectrum is \\
+\midrule
+\textbf{Adjacency\_moment\_3} & Spectral\_Adjacency & \textit{Third moment of adjacency eigenvalues} & Positive values mean more high-frequency components; negative means more low-frequency components \\
+\midrule
+\textbf{Adjacency\_moment\_4} & Spectral\_Adjacency & \textit{Fourth moment of adjacency eigenvalues} & The larger this number the more peaked the adjacency spectrum is \\
+\midrule
+\textbf{Spectral\_laplacian\_heat\_trace\_t0.1} & Spectral\_Laplacian & \textit{Laplacian heat trace at t=0.1} & The larger this number the more heat spreads quickly through the graph \\
+\midrule
+\textbf{Spectral\_laplacian\_heat\_trace\_t1.0} & Spectral\_Laplacian & \textit{Laplacian heat trace at t=1.0} & The larger this number the more heat spreads through the graph \\
+\midrule
+\textbf{Spectral\_laplacian\_heat\_trace\_t5.0} & Spectral\_Laplacian & \textit{Laplacian heat trace at t=5.0} & The larger this number the more heat spreads through the graph \\
+\midrule
+\textbf{TDA\_H0\_count} & TDA & \textit{Number of H0 homology features (connected components)} & The larger this number the more disconnected components the graph has \\
+\midrule
+\textbf{TDA\_H0\_total\_persistence} & TDA & \textit{Total persistence of H0 features} & The larger this number the more persistent the connectivity structure is \\
+\midrule
+\textbf{TDA\_H0\_mean\_persistence} & TDA & \textit{Mean persistence of H0 features} & The larger this number the more stable the connectivity structure is \\
+\midrule
+\textbf{TDA\_H0\_max\_persistence} & TDA & \textit{Maximum persistence of H0 features} & The larger this number the more stable the most persistent component is \\
+\midrule
+\textbf{TDA\_H0\_persistence\_entropy} & TDA & \textit{Entropy of H0 persistence distribution} & The larger this number the more diverse the persistence values are \\
+\midrule
+\textbf{TDA\_H0\_mean\_birth} & TDA & \textit{Mean birth time of H0 features} & The larger this number the later components typically appear \\
+\midrule
+\textbf{TDA\_H0\_mean\_death} & TDA & \textit{Mean death time of H0 features} & The larger this number the later components typically disappear \\
+\midrule
+\textbf{TDA\_H1\_count} & TDA & \textit{Number of H1 homology features (cycles)} & The larger this number the more cyclic structures the graph has \\
+\midrule
+\textbf{TDA\_H1\_total\_persistence} & TDA & \textit{Total persistence of H1 features} & The larger this number the more persistent the cyclic structure is \\
+\midrule
+\textbf{TDA\_H1\_mean\_persistence} & TDA & \textit{Mean persistence of H1 features} & The larger this number the more stable the cyclic structure is \\
+\midrule
+\textbf{TDA\_H1\_max\_persistence} & TDA & \textit{Maximum persistence of H1 features} & The larger this number the more stable the most persistent cycle is \\
+\midrule
+\textbf{TDA\_H1\_persistence\_entropy} & TDA & \textit{Entropy of H1 persistence distribution} & The larger this number the more diverse the cycle persistence values are \\
+\midrule
+\textbf{TDA\_H1\_mean\_birth} & TDA & \textit{Mean birth time of H1 features} & The larger this number the later cycles typically appear \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\tiny
+\begin{tabular}{p{3.5cm}p{2.5cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Feature Name} & \textbf{Group} & \textbf{Description} & \textbf{Interpretation} \\
+\midrule
+\textbf{TDA\_H1\_mean\_death} & TDA & \textit{Mean death time of H1 features} & The larger this number the later cycles typically disappear \\
+\midrule
+\textbf{TDA\_Betti0\_at\_q25} & TDA & \textit{Betti number $\beta_0$ at 25th percentile filtration} & The larger this number the more components exist at low filtration levels \\
+\midrule
+\textbf{TDA\_Betti0\_at\_q50} & TDA & \textit{Betti number $\beta_0$ at 50th percentile filtration} & The larger this number the more components exist at medium filtration levels \\
+\midrule
+\textbf{TDA\_Betti0\_at\_q75} & TDA & \textit{Betti number $\beta_0$ at 75th percentile filtration} & The larger this number the more components exist at high filtration levels \\
+\midrule
+\textbf{TDA\_Betti1\_at\_q25} & TDA & \textit{Betti number $\beta_1$ at 25th percentile filtration} & The larger this number the more cycles exist at low filtration levels \\
+\midrule
+\textbf{TDA\_Betti1\_at\_q50} & TDA & \textit{Betti number $\beta_1$ at 50th percentile filtration} & The larger this number the more cycles exist at medium filtration levels \\
+\midrule
+\textbf{TDA\_Betti1\_at\_q75} & TDA & \textit{Betti number $\beta_1$ at 75th percentile filtration} & The larger this number the more cycles exist at high filtration levels \\
+\midrule
+\textbf{Basic\_avg\_degree\_norm} & Basic\_Normalized & \textit{Average degree normalized by graph size} & The larger this number the more connected the graph is relative to its size \\
+\midrule
+\textbf{Basic\_degree\_entropy\_norm} & Basic\_Normalized & \textit{Degree entropy normalized by maximum possible} & The larger this number the more diverse the node degrees are relative to maximum diversity \\
+\midrule
+\textbf{Connectivity\_diameter\_norm} & Connectivity\_Normalized & \textit{Diameter normalized by graph size} & The larger this number the more spread out the graph is relative to its size \\
+\midrule
+\textbf{Connectivity\_radius\_norm} & Connectivity\_Normalized & \textit{Radius normalized by graph size} & The larger this number the more spread out the graph is relative to its size \\
+\midrule
+\textbf{Wiener\_mean\_distance} & Connectivity\_Normalized & \textit{Mean distance normalized by Wiener index} & The larger this number the more spread out the graph is relative to total distance \\
+\midrule
+\textbf{Motif\_triangles\_per\_Cn3} & Motifs\_3\_4\_Normalized & \textit{Triangles normalized by C(n,3)} & The larger this number the more triangular the graph is relative to maximum possible \\
+\midrule
+\textbf{Motif\_4\_cycles\_per\_Cn4} & Motifs\_3\_4\_Normalized & \textit{4-cycles normalized by C(n,4)} & The larger this number the more square-like the graph is relative to maximum possible \\
+\midrule
+\textbf{Motif\_4\_cliques\_per\_Cn4} & Motifs\_3\_4\_Normalized & \textit{4-cliques normalized by C(n,4)} & The larger this number the more tightly connected 4-node groups are relative to maximum possible \\
+\midrule
+\textbf{Motif\_wedges\_per\_max} & Motifs\_3\_4\_Normalized & \textit{Wedges normalized by theoretical maximum} & The larger this number the more path-like the graph is relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced\_K1\_3\_per\_Cn4} & Motifs\_3\_4\_Normalized & \textit{K1,3 normalized by C(n,4)} & The larger this number the more star-like the graph is relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced\_P4\_per\_Cn4} & Motifs\_3\_4\_Normalized & \textit{P4 normalized by C(n,4)} & The larger this number the more path-like the graph is relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced\_C4\_per\_Cn4} & Motifs\_3\_4\_Normalized & \textit{C4 normalized by C(n,4)} & The larger this number the more cycle-like the graph is relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced\_TailedTriangle\_per\_Cn4} & Motifs\_3\_4\_Normalized & \textit{Tailed triangle normalized by C(n,4)} & The larger this number the more tailed triangle structures are relative to maximum possible \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\tiny
+\begin{tabular}{p{3.5cm}p{2.5cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Feature Name} & \textbf{Group} & \textbf{Description} & \textbf{Interpretation} \\
+\midrule
+\textbf{Motif\_induced\_Diamond\_per\_Cn4} & Motifs\_3\_4\_Normalized & \textit{Diamond normalized by C(n,4)} & The larger this number the more diamond structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced\_K4\_per\_Cn4} & Motifs\_3\_4\_Normalized & \textit{K4 normalized by C(n,4)} & The larger this number the more tightly connected 4-node groups are relative to maximum possible \\
+\midrule
+\textbf{Robust\_articulation\_points\_per\_node} & Robustness\_Normalized & \textit{Articulation points per node} & The larger this number the more vulnerable the graph is to fragmentation per node \\
+\midrule
+\textbf{Robust\_bridge\_count\_per\_edge} & Robustness\_Normalized & \textit{Bridges per edge} & The larger this number the more vulnerable the graph is to fragmentation per edge \\
+\midrule
+\textbf{Connectivity\_num\_components\_per\_node} & Connectivity\_Normalized & \textit{Components per node} & The larger this number the more fragmented the graph is per node \\
+\midrule
+\textbf{Centrality\_closeness\_mean\_norm} & Centrality\_Normalized & \textit{Mean closeness normalized by maximum} & The larger this number the more centrally located nodes are on average relative to maximum \\
+\midrule
+\textbf{Centrality\_closeness\_max\_norm} & Centrality\_Normalized & \textit{Max closeness normalized by maximum} & The larger this number the more centrally located the most central node is relative to maximum \\
+\midrule
+\textbf{Spectral\_algebraic\_connectivity\_over\_avgdeg} & Spectral\_Normalized & \textit{Algebraic connectivity over average degree} & The larger this number the more connected the graph is relative to its average connectivity \\
+\midrule
+\textbf{Spectral\_spectral\_gap\_rel} & Spectral\_Normalized & \textit{Relative spectral gap} & The larger this number the more well-connected the graph is relative to its connectivity \\
+\midrule
+\textbf{Spectral\_laplacian\_heat\_trace\_t0.1\_per\_node} & Spectral\_Normalized & \textit{Heat trace t=0.1 per node} & The larger this number the more heat spreads quickly per node \\
+\midrule
+\textbf{Spectral\_laplacian\_heat\_trace\_t1.0\_per\_node} & Spectral\_Normalized & \textit{Heat trace t=1.0 per node} & The larger this number the more heat spreads per node \\
+\midrule
+\textbf{Spectral\_laplacian\_heat\_trace\_t5.0\_per\_node} & Spectral\_Normalized & \textit{Heat trace t=5.0 per node} & The larger this number the more heat spreads per node \\
+\midrule
+\textbf{Adjacency\_energy\_per\_node} & Spectral\_Normalized & \textit{Adjacency energy per node} & The larger this number the more energetic/vibrant the graph is per node \\
+\midrule
+\textbf{Adjacency\_energy\_over\_fro} & Spectral\_Normalized & \textit{Adjacency energy over Frobenius norm} & The larger this number the more energetic the graph is relative to its total energy \\
+\midrule
+\textbf{Adjacency\_estrada\_per\_node} & Spectral\_Normalized & \textit{Estrada index per node} & The larger this number the more communicable the graph is per node \\
+\midrule
+\textbf{log\_Adjacency\_estrada\_per\_node} & Spectral\_Normalized & \textit{Log Estrada index per node} & The larger this number the more communicable the graph is per node (log scale) \\
+\midrule
+\textbf{Adjacency\_moment\_2\_over\_avgdeg} & Spectral\_Normalized & \textit{Second moment over average degree} & The larger this number the more spread out the adjacency spectrum is relative to average connectivity \\
+\midrule
+\textbf{Adjacency\_moment\_3\_over\_avgdeg3} & Spectral\_Normalized & \textit{Third moment over average degree cubed} & The larger this number the more high-frequency components are relative to connectivity cubed \\
+\midrule
+\textbf{Adjacency\_moment\_4\_over\_avgdeg4} & Spectral\_Normalized & \textit{Fourth moment over average degree to fourth} & The larger this number the more peaked the adjacency spectrum is relative to connectivity to fourth power \\
+\midrule
+\textbf{Planarity\_num\_faces\_over\_upperbound} & Planarity\_Normalized & \textit{Faces over theoretical upper bound} & The larger this number the more complex the planar structure is relative to maximum possible \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\tiny
+\begin{tabular}{p{3.5cm}p{2.5cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Feature Name} & \textbf{Group} & \textbf{Description} & \textbf{Interpretation} \\
+\midrule
+\textbf{Planarity\_face\_size\_mean\_norm} & Planarity\_Normalized & \textit{Mean face size normalized} & The larger this number the larger the typical face is relative to maximum possible \\
+\midrule
+\textbf{Symmetry\_aut\_size\_log\_over\_log\_nfact} & Symmetry\_Normalized & \textit{Log automorphism size over log n!} & The larger this number the more symmetric the graph is relative to maximum possible symmetry \\
+\midrule
+\textbf{Symmetry\_num\_orbits\_per\_node} & Symmetry\_Normalized & \textit{Orbits per node} & The larger this number the more diverse the node roles are per node \\
+\midrule
+\textbf{Symmetry\_orbit\_size\_max\_per\_node} & Symmetry\_Normalized & \textit{Max orbit size per node} & The larger this number the more nodes share the same role per node \\
+\midrule
+\textbf{TDA\_H0\_count\_per\_node} & TDA\_Normalized & \textit{H0 features per node} & The larger this number the more disconnected components exist per node \\
+\midrule
+\textbf{TDA\_H0\_total\_persistence\_over\_diam} & TDA\_Normalized & \textit{H0 persistence over diameter} & The larger this number the more persistent the connectivity structure is relative to graph spread \\
+\midrule
+\textbf{TDA\_H0\_mean\_persistence\_over\_diam} & TDA\_Normalized & \textit{H0 mean persistence over diameter} & The larger this number the more stable the connectivity structure is relative to graph spread \\
+\midrule
+\textbf{TDA\_H0\_max\_persistence\_over\_diam} & TDA\_Normalized & \textit{H0 max persistence over diameter} & The larger this number the more stable the most persistent component is relative to graph spread \\
+\midrule
+\textbf{TDA\_H0\_mean\_birth\_over\_diam} & TDA\_Normalized & \textit{H0 mean birth over diameter} & The larger this number the later components typically appear relative to graph spread \\
+\midrule
+\textbf{TDA\_H0\_mean\_death\_over\_diam} & TDA\_Normalized & \textit{H0 mean death over diameter} & The larger this number the later components typically disappear relative to graph spread \\
+\midrule
+\textbf{TDA\_H1\_count\_per\_node} & TDA\_Normalized & \textit{H1 features per node} & The larger this number the more cyclic structures exist per node \\
+\midrule
+\textbf{TDA\_H1\_total\_persistence\_over\_diam} & TDA\_Normalized & \textit{H1 persistence over diameter} & The larger this number the more persistent the cyclic structure is relative to graph spread \\
+\midrule
+\textbf{TDA\_H1\_mean\_persistence\_over\_diam} & TDA\_Normalized & \textit{H1 mean persistence over diameter} & The larger this number the more stable the cyclic structure is relative to graph spread \\
+\midrule
+\textbf{TDA\_H1\_max\_persistence\_over\_diam} & TDA\_Normalized & \textit{H1 max persistence over diameter} & The larger this number the more stable the most persistent cycle is relative to graph spread \\
+\midrule
+\textbf{TDA\_H1\_mean\_birth\_over\_diam} & TDA\_Normalized & \textit{H1 mean birth over diameter} & The larger this number the later cycles typically appear relative to graph spread \\
+\midrule
+\textbf{TDA\_H1\_mean\_death\_over\_diam} & TDA\_Normalized & \textit{H1 mean death over diameter} & The larger this number the later cycles typically disappear relative to graph spread \\
+\midrule
+\textbf{TDA\_Betti0\_at\_q25\_per\_node} & TDA\_Normalized & \textit{Betti0 at q25 per node} & The larger this number the more components exist at low filtration levels per node \\
+\midrule
+\textbf{TDA\_Betti1\_at\_q25\_per\_node} & TDA\_Normalized & \textit{Betti1 at q25 per node} & The larger this number the more cycles exist at low filtration levels per node \\
+\midrule
+\textbf{TDA\_Betti0\_at\_q50\_per\_node} & TDA\_Normalized & \textit{Betti0 at q50 per node} & The larger this number the more components exist at medium filtration levels per node \\
+\midrule
+\textbf{TDA\_Betti1\_at\_q50\_per\_node} & TDA\_Normalized & \textit{Betti1 at q50 per node} & The larger this number the more cycles exist at medium filtration levels per node \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\tiny
+\begin{tabular}{p{3.5cm}p{2.5cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Feature Name} & \textbf{Group} & \textbf{Description} & \textbf{Interpretation} \\
+\midrule
+\textbf{TDA\_Betti0\_at\_q75\_per\_node} & TDA\_Normalized & \textit{Betti0 at q75 per node} & The larger this number the more components exist at high filtration levels per node \\
+\midrule
+\textbf{TDA\_Betti1\_at\_q75\_per\_node} & TDA\_Normalized & \textit{Betti1 at q75 per node} & The larger this number the more cycles exist at high filtration levels per node \\
+\midrule
+\textbf{Motif\_induced\_g\_1\_4} & Motifs\_4 & \textit{Number of induced Path4 (P4) subgraphs} & The larger this number the more path-like 4-node structures the graph has \\
+\midrule
+\textbf{Motif\_induced\_g\_2\_4} & Motifs\_4 & \textit{Number of induced Star4 (K1,3) subgraphs} & The larger this number the more star-like 4-node structures the graph has \\
+\midrule
+\textbf{Motif\_induced\_g\_3\_4} & Motifs\_4 & \textit{Number of induced Cycle4 (C4) subgraphs} & The larger this number the more cycle-like 4-node structures the graph has \\
+\midrule
+\textbf{Motif\_induced\_g\_4\_4} & Motifs\_4 & \textit{Number of induced TailedTriangle subgraphs} & The larger this number the more tailed triangle 4-node structures the graph has \\
+\midrule
+\textbf{Motif\_induced\_g\_5\_4} & Motifs\_4 & \textit{Number of induced Diamond subgraphs} & The larger this number the more diamond 4-node structures the graph has \\
+\midrule
+\textbf{Motif\_induced\_g\_6\_4} & Motifs\_4 & \textit{Number of induced Clique4 (K4) subgraphs} & The larger this number the more tightly connected 4-node groups the graph has \\
+\midrule
+\textbf{Motif\_induced\_g\_1\_4\_per\_Cn4} & Motifs\_4\_Normalized & \textit{Path4 normalized by C(n,4)} & The larger this number the more path-like 4-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced\_g\_2\_4\_per\_Cn4} & Motifs\_4\_Normalized & \textit{Star4 normalized by C(n,4)} & The larger this number the more star-like 4-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced\_g\_3\_4\_per\_Cn4} & Motifs\_4\_Normalized & \textit{Cycle4 normalized by C(n,4)} & The larger this number the more cycle-like 4-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced\_g\_4\_4\_per\_Cn4} & Motifs\_4\_Normalized & \textit{TailedTriangle normalized by C(n,4)} & The larger this number the more tailed triangle 4-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced\_g\_5\_4\_per\_Cn4} & Motifs\_4\_Normalized & \textit{Diamond normalized by C(n,4)} & The larger this number the more diamond 4-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced\_g\_6\_4\_per\_Cn4} & Motifs\_4\_Normalized & \textit{Clique4 normalized by C(n,4)} & The larger this number the more tightly connected 4-node groups are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_0\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_0 normalized by C(n,5)} & The larger this number the more g\_0 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_1\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_1 normalized by C(n,5)} & The larger this number the more g\_1 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_2\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_2 normalized by C(n,5)} & The larger this number the more g\_2 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_3\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_3 normalized by C(n,5)} & The larger this number the more g\_3 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_4\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_4 normalized by C(n,5)} & The larger this number the more g\_4 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_5\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_5 normalized by C(n,5)} & The larger this number the more g\_5 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_6\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_6 normalized by C(n,5)} & The larger this number the more g\_6 5-node structures are relative to maximum possible \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\tiny
+\begin{tabular}{p{3.5cm}p{2.5cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Feature Name} & \textbf{Group} & \textbf{Description} & \textbf{Interpretation} \\
+\midrule
+\textbf{Motif\_induced5\_g\_7\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_7 normalized by C(n,5)} & The larger this number the more g\_7 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_8\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_8 normalized by C(n,5)} & The larger this number the more g\_8 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_9\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_9 normalized by C(n,5)} & The larger this number the more g\_9 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_10\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_10 normalized by C(n,5)} & The larger this number the more g\_10 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_11\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_11 normalized by C(n,5)} & The larger this number the more g\_11 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_12\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_12 normalized by C(n,5)} & The larger this number the more g\_12 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_13\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_13 normalized by C(n,5)} & The larger this number the more g\_13 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_14\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_14 normalized by C(n,5)} & The larger this number the more g\_14 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_15\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_15 normalized by C(n,5)} & The larger this number the more g\_15 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_16\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_16 normalized by C(n,5)} & The larger this number the more g\_16 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_17\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_17 normalized by C(n,5)} & The larger this number the more g\_17 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_18\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_18 normalized by C(n,5)} & The larger this number the more g\_18 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_induced5\_g\_20\_5\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-node graphlet g\_20 normalized by C(n,5)} & The larger this number the more g\_20 5-node structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_5\_cycles\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-cycles normalized by C(n,5)} & The larger this number the more 5-sided cycle structures are relative to maximum possible \\
+\midrule
+\textbf{Motif\_5\_cliques\_per\_Cn5} & Motifs\_5\_Normalized & \textit{5-cliques normalized by C(n,5)} & The larger this number the more tightly connected 5-node groups are relative to maximum possible \\
+\midrule
+\textbf{Motif\_5\_cycles\_per\_Kn} & Motifs\_5\_Normalized & \textit{5-cycles normalized by complete graph} & The larger this number the more 5-sided cycle structures are relative to complete graph \\
+\midrule
+\textbf{Spectral\_kirchhoff\_index} & Spectral\_Laplacian & \textit{Kirchhoff index (alternative name)} & The larger this number the more spread out the graph is \\
+\midrule
+\textbf{Spectral\_laplacian\_heat\_trace\_t0.5} & Spectral\_Laplacian & \textit{Laplacian heat trace at t=0.5} & The larger this number the more heat spreads through the graph \\
+\midrule
+\textbf{Spectral\_laplacian\_heat\_trace\_t2.0} & Spectral\_Laplacian & \textit{Laplacian heat trace at t=2.0} & The larger this number the more heat spreads through the graph \\
+\midrule
+\textbf{Spectral\_adjacency\_energy} & Spectral\_Adjacency & \textit{Adjacency energy (alternative name)} & The larger this number the more energetic/vibrant the graph is \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\tiny
+\begin{tabular}{p{3.5cm}p{2.5cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Feature Name} & \textbf{Group} & \textbf{Description} & \textbf{Interpretation} \\
+\midrule
+\textbf{Spectral\_adjacency\_estrada\_index} & Spectral\_Adjacency & \textit{Adjacency Estrada index (alternative name)} & The larger this number the more communicable the graph is \\
+\midrule
+\textbf{Spectral\_adjacency\_moment\_2} & Spectral\_Adjacency & \textit{Adjacency second moment (alternative name)} & The larger this number the more spread out the adjacency spectrum is \\
+\midrule
+\textbf{Spectral\_adjacency\_moment\_3} & Spectral\_Adjacency & \textit{Adjacency third moment (alternative name)} & Positive values mean more high-frequency components; negative means more low-frequency components \\
+\midrule
+\textbf{Spectral\_adjacency\_moment\_4} & Spectral\_Adjacency & \textit{Adjacency fourth moment (alternative name)} & The larger this number the more peaked the adjacency spectrum is \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
 \end{document}
-	

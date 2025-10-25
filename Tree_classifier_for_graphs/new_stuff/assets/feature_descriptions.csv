@@ -1,0 +1,244 @@
+Feature_Name,Feature_Group,Description,Value_Representation,Plain_English_Interpretation
+Basic_num_nodes,Basic,Total number of nodes in the graph,Positive integer,The larger this number the bigger the graph is
+Basic_num_edges,Basic,Total number of edges in the graph,Non-negative integer,The larger this number the more connected the graph is
+Basic_min_degree,Basic,Minimum degree among all nodes,Non-negative integer,The larger this number the more connected the least connected node is
+Basic_max_degree,Basic,Maximum degree among all nodes,Non-negative integer,The larger this number the more connected the most connected node is
+Basic_avg_degree,Basic,Average degree across all nodes,Positive real number,The larger this number the more connected the graph is on average
+Basic_degree_std,Basic,Standard deviation of node degrees,Non-negative real number,The larger this number the more unequal the node connections are
+Basic_degree_skew,Basic,Skewness of degree distribution,Real number (can be negative),Positive values mean more high-degree nodes; negative means more low-degree nodes
+Basic_density,Basic,Graph density (edges/max_possible_edges),Real number between 0 and 1,The larger this number the more densely connected the graph is
+Basic_edge_to_node_ratio,Basic,Ratio of edges to nodes,Positive real number,The larger this number the more edges per node the graph has
+Basic_degree_entropy,Basic,Shannon entropy of degree distribution,Non-negative real number,The larger this number the more diverse the node degrees are
+Assortativity_degree,Basic,Degree assortativity coefficient,Real number between -1 and 1,Positive values mean similar-degree nodes connect; negative means opposite-degree nodes connect
+Clustering_mean,Basic,Average local clustering coefficient,Real number between 0 and 1,The larger this number the more clustered/triangular the graph is
+Clustering_q10,Basic,10th percentile of clustering coefficients,Real number between 0 and 1,The larger this number the more clustered the least clustered nodes are
+Clustering_q50,Basic,50th percentile (median) of clustering coefficients,Real number between 0 and 1,The larger this number the more clustered the typical node is
+Clustering_q90,Basic,90th percentile of clustering coefficients,Real number between 0 and 1,The larger this number the more clustered the most clustered nodes are
+Clustering_frac_zero,Basic,Fraction of nodes with zero clustering,Real number between 0 and 1,The larger this number the more tree-like the graph is
+Clustering_frac_one,Basic,Fraction of nodes with clustering = 1,Real number between 0 and 1,The larger this number the more clique-like the graph is
+Degree_gini,Basic,Gini coefficient of degree distribution,Real number between 0 and 1,The larger this number the more unequal the node degrees are
+Connectivity_is_connected,Connectivity,Whether graph is connected (True/False),Boolean,True means all nodes can reach each other; False means graph is fragmented
+Connectivity_num_components,Connectivity,Number of connected components,Positive integer,The larger this number the more fragmented the graph is
+Connectivity_diameter,Connectivity,Graph diameter (longest shortest path),Non-negative integer,The larger this number the more spread out the graph is
+Connectivity_radius,Connectivity,Graph radius (minimum eccentricity),Non-negative integer,The larger this number the more spread out the graph is
+Connectivity_avg_shortest_path_length,Connectivity,Average shortest path length,Positive real number,The larger this number the more spread out the graph is
+Connectivity_wiener_index,Connectivity,Sum of all shortest path lengths,Non-negative real number,The larger this number the more spread out the graph is
+Eff_diameter_p90,Connectivity,90th percentile effective diameter,Positive real number,The larger this number the more spread out the graph is
+Ecc_mean,Connectivity,Mean eccentricity of nodes,Positive real number,The larger this number the more spread out the graph is
+Ecc_q90,Connectivity,90th percentile eccentricity,Positive real number,The larger this number the more spread out the graph is
+Centrality_betweenness_mean,Centrality,Mean betweenness centrality,Real number between 0 and 1,The larger this number the more nodes act as bridges/connectors
+Centrality_betweenness_max,Centrality,Maximum betweenness centrality,Real number between 0 and 1,The larger this number the more important the most central node is
+Centrality_betweenness_std,Centrality,Standard deviation of betweenness centrality,Non-negative real number,The larger this number the more unequal the node importance is
+Centrality_betweenness_skew,Centrality,Skewness of betweenness centrality distribution,Real number,Positive values mean few very important nodes; negative means many moderately important nodes
+Centrality_closeness_mean,Centrality,Mean closeness centrality,Real number between 0 and 1,The larger this number the more centrally located nodes are on average
+Centrality_closeness_max,Centrality,Maximum closeness centrality,Real number between 0 and 1,The larger this number the more centrally located the most central node is
+Centrality_closeness_std,Centrality,Standard deviation of closeness centrality,Non-negative real number,The larger this number the more unequal the node centrality is
+Centrality_closeness_skew,Centrality,Skewness of closeness centrality distribution,Real number,Positive values mean few very central nodes; negative means many moderately central nodes
+Centrality_eigenvector_mean,Centrality,Mean eigenvector centrality,Real number between 0 and 1,The larger this number the more nodes are connected to important nodes
+Centrality_eigenvector_max,Centrality,Maximum eigenvector centrality,Real number between 0 and 1,The larger this number the more important the most influential node is
+Centrality_eigenvector_std,Centrality,Standard deviation of eigenvector centrality,Non-negative real number,The larger this number the more unequal the node influence is
+Centrality_eigenvector_skew,Centrality,Skewness of eigenvector centrality distribution,Real number,Positive values mean few very influential nodes; negative means many moderately influential nodes
+Core_max_core_index,Core,Maximum k-core index,Non-negative integer,The larger this number the more tightly connected the densest core is
+Core_core_index_mean,Core,Mean k-core index,Non-negative real number,The larger this number the more tightly connected nodes are on average
+Robust_articulation_points,Robustness,Number of articulation points (cut vertices),Non-negative integer,The larger this number the more vulnerable the graph is to fragmentation
+Robust_bridge_count,Robustness,Number of bridges (cut edges),Non-negative integer,The larger this number the more vulnerable the graph is to fragmentation
+Cycle_num_cycles_len_5,Cycles,Number of cycles of length 5,Non-negative integer,The larger this number the more 5-cycles the graph contains
+Cycle_num_cycles_len_6,Cycles,Number of cycles of length 6,Non-negative integer,The larger this number the more 6-cycles the graph contains
+Spectral_algebraic_connectivity,Spectral_Laplacian,Second smallest Laplacian eigenvalue (Fiedler value),Non-negative real number,The larger this number the more connected the graph is
+Spectral_spectral_gap,Spectral_Laplacian,Difference between first two Laplacian eigenvalues,Non-negative real number,The larger this number the more well-connected the graph is
+Spectral_laplacian_mean,Spectral_Laplacian,Mean of Laplacian eigenvalues,Non-negative real number,The larger this number the more connected the graph is on average
+Spectral_laplacian_std,Spectral_Laplacian,Standard deviation of Laplacian eigenvalues,Non-negative real number,The larger this number the more varied the connectivity patterns are
+Spectral_laplacian_skew,Spectral_Laplacian,Skewness of Laplacian eigenvalue distribution,Real number,Positive values mean few highly connected components; negative means many moderately connected components
+Spectral_lap_eig_0,Spectral_Laplacian,Smallest Laplacian eigenvalue,Non-negative real number,Always 0 for connected graphs; larger values indicate more disconnected components
+Spectral_lap_eig_1,Spectral_Laplacian,Second smallest Laplacian eigenvalue,Non-negative real number,The larger this number the more connected the graph is
+Spectral_lap_eig_2,Spectral_Laplacian,Third smallest Laplacian eigenvalue,Non-negative real number,The larger this number the more connected the graph is
+Spectral_lap_eig_3,Spectral_Laplacian,Fourth smallest Laplacian eigenvalue,Non-negative real number,The larger this number the more connected the graph is
+Spectral_lap_eig_4,Spectral_Laplacian,Fifth smallest Laplacian eigenvalue,Non-negative real number,The larger this number the more connected the graph is
+Spectral_lap_eig_5,Spectral_Laplacian,Sixth smallest Laplacian eigenvalue,Non-negative real number,The larger this number the more connected the graph is
+Spectral_lap_eig_6,Spectral_Laplacian,Seventh smallest Laplacian eigenvalue,Non-negative real number,The larger this number the more connected the graph is
+Spectral_lap_eig_7,Spectral_Laplacian,Eighth smallest Laplacian eigenvalue,Non-negative real number,The larger this number the more connected the graph is
+Spectral_lap_eig_8,Spectral_Laplacian,Ninth smallest Laplacian eigenvalue,Non-negative real number,The larger this number the more connected the graph is
+Spectral_lap_eig_9,Spectral_Laplacian,Tenth smallest Laplacian eigenvalue,Non-negative real number,The larger this number the more connected the graph is
+Kirchhoff_index,Spectral_Laplacian,Kirchhoff index (sum of resistance distances),Non-negative real number,The larger this number the more spread out the graph is
+NetLSD_mean,NetLSD,Mean NetLSD signature,Non-negative real number,The larger this number the more complex the graph structure is
+NetLSD_std,NetLSD,Standard deviation of NetLSD signature,Non-negative real number,The larger this number the more varied the graph structure is
+NetLSD_q10,NetLSD,10th percentile of NetLSD signature,Non-negative real number,The larger this number the more complex the simplest parts are
+NetLSD_q90,NetLSD,90th percentile of NetLSD signature,Non-negative real number,The larger this number the more complex the most complex parts are
+Planarity_num_faces,Planarity,Number of faces in planar embedding,Non-negative integer,The larger this number the more complex the planar structure is
+Planarity_face_size_mean,Planarity,Mean face size in planar embedding,Positive real number,The larger this number the larger the typical face is
+Planarity_face_size_max,Planarity,Maximum face size in planar embedding,Positive integer,The larger this number the larger the biggest face is
+Symmetry_automorphism_group_order,Symmetry,Order of automorphism group,Positive integer,The larger this number the more symmetric the graph is
+Symmetry_num_orbits,Symmetry,Number of node orbits under automorphisms,Positive integer,The larger this number the more diverse the node roles are
+Symmetry_orbit_size_max,Symmetry,Maximum orbit size,Positive integer,The larger this number the more nodes share the same role
+Comm_modularity,Community,Modularity of best community partition,Real number between -1 and 1,The larger this number the more clearly separated the communities are
+Comm_count,Community,Number of communities found,Positive integer,The larger this number the more fragmented the graph is
+Comm_size_max,Community,Size of largest community,Positive integer,The larger this number the more dominant the largest community is
+Comm_size_gini,Community,Gini coefficient of community sizes,Real number between 0 and 1,The larger this number the more unequal the community sizes are
+Comm_internal_edge_frac,Community,Fraction of edges within communities,Real number between 0 and 1,The larger this number the more internally connected communities are
+Motif_triangles,Motifs_3_4,Number of triangles (3-cliques),Non-negative integer,The larger this number the more triangular structures the graph has
+Motif_wedges,Motifs_3_4,Number of wedges (2-paths),Non-negative integer,The larger this number the more path-like structures the graph has
+Motif_4_cycles,Motifs_3_4,Number of 4-cycles,Non-negative integer,The larger this number the more square-like structures the graph has
+Motif_4_cliques,Motifs_3_4,Number of 4-cliques (K4),Non-negative integer,The larger this number the more tightly connected 4-node groups the graph has
+Motif_triangle_edge_incidence_mean,Motifs_3_4,Mean triangles per edge,Non-negative real number,The larger this number the more triangles each edge participates in
+Motif_triangle_edge_incidence_std,Motifs_3_4,Standard deviation of triangles per edge,Non-negative real number,The larger this number the more varied edge participation in triangles is
+Motif_square_clustering_proxy,Motifs_3_4,Tendency to form 4-cycles relative to 2-paths,Real number between 0 and 1,The larger this number the more square-like the graph structure is
+Motif_triangle_edge_incidence_median,Motifs_3_4,Median triangles per edge,Non-negative real number,The larger this number the more triangles the typical edge participates in
+Motif_triangle_edge_incidence_q90,Motifs_3_4,90th percentile triangles per edge,Non-negative real number,The larger this number the more triangles the most triangular edges participate in
+Motif_triangle_edge_frac_zero,Motifs_3_4,Fraction of edges with zero triangles,Real number between 0 and 1,The larger this number the more tree-like the graph is
+Motif_triangle_edge_frac_ge2,Motifs_3_4,Fraction of edges with ≥2 triangles,Real number between 0 and 1,The larger this number the more clustered the graph is
+Motif_induced_K1_3,Motifs_3_4,Number of induced K1,3 (star) subgraphs,Non-negative integer,The larger this number the more star-like structures the graph has
+Motif_induced_P4,Motifs_3_4,Number of induced P4 (path) subgraphs,Non-negative integer,The larger this number the more path-like structures the graph has
+Motif_induced_C4,Motifs_3_4,Number of induced C4 (cycle) subgraphs,Non-negative integer,The larger this number the more cycle-like structures the graph has
+Motif_induced_TailedTriangle,Motifs_3_4,Number of induced tailed triangle subgraphs,Non-negative integer,The larger this number the more tailed triangle structures the graph has
+Motif_induced_Diamond,Motifs_3_4,Number of induced diamond subgraphs,Non-negative integer,The larger this number the more diamond structures the graph has
+Motif_induced_K4,Motifs_3_4,Number of induced K4 (clique) subgraphs,Non-negative integer,The larger this number the more tightly connected 4-node groups the graph has
+Motif_induced_connected_per_4set,Motifs_3_4,Fraction of 4-node subsets that are connected,Real number between 0 and 1,The larger this number the more connected 4-node groups are
+Motif_5_cycles,Motifs_5,Number of 5-cycles,Non-negative integer,The larger this number the more 5-sided cycle structures the graph has
+Motif_5_cliques,Motifs_5,Number of 5-cliques (K5),Non-negative integer,The larger this number the more tightly connected 5-node groups the graph has
+Motif_induced5_g_0_5,Motifs_5,Number of induced 5-node graphlet g_0,Non-negative integer,The larger this number the more g_0 structures the graph has
+Motif_induced5_g_1_5,Motifs_5,Number of induced 5-node graphlet g_1,Non-negative integer,The larger this number the more g_1 structures the graph has
+Motif_induced5_g_2_5,Motifs_5,Number of induced 5-node graphlet g_2,Non-negative integer,The larger this number the more g_2 structures the graph has
+Motif_induced5_g_3_5,Motifs_5,Number of induced 5-node graphlet g_3,Non-negative integer,The larger this number the more g_3 structures the graph has
+Motif_induced5_g_4_5,Motifs_5,Number of induced 5-node graphlet g_4,Non-negative integer,The larger this number the more g_4 structures the graph has
+Motif_induced5_g_5_5,Motifs_5,Number of induced 5-node graphlet g_5,Non-negative integer,The larger this number the more g_5 structures the graph has
+Motif_induced5_g_6_5,Motifs_5,Number of induced 5-node graphlet g_6,Non-negative integer,The larger this number the more g_6 structures the graph has
+Motif_induced5_g_7_5,Motifs_5,Number of induced 5-node graphlet g_7,Non-negative integer,The larger this number the more g_7 structures the graph has
+Motif_induced5_g_8_5,Motifs_5,Number of induced 5-node graphlet g_8,Non-negative integer,The larger this number the more g_8 structures the graph has
+Motif_induced5_g_9_5,Motifs_5,Number of induced 5-node graphlet g_9,Non-negative integer,The larger this number the more g_9 structures the graph has
+Motif_induced5_g_10_5,Motifs_5,Number of induced 5-node graphlet g_10,Non-negative integer,The larger this number the more g_10 structures the graph has
+Motif_induced5_g_11_5,Motifs_5,Number of induced 5-node graphlet g_11,Non-negative integer,The larger this number the more g_11 structures the graph has
+Motif_induced5_g_12_5,Motifs_5,Number of induced 5-node graphlet g_12,Non-negative integer,The larger this number the more g_12 structures the graph has
+Motif_induced5_g_13_5,Motifs_5,Number of induced 5-node graphlet g_13,Non-negative integer,The larger this number the more g_13 structures the graph has
+Motif_induced5_g_14_5,Motifs_5,Number of induced 5-node graphlet g_14,Non-negative integer,The larger this number the more g_14 structures the graph has
+Motif_induced5_g_15_5,Motifs_5,Number of induced 5-node graphlet g_15,Non-negative integer,The larger this number the more g_15 structures the graph has
+Motif_induced5_g_16_5,Motifs_5,Number of induced 5-node graphlet g_16,Non-negative integer,The larger this number the more g_16 structures the graph has
+Motif_induced5_g_17_5,Motifs_5,Number of induced 5-node graphlet g_17,Non-negative integer,The larger this number the more g_17 structures the graph has
+Motif_induced5_g_18_5,Motifs_5,Number of induced 5-node graphlet g_18,Non-negative integer,The larger this number the more g_18 structures the graph has
+Motif_induced5_g_20_5,Motifs_5,Number of induced 5-node graphlet g_20,Non-negative integer,The larger this number the more g_20 structures the graph has
+Motif_induced_connected_per_5set,Motifs_5,Fraction of 5-node subsets that are connected,Real number between 0 and 1,The larger this number the more connected 5-node groups are
+Adjacency_energy,Spectral_Adjacency,Sum of absolute eigenvalues of adjacency matrix,Non-negative real number,The larger this number the more energetic/vibrant the graph is
+Adjacency_estrada_index,Spectral_Adjacency,Sum of exponentials of eigenvalues,Non-negative real number,The larger this number the more communicable the graph is
+Adjacency_moment_2,Spectral_Adjacency,Second moment of adjacency eigenvalues,Non-negative real number,The larger this number the more spread out the adjacency spectrum is
+Adjacency_moment_3,Spectral_Adjacency,Third moment of adjacency eigenvalues,Real number,Positive values mean more high-frequency components; negative means more low-frequency components
+Adjacency_moment_4,Spectral_Adjacency,Fourth moment of adjacency eigenvalues,Non-negative real number,The larger this number the more peaked the adjacency spectrum is
+Spectral_laplacian_heat_trace_t0.1,Spectral_Laplacian,Laplacian heat trace at t=0.1,Non-negative real number,The larger this number the more heat spreads quickly through the graph
+Spectral_laplacian_heat_trace_t1.0,Spectral_Laplacian,Laplacian heat trace at t=1.0,Non-negative real number,The larger this number the more heat spreads through the graph
+Spectral_laplacian_heat_trace_t5.0,Spectral_Laplacian,Laplacian heat trace at t=5.0,Non-negative real number,The larger this number the more heat spreads through the graph
+TDA_H0_count,TDA,Number of H0 homology features (connected components),Non-negative integer,The larger this number the more disconnected components the graph has
+TDA_H0_total_persistence,TDA,Total persistence of H0 features,Non-negative real number,The larger this number the more persistent the connectivity structure is
+TDA_H0_mean_persistence,TDA,Mean persistence of H0 features,Non-negative real number,The larger this number the more stable the connectivity structure is
+TDA_H0_max_persistence,TDA,Maximum persistence of H0 features,Non-negative real number,The larger this number the more stable the most persistent component is
+TDA_H0_persistence_entropy,TDA,Entropy of H0 persistence distribution,Non-negative real number,The larger this number the more diverse the persistence values are
+TDA_H0_mean_birth,TDA,Mean birth time of H0 features,Non-negative real number,The larger this number the later components typically appear
+TDA_H0_mean_death,TDA,Mean death time of H0 features,Non-negative real number,The larger this number the later components typically disappear
+TDA_H1_count,TDA,Number of H1 homology features (cycles),Non-negative integer,The larger this number the more cyclic structures the graph has
+TDA_H1_total_persistence,TDA,Total persistence of H1 features,Non-negative real number,The larger this number the more persistent the cyclic structure is
+TDA_H1_mean_persistence,TDA,Mean persistence of H1 features,Non-negative real number,The larger this number the more stable the cyclic structure is
+TDA_H1_max_persistence,TDA,Maximum persistence of H1 features,Non-negative real number,The larger this number the more stable the most persistent cycle is
+TDA_H1_persistence_entropy,TDA,Entropy of H1 persistence distribution,Non-negative real number,The larger this number the more diverse the cycle persistence values are
+TDA_H1_mean_birth,TDA,Mean birth time of H1 features,Non-negative real number,The larger this number the later cycles typically appear
+TDA_H1_mean_death,TDA,Mean death time of H1 features,Non-negative real number,The larger this number the later cycles typically disappear
+TDA_Betti0_at_q25,TDA,Betti number β0 at 25th percentile filtration,Non-negative integer,The larger this number the more components exist at low filtration levels
+TDA_Betti0_at_q50,TDA,Betti number β0 at 50th percentile filtration,Non-negative integer,The larger this number the more components exist at medium filtration levels
+TDA_Betti0_at_q75,TDA,Betti number β0 at 75th percentile filtration,Non-negative integer,The larger this number the more components exist at high filtration levels
+TDA_Betti1_at_q25,TDA,Betti number β1 at 25th percentile filtration,Non-negative integer,The larger this number the more cycles exist at low filtration levels
+TDA_Betti1_at_q50,TDA,Betti number β1 at 50th percentile filtration,Non-negative integer,The larger this number the more cycles exist at medium filtration levels
+TDA_Betti1_at_q75,TDA,Betti number β1 at 75th percentile filtration,Non-negative integer,The larger this number the more cycles exist at high filtration levels
+Basic_avg_degree_norm,Basic_Normalized,Average degree normalized by graph size,Real number between 0 and 1,The larger this number the more connected the graph is relative to its size
+Basic_degree_entropy_norm,Basic_Normalized,Degree entropy normalized by maximum possible,Real number between 0 and 1,The larger this number the more diverse the node degrees are relative to maximum diversity
+Connectivity_diameter_norm,Connectivity_Normalized,Diameter normalized by graph size,Real number between 0 and 1,The larger this number the more spread out the graph is relative to its size
+Connectivity_radius_norm,Connectivity_Normalized,Radius normalized by graph size,Real number between 0 and 1,The larger this number the more spread out the graph is relative to its size
+Wiener_mean_distance,Connectivity_Normalized,Mean distance normalized by Wiener index,Real number between 0 and 1,The larger this number the more spread out the graph is relative to total distance
+Motif_triangles_per_Cn3,Motifs_3_4_Normalized,Triangles normalized by C(n,3),Real number between 0 and 1,The larger this number the more triangular the graph is relative to maximum possible
+Motif_4_cycles_per_Cn4,Motifs_3_4_Normalized,4-cycles normalized by C(n,4),Real number between 0 and 1,The larger this number the more square-like the graph is relative to maximum possible
+Motif_4_cliques_per_Cn4,Motifs_3_4_Normalized,4-cliques normalized by C(n,4),Real number between 0 and 1,The larger this number the more tightly connected 4-node groups are relative to maximum possible
+Motif_wedges_per_max,Motifs_3_4_Normalized,Wedges normalized by theoretical maximum,Real number between 0 and 1,The larger this number the more path-like the graph is relative to maximum possible
+Motif_induced_K1_3_per_Cn4,Motifs_3_4_Normalized,K1,3 normalized by C(n,4),Real number between 0 and 1,The larger this number the more star-like the graph is relative to maximum possible
+Motif_induced_P4_per_Cn4,Motifs_3_4_Normalized,P4 normalized by C(n,4),Real number between 0 and 1,The larger this number the more path-like the graph is relative to maximum possible
+Motif_induced_C4_per_Cn4,Motifs_3_4_Normalized,C4 normalized by C(n,4),Real number between 0 and 1,The larger this number the more cycle-like the graph is relative to maximum possible
+Motif_induced_TailedTriangle_per_Cn4,Motifs_3_4_Normalized,Tailed triangle normalized by C(n,4),Real number between 0 and 1,The larger this number the more tailed triangle structures are relative to maximum possible
+Motif_induced_Diamond_per_Cn4,Motifs_3_4_Normalized,Diamond normalized by C(n,4),Real number between 0 and 1,The larger this number the more diamond structures are relative to maximum possible
+Motif_induced_K4_per_Cn4,Motifs_3_4_Normalized,K4 normalized by C(n,4),Real number between 0 and 1,The larger this number the more tightly connected 4-node groups are relative to maximum possible
+Robust_articulation_points_per_node,Robustness_Normalized,Articulation points per node,Real number between 0 and 1,The larger this number the more vulnerable the graph is to fragmentation per node
+Robust_bridge_count_per_edge,Robustness_Normalized,Bridges per edge,Real number between 0 and 1,The larger this number the more vulnerable the graph is to fragmentation per edge
+Connectivity_num_components_per_node,Connectivity_Normalized,Components per node,Real number between 0 and 1,The larger this number the more fragmented the graph is per node
+Centrality_closeness_mean_norm,Centrality_Normalized,Mean closeness normalized by maximum,Real number between 0 and 1,The larger this number the more centrally located nodes are on average relative to maximum
+Centrality_closeness_max_norm,Centrality_Normalized,Max closeness normalized by maximum,Real number between 0 and 1,The larger this number the more centrally located the most central node is relative to maximum
+Spectral_algebraic_connectivity_over_avgdeg,Spectral_Normalized,Algebraic connectivity over average degree,Non-negative real number,The larger this number the more connected the graph is relative to its average connectivity
+Spectral_spectral_gap_rel,Spectral_Normalized,Relative spectral gap,Real number between 0 and 1,The larger this number the more well-connected the graph is relative to its connectivity
+Spectral_laplacian_heat_trace_t0.1_per_node,Spectral_Normalized,Heat trace t=0.1 per node,Non-negative real number,The larger this number the more heat spreads quickly per node
+Spectral_laplacian_heat_trace_t1.0_per_node,Spectral_Normalized,Heat trace t=1.0 per node,Non-negative real number,The larger this number the more heat spreads per node
+Spectral_laplacian_heat_trace_t5.0_per_node,Spectral_Normalized,Heat trace t=5.0 per node,Non-negative real number,The larger this number the more heat spreads per node
+Adjacency_energy_per_node,Spectral_Normalized,Adjacency energy per node,Non-negative real number,The larger this number the more energetic/vibrant the graph is per node
+Adjacency_energy_over_fro,Spectral_Normalized,Adjacency energy over Frobenius norm,Real number between 0 and 1,The larger this number the more energetic the graph is relative to its total energy
+Adjacency_estrada_per_node,Spectral_Normalized,Estrada index per node,Non-negative real number,The larger this number the more communicable the graph is per node
+log_Adjacency_estrada_per_node,Spectral_Normalized,Log Estrada index per node,Real number,The larger this number the more communicable the graph is per node (log scale)
+Adjacency_moment_2_over_avgdeg,Spectral_Normalized,Second moment over average degree,Non-negative real number,The larger this number the more spread out the adjacency spectrum is relative to average connectivity
+Adjacency_moment_3_over_avgdeg3,Spectral_Normalized,Third moment over average degree cubed,Real number,The larger this number the more high-frequency components are relative to connectivity cubed
+Adjacency_moment_4_over_avgdeg4,Spectral_Normalized,Fourth moment over average degree to fourth,Non-negative real number,The larger this number the more peaked the adjacency spectrum is relative to connectivity to fourth power
+Planarity_num_faces_over_upperbound,Planarity_Normalized,Faces over theoretical upper bound,Real number between 0 and 1,The larger this number the more complex the planar structure is relative to maximum possible
+Planarity_face_size_mean_norm,Planarity_Normalized,Mean face size normalized,Real number between 0 and 1,The larger this number the larger the typical face is relative to maximum possible
+Symmetry_aut_size_log_over_log_nfact,Symmetry_Normalized,Log automorphism size over log n!,Real number between 0 and 1,The larger this number the more symmetric the graph is relative to maximum possible symmetry
+Symmetry_num_orbits_per_node,Symmetry_Normalized,Orbits per node,Real number between 0 and 1,The larger this number the more diverse the node roles are per node
+Symmetry_orbit_size_max_per_node,Symmetry_Normalized,Max orbit size per node,Real number between 0 and 1,The larger this number the more nodes share the same role per node
+TDA_H0_count_per_node,TDA_Normalized,H0 features per node,Non-negative real number,The larger this number the more disconnected components exist per node
+TDA_H0_total_persistence_over_diam,TDA_Normalized,H0 persistence over diameter,Non-negative real number,The larger this number the more persistent the connectivity structure is relative to graph spread
+TDA_H0_mean_persistence_over_diam,TDA_Normalized,H0 mean persistence over diameter,Non-negative real number,The larger this number the more stable the connectivity structure is relative to graph spread
+TDA_H0_max_persistence_over_diam,TDA_Normalized,H0 max persistence over diameter,Non-negative real number,The larger this number the more stable the most persistent component is relative to graph spread
+TDA_H0_mean_birth_over_diam,TDA_Normalized,H0 mean birth over diameter,Non-negative real number,The larger this number the later components typically appear relative to graph spread
+TDA_H0_mean_death_over_diam,TDA_Normalized,H0 mean death over diameter,Non-negative real number,The larger this number the later components typically disappear relative to graph spread
+TDA_H1_count_per_node,TDA_Normalized,H1 features per node,Non-negative real number,The larger this number the more cyclic structures exist per node
+TDA_H1_total_persistence_over_diam,TDA_Normalized,H1 persistence over diameter,Non-negative real number,The larger this number the more persistent the cyclic structure is relative to graph spread
+TDA_H1_mean_persistence_over_diam,TDA_Normalized,H1 mean persistence over diameter,Non-negative real number,The larger this number the more stable the cyclic structure is relative to graph spread
+TDA_H1_max_persistence_over_diam,TDA_Normalized,H1 max persistence over diameter,Non-negative real number,The larger this number the more stable the most persistent cycle is relative to graph spread
+TDA_H1_mean_birth_over_diam,TDA_Normalized,H1 mean birth over diameter,Non-negative real number,The larger this number the later cycles typically appear relative to graph spread
+TDA_H1_mean_death_over_diam,TDA_Normalized,H1 mean death over diameter,Non-negative real number,The larger this number the later cycles typically disappear relative to graph spread
+TDA_Betti0_at_q25_per_node,TDA_Normalized,Betti0 at q25 per node,Non-negative real number,The larger this number the more components exist at low filtration levels per node
+TDA_Betti1_at_q25_per_node,TDA_Normalized,Betti1 at q25 per node,Non-negative real number,The larger this number the more cycles exist at low filtration levels per node
+TDA_Betti0_at_q50_per_node,TDA_Normalized,Betti0 at q50 per node,Non-negative real number,The larger this number the more components exist at medium filtration levels per node
+TDA_Betti1_at_q50_per_node,TDA_Normalized,Betti1 at q50 per node,Non-negative real number,The larger this number the more cycles exist at medium filtration levels per node
+TDA_Betti0_at_q75_per_node,TDA_Normalized,Betti0 at q75 per node,Non-negative real number,The larger this number the more components exist at high filtration levels per node
+TDA_Betti1_at_q75_per_node,TDA_Normalized,Betti1 at q75 per node,Non-negative real number,The larger this number the more cycles exist at high filtration levels per node
+Motif_induced_g_1_4,Motifs_4,Number of induced Path4 (P4) subgraphs,Non-negative integer,The larger this number the more path-like 4-node structures the graph has
+Motif_induced_g_2_4,Motifs_4,Number of induced Star4 (K1,3) subgraphs,Non-negative integer,The larger this number the more star-like 4-node structures the graph has
+Motif_induced_g_3_4,Motifs_4,Number of induced Cycle4 (C4) subgraphs,Non-negative integer,The larger this number the more cycle-like 4-node structures the graph has
+Motif_induced_g_4_4,Motifs_4,Number of induced TailedTriangle subgraphs,Non-negative integer,The larger this number the more tailed triangle 4-node structures the graph has
+Motif_induced_g_5_4,Motifs_4,Number of induced Diamond subgraphs,Non-negative integer,The larger this number the more diamond 4-node structures the graph has
+Motif_induced_g_6_4,Motifs_4,Number of induced Clique4 (K4) subgraphs,Non-negative integer,The larger this number the more tightly connected 4-node groups the graph has
+Motif_induced_g_1_4_per_Cn4,Motifs_4_Normalized,Path4 normalized by C(n,4),Real number between 0 and 1,The larger this number the more path-like 4-node structures are relative to maximum possible
+Motif_induced_g_2_4_per_Cn4,Motifs_4_Normalized,Star4 normalized by C(n,4),Real number between 0 and 1,The larger this number the more star-like 4-node structures are relative to maximum possible
+Motif_induced_g_3_4_per_Cn4,Motifs_4_Normalized,Cycle4 normalized by C(n,4),Real number between 0 and 1,The larger this number the more cycle-like 4-node structures are relative to maximum possible
+Motif_induced_g_4_4_per_Cn4,Motifs_4_Normalized,TailedTriangle normalized by C(n,4),Real number between 0 and 1,The larger this number the more tailed triangle 4-node structures are relative to maximum possible
+Motif_induced_g_5_4_per_Cn4,Motifs_4_Normalized,Diamond normalized by C(n,4),Real number between 0 and 1,The larger this number the more diamond 4-node structures are relative to maximum possible
+Motif_induced_g_6_4_per_Cn4,Motifs_4_Normalized,Clique4 normalized by C(n,4),Real number between 0 and 1,The larger this number the more tightly connected 4-node groups are relative to maximum possible
+Motif_induced5_g_0_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_0 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_0 5-node structures are relative to maximum possible
+Motif_induced5_g_1_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_1 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_1 5-node structures are relative to maximum possible
+Motif_induced5_g_2_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_2 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_2 5-node structures are relative to maximum possible
+Motif_induced5_g_3_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_3 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_3 5-node structures are relative to maximum possible
+Motif_induced5_g_4_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_4 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_4 5-node structures are relative to maximum possible
+Motif_induced5_g_5_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_5 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_5 5-node structures are relative to maximum possible
+Motif_induced5_g_6_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_6 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_6 5-node structures are relative to maximum possible
+Motif_induced5_g_7_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_7 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_7 5-node structures are relative to maximum possible
+Motif_induced5_g_8_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_8 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_8 5-node structures are relative to maximum possible
+Motif_induced5_g_9_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_9 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_9 5-node structures are relative to maximum possible
+Motif_induced5_g_10_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_10 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_10 5-node structures are relative to maximum possible
+Motif_induced5_g_11_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_11 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_11 5-node structures are relative to maximum possible
+Motif_induced5_g_12_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_12 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_12 5-node structures are relative to maximum possible
+Motif_induced5_g_13_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_13 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_13 5-node structures are relative to maximum possible
+Motif_induced5_g_14_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_14 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_14 5-node structures are relative to maximum possible
+Motif_induced5_g_15_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_15 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_15 5-node structures are relative to maximum possible
+Motif_induced5_g_16_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_16 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_16 5-node structures are relative to maximum possible
+Motif_induced5_g_17_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_17 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_17 5-node structures are relative to maximum possible
+Motif_induced5_g_18_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_18 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_18 5-node structures are relative to maximum possible
+Motif_induced5_g_20_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_20 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_20 5-node structures are relative to maximum possible
+Motif_5_cycles_per_Cn5,Motifs_5_Normalized,5-cycles normalized by C(n,5),Real number between 0 and 1,The larger this number the more 5-sided cycle structures are relative to maximum possible
+Motif_5_cliques_per_Cn5,Motifs_5_Normalized,5-cliques normalized by C(n,5),Real number between 0 and 1,The larger this number the more tightly connected 5-node groups are relative to maximum possible
+Motif_5_cycles_per_Kn,Motifs_5_Normalized,5-cycles normalized by complete graph,Real number between 0 and 1,The larger this number the more 5-sided cycle structures are relative to complete graph
+Spectral_kirchhoff_index,Spectral_Laplacian,Kirchhoff index (alternative name),Non-negative real number,The larger this number the more spread out the graph is
+Spectral_laplacian_heat_trace_t0.5,Spectral_Laplacian,Laplacian heat trace at t=0.5,Non-negative real number,The larger this number the more heat spreads through the graph
+Spectral_laplacian_heat_trace_t2.0,Spectral_Laplacian,Laplacian heat trace at t=2.0,Non-negative real number,The larger this number the more heat spreads through the graph
+Spectral_adjacency_energy,Spectral_Adjacency,Adjacency energy (alternative name),Non-negative real number,The larger this number the more energetic/vibrant the graph is
+Spectral_adjacency_estrada_index,Spectral_Adjacency,Adjacency Estrada index (alternative name),Non-negative real number,The larger this number the more communicable the graph is
+Spectral_adjacency_moment_2,Spectral_Adjacency,Adjacency second moment (alternative name),Non-negative real number,The larger this number the more spread out the adjacency spectrum is
+Spectral_adjacency_moment_3,Spectral_Adjacency,Adjacency third moment (alternative name),Real number,Positive values mean more high-frequency components; negative means more low-frequency components
+Spectral_adjacency_moment_4,Spectral_Adjacency,Adjacency fourth moment (alternative name),Non-negative real number,The larger this number the more peaked the adjacency spectrum is
