@@ -86,7 +86,7 @@ Motif_triangle_edge_incidence_median,Motifs_3_4,Median triangles per edge,Non-ne
 Motif_triangle_edge_incidence_q90,Motifs_3_4,90th percentile triangles per edge,Non-negative real number,The larger this number the more triangles the most triangular edges participate in
 Motif_triangle_edge_frac_zero,Motifs_3_4,Fraction of edges with zero triangles,Real number between 0 and 1,The larger this number the more tree-like the graph is
 Motif_triangle_edge_frac_ge2,Motifs_3_4,Fraction of edges with ≥2 triangles,Real number between 0 and 1,The larger this number the more clustered the graph is
-Motif_induced_K1_3,Motifs_3_4,Number of induced K1,3 (star) subgraphs,Non-negative integer,The larger this number the more star-like structures the graph has
+Motif_induced_K1_3,Motifs_3_4,Number of induced K13 (star) subgraphs,Non-negative integer,The larger this number the more star-like structures the graph has
 Motif_induced_P4,Motifs_3_4,Number of induced P4 (path) subgraphs,Non-negative integer,The larger this number the more path-like structures the graph has
 Motif_induced_C4,Motifs_3_4,Number of induced C4 (cycle) subgraphs,Non-negative integer,The larger this number the more cycle-like structures the graph has
 Motif_induced_TailedTriangle,Motifs_3_4,Number of induced tailed triangle subgraphs,Non-negative integer,The larger this number the more tailed triangle structures the graph has
@@ -149,16 +149,16 @@ Basic_degree_entropy_norm,Basic_Normalized,Degree entropy normalized by maximum 
 Connectivity_diameter_norm,Connectivity_Normalized,Diameter normalized by graph size,Real number between 0 and 1,The larger this number the more spread out the graph is relative to its size
 Connectivity_radius_norm,Connectivity_Normalized,Radius normalized by graph size,Real number between 0 and 1,The larger this number the more spread out the graph is relative to its size
 Wiener_mean_distance,Connectivity_Normalized,Mean distance normalized by Wiener index,Real number between 0 and 1,The larger this number the more spread out the graph is relative to total distance
-Motif_triangles_per_Cn3,Motifs_3_4_Normalized,Triangles normalized by C(n,3),Real number between 0 and 1,The larger this number the more triangular the graph is relative to maximum possible
-Motif_4_cycles_per_Cn4,Motifs_3_4_Normalized,4-cycles normalized by C(n,4),Real number between 0 and 1,The larger this number the more square-like the graph is relative to maximum possible
-Motif_4_cliques_per_Cn4,Motifs_3_4_Normalized,4-cliques normalized by C(n,4),Real number between 0 and 1,The larger this number the more tightly connected 4-node groups are relative to maximum possible
+Motif_triangles_per_Cn3,Motifs_3_4_Normalized,Triangles normalized by C(n3),Real number between 0 and 1,The larger this number the more triangular the graph is relative to maximum possible
+Motif_4_cycles_per_Cn4,Motifs_3_4_Normalized,4-cycles normalized by C(n4),Real number between 0 and 1,The larger this number the more square-like the graph is relative to maximum possible
+Motif_4_cliques_per_Cn4,Motifs_3_4_Normalized,4-cliques normalized by C(n4),Real number between 0 and 1,The larger this number the more tightly connected 4-node groups are relative to maximum possible
 Motif_wedges_per_max,Motifs_3_4_Normalized,Wedges normalized by theoretical maximum,Real number between 0 and 1,The larger this number the more path-like the graph is relative to maximum possible
-Motif_induced_K1_3_per_Cn4,Motifs_3_4_Normalized,K1,3 normalized by C(n,4),Real number between 0 and 1,The larger this number the more star-like the graph is relative to maximum possible
-Motif_induced_P4_per_Cn4,Motifs_3_4_Normalized,P4 normalized by C(n,4),Real number between 0 and 1,The larger this number the more path-like the graph is relative to maximum possible
-Motif_induced_C4_per_Cn4,Motifs_3_4_Normalized,C4 normalized by C(n,4),Real number between 0 and 1,The larger this number the more cycle-like the graph is relative to maximum possible
-Motif_induced_TailedTriangle_per_Cn4,Motifs_3_4_Normalized,Tailed triangle normalized by C(n,4),Real number between 0 and 1,The larger this number the more tailed triangle structures are relative to maximum possible
-Motif_induced_Diamond_per_Cn4,Motifs_3_4_Normalized,Diamond normalized by C(n,4),Real number between 0 and 1,The larger this number the more diamond structures are relative to maximum possible
-Motif_induced_K4_per_Cn4,Motifs_3_4_Normalized,K4 normalized by C(n,4),Real number between 0 and 1,The larger this number the more tightly connected 4-node groups are relative to maximum possible
+Motif_induced_K1_3_per_Cn4,Motifs_3_4_Normalized,K13 normalized by C(n4),Real number between 0 and 1,The larger this number the more star-like the graph is relative to maximum possible
+Motif_induced_P4_per_Cn4,Motifs_3_4_Normalized,P4 normalized by C(n4),Real number between 0 and 1,The larger this number the more path-like the graph is relative to maximum possible
+Motif_induced_C4_per_Cn4,Motifs_3_4_Normalized,C4 normalized by C(n4),Real number between 0 and 1,The larger this number the more cycle-like the graph is relative to maximum possible
+Motif_induced_TailedTriangle_per_Cn4,Motifs_3_4_Normalized,Tailed triangle normalized by C(n4),Real number between 0 and 1,The larger this number the more tailed triangle structures are relative to maximum possible
+Motif_induced_Diamond_per_Cn4,Motifs_3_4_Normalized,Diamond normalized by C(n4),Real number between 0 and 1,The larger this number the more diamond structures are relative to maximum possible
+Motif_induced_K4_per_Cn4,Motifs_3_4_Normalized,K4 normalized by C(n4),Real number between 0 and 1,The larger this number the more tightly connected 4-node groups are relative to maximum possible
 Robust_articulation_points_per_node,Robustness_Normalized,Articulation points per node,Real number between 0 and 1,The larger this number the more vulnerable the graph is to fragmentation per node
 Robust_bridge_count_per_edge,Robustness_Normalized,Bridges per edge,Real number between 0 and 1,The larger this number the more vulnerable the graph is to fragmentation per edge
 Connectivity_num_components_per_node,Connectivity_Normalized,Components per node,Real number between 0 and 1,The larger this number the more fragmented the graph is per node
@@ -200,39 +200,39 @@ TDA_Betti1_at_q50_per_node,TDA_Normalized,Betti1 at q50 per node,Non-negative re
 TDA_Betti0_at_q75_per_node,TDA_Normalized,Betti0 at q75 per node,Non-negative real number,The larger this number the more components exist at high filtration levels per node
 TDA_Betti1_at_q75_per_node,TDA_Normalized,Betti1 at q75 per node,Non-negative real number,The larger this number the more cycles exist at high filtration levels per node
 Motif_induced_g_1_4,Motifs_4,Number of induced Path4 (P4) subgraphs,Non-negative integer,The larger this number the more path-like 4-node structures the graph has
-Motif_induced_g_2_4,Motifs_4,Number of induced Star4 (K1,3) subgraphs,Non-negative integer,The larger this number the more star-like 4-node structures the graph has
+Motif_induced_g_2_4,Motifs_4,Number of induced Star4 (K13) subgraphs,Non-negative integer,The larger this number the more star-like 4-node structures the graph has
 Motif_induced_g_3_4,Motifs_4,Number of induced Cycle4 (C4) subgraphs,Non-negative integer,The larger this number the more cycle-like 4-node structures the graph has
 Motif_induced_g_4_4,Motifs_4,Number of induced TailedTriangle subgraphs,Non-negative integer,The larger this number the more tailed triangle 4-node structures the graph has
 Motif_induced_g_5_4,Motifs_4,Number of induced Diamond subgraphs,Non-negative integer,The larger this number the more diamond 4-node structures the graph has
 Motif_induced_g_6_4,Motifs_4,Number of induced Clique4 (K4) subgraphs,Non-negative integer,The larger this number the more tightly connected 4-node groups the graph has
-Motif_induced_g_1_4_per_Cn4,Motifs_4_Normalized,Path4 normalized by C(n,4),Real number between 0 and 1,The larger this number the more path-like 4-node structures are relative to maximum possible
-Motif_induced_g_2_4_per_Cn4,Motifs_4_Normalized,Star4 normalized by C(n,4),Real number between 0 and 1,The larger this number the more star-like 4-node structures are relative to maximum possible
-Motif_induced_g_3_4_per_Cn4,Motifs_4_Normalized,Cycle4 normalized by C(n,4),Real number between 0 and 1,The larger this number the more cycle-like 4-node structures are relative to maximum possible
-Motif_induced_g_4_4_per_Cn4,Motifs_4_Normalized,TailedTriangle normalized by C(n,4),Real number between 0 and 1,The larger this number the more tailed triangle 4-node structures are relative to maximum possible
-Motif_induced_g_5_4_per_Cn4,Motifs_4_Normalized,Diamond normalized by C(n,4),Real number between 0 and 1,The larger this number the more diamond 4-node structures are relative to maximum possible
-Motif_induced_g_6_4_per_Cn4,Motifs_4_Normalized,Clique4 normalized by C(n,4),Real number between 0 and 1,The larger this number the more tightly connected 4-node groups are relative to maximum possible
-Motif_induced5_g_0_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_0 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_0 5-node structures are relative to maximum possible
-Motif_induced5_g_1_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_1 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_1 5-node structures are relative to maximum possible
-Motif_induced5_g_2_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_2 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_2 5-node structures are relative to maximum possible
-Motif_induced5_g_3_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_3 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_3 5-node structures are relative to maximum possible
-Motif_induced5_g_4_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_4 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_4 5-node structures are relative to maximum possible
-Motif_induced5_g_5_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_5 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_5 5-node structures are relative to maximum possible
-Motif_induced5_g_6_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_6 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_6 5-node structures are relative to maximum possible
-Motif_induced5_g_7_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_7 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_7 5-node structures are relative to maximum possible
-Motif_induced5_g_8_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_8 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_8 5-node structures are relative to maximum possible
-Motif_induced5_g_9_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_9 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_9 5-node structures are relative to maximum possible
-Motif_induced5_g_10_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_10 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_10 5-node structures are relative to maximum possible
-Motif_induced5_g_11_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_11 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_11 5-node structures are relative to maximum possible
-Motif_induced5_g_12_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_12 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_12 5-node structures are relative to maximum possible
-Motif_induced5_g_13_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_13 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_13 5-node structures are relative to maximum possible
-Motif_induced5_g_14_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_14 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_14 5-node structures are relative to maximum possible
-Motif_induced5_g_15_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_15 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_15 5-node structures are relative to maximum possible
-Motif_induced5_g_16_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_16 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_16 5-node structures are relative to maximum possible
-Motif_induced5_g_17_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_17 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_17 5-node structures are relative to maximum possible
-Motif_induced5_g_18_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_18 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_18 5-node structures are relative to maximum possible
-Motif_induced5_g_20_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_20 normalized by C(n,5),Real number between 0 and 1,The larger this number the more g_20 5-node structures are relative to maximum possible
-Motif_5_cycles_per_Cn5,Motifs_5_Normalized,5-cycles normalized by C(n,5),Real number between 0 and 1,The larger this number the more 5-sided cycle structures are relative to maximum possible
-Motif_5_cliques_per_Cn5,Motifs_5_Normalized,5-cliques normalized by C(n,5),Real number between 0 and 1,The larger this number the more tightly connected 5-node groups are relative to maximum possible
+Motif_induced_g_1_4_per_Cn4,Motifs_4_Normalized,Path4 normalized by C(n4),Real number between 0 and 1,The larger this number the more path-like 4-node structures are relative to maximum possible
+Motif_induced_g_2_4_per_Cn4,Motifs_4_Normalized,Star4 normalized by C(n4),Real number between 0 and 1,The larger this number the more star-like 4-node structures are relative to maximum possible
+Motif_induced_g_3_4_per_Cn4,Motifs_4_Normalized,Cycle4 normalized by C(n4),Real number between 0 and 1,The larger this number the more cycle-like 4-node structures are relative to maximum possible
+Motif_induced_g_4_4_per_Cn4,Motifs_4_Normalized,TailedTriangle normalized by C(n4),Real number between 0 and 1,The larger this number the more tailed triangle 4-node structures are relative to maximum possible
+Motif_induced_g_5_4_per_Cn4,Motifs_4_Normalized,Diamond normalized by C(n4),Real number between 0 and 1,The larger this number the more diamond 4-node structures are relative to maximum possible
+Motif_induced_g_6_4_per_Cn4,Motifs_4_Normalized,Clique4 normalized by C(n4),Real number between 0 and 1,The larger this number the more tightly connected 4-node groups are relative to maximum possible
+Motif_induced5_g_0_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_0 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_0 5-node structures are relative to maximum possible
+Motif_induced5_g_1_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_1 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_1 5-node structures are relative to maximum possible
+Motif_induced5_g_2_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_2 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_2 5-node structures are relative to maximum possible
+Motif_induced5_g_3_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_3 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_3 5-node structures are relative to maximum possible
+Motif_induced5_g_4_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_4 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_4 5-node structures are relative to maximum possible
+Motif_induced5_g_5_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_5 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_5 5-node structures are relative to maximum possible
+Motif_induced5_g_6_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_6 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_6 5-node structures are relative to maximum possible
+Motif_induced5_g_7_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_7 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_7 5-node structures are relative to maximum possible
+Motif_induced5_g_8_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_8 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_8 5-node structures are relative to maximum possible
+Motif_induced5_g_9_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_9 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_9 5-node structures are relative to maximum possible
+Motif_induced5_g_10_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_10 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_10 5-node structures are relative to maximum possible
+Motif_induced5_g_11_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_11 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_11 5-node structures are relative to maximum possible
+Motif_induced5_g_12_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_12 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_12 5-node structures are relative to maximum possible
+Motif_induced5_g_13_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_13 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_13 5-node structures are relative to maximum possible
+Motif_induced5_g_14_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_14 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_14 5-node structures are relative to maximum possible
+Motif_induced5_g_15_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_15 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_15 5-node structures are relative to maximum possible
+Motif_induced5_g_16_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_16 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_16 5-node structures are relative to maximum possible
+Motif_induced5_g_17_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_17 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_17 5-node structures are relative to maximum possible
+Motif_induced5_g_18_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_18 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_18 5-node structures are relative to maximum possible
+Motif_induced5_g_20_5_per_Cn5,Motifs_5_Normalized,5-node graphlet g_20 normalized by C(n5),Real number between 0 and 1,The larger this number the more g_20 5-node structures are relative to maximum possible
+Motif_5_cycles_per_Cn5,Motifs_5_Normalized,5-cycles normalized by C(n5),Real number between 0 and 1,The larger this number the more 5-sided cycle structures are relative to maximum possible
+Motif_5_cliques_per_Cn5,Motifs_5_Normalized,5-cliques normalized by C(n5),Real number between 0 and 1,The larger this number the more tightly connected 5-node groups are relative to maximum possible
 Motif_5_cycles_per_Kn,Motifs_5_Normalized,5-cycles normalized by complete graph,Real number between 0 and 1,The larger this number the more 5-sided cycle structures are relative to complete graph
 Spectral_kirchhoff_index,Spectral_Laplacian,Kirchhoff index (alternative name),Non-negative real number,The larger this number the more spread out the graph is
 Spectral_laplacian_heat_trace_t0.5,Spectral_Laplacian,Laplacian heat trace at t=0.5,Non-negative real number,The larger this number the more heat spreads through the graph
