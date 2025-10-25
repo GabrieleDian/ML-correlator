@@ -8,7 +8,7 @@
 \usepackage{booktabs}
 \usepackage{siunitx}
 
-\title{Predicting coefficients for f-graphs and denominator graphs}
+\title{Predicting coefficients for graphs}
 \author{}
 \date{}
 
@@ -16,15 +16,42 @@
 	
 	\maketitle
 	\tableofcontents
-	\section{Ideas}
-
-
-        \begin{itemize}
-                \item Denominator graphs upto 12 loops
-                \item f-graphs upto 11 loops
-                \item Catalan numbers (always the largest) - regression on f-graphs - interesting results in predicting 14 at 10 loops based on 9 loops.
+        \newpage
+        \begin{abstract}
+                In this set of notes we do the following.
+                \begin{itemize}
+                \item \bf{denominator graphs:}
+                \begin{itemize}
+                \item Intra-loop modelling - ability to model within loop level
+                \item Modelling higher-loop based on previous loop order
+                \item Shap value analysis - what is the driving the decision
+                \end{itemize}
+                \item \bf{f-graphs}
         \end{itemize}
-	
+        \end{abstract}
+        
+        \newpage
+
+	\section{Motivation}
+
+
+        \section{Features}
+
+
+        \section{Intra-loop modelling}
+
+
+        \section{Predicting $l$ from $p < l$ loop orders}
+
+        \subsection{Approach 1: Timeseries approach}
+        \subsubsection{Shap Analysis}
+
+        \subsection{Approach 2: General $l$ learning}
+        \subsubsection{Shap Analysis}
+
+        \subsection{Ensemble learning}
+
+   
 	
 
 	
