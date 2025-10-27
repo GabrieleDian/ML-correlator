@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""
+Convert slow CSV graph files into fast .npz binaries for later use.
+Supports rational coefficients like '-1/2', '3/4', etc.
+"""
+
+import pandas as pd
+import numpy as np
+import ast
+from fractions import Fraction
+from pathlib import Path
+from tqdm import tqdm
+
+def safe_fraction_to_float(x):
+    """Convert strings like '-1/2' or '3' to float safely."""
+    try:
+        return float(Fraction(str(x)))
+    except Exception:
+        try:
+            return float(x)
+        except Exception:
+            return 0.0  # fallback for 'nan' or malformed entries
+
+def convert_csv_to_npz(loop_order, base_dir="../Graph_Edge_Data"):
+    base_dir = Path(base_dir)
+    csv_path = base_dir / f"graph_data_{loop_order}.csv"
+    npz_path = base_dir / f"graph_edges_{loop_order}.npz"
+
+    if not csv_path.exists():
+        print(f"❌ CSV not found: {csv_path}")
+        return
+    if npz_path.exists():
+        print(f"⚠️  {npz_path.name} already exists, skipping.")
+        return
+
+    print(f"📂 Converting {csv_path.name} → {npz_path.name}")
+
+    df = pd.read_csv(csv_path)
+
+    denom_edges = [ast.literal_eval(e) for e in tqdm(df["DEN_EDGES"], desc="Parsing DEN_EDGES")]
+    numer_edges = [ast.literal_eval(e) for e in tqdm(df["NUM_EDGES"], desc="Parsing NUM_EDGES")]
+
+    # Convert coefficients robustly (handles fractions and floats)
+    coeffs = np.array([safe_fraction_to_float(x) for x in df["COEFFICIENTS"]], dtype=float)
+
+    np.savez_compressed(
+        npz_path,
+        denom_edges=np.array(denom_edges, dtype=object),
+        numer_edges=np.array(numer_edges, dtype=object),
+        coefficients=coeffs,
+    )
+
+    size = npz_path.stat().st_size / 1e6
+    print(f"✅ Saved binary version: {npz_path} ({size:.2f} MB)")
+
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--loops", nargs="+", required=True, help="Loop orders to convert (e.g. 7 8 9 10 11 12)")
+    parser.add_argument("--data-dir", default="../Graph_Edge_Data", help="Base directory with CSVs")
+    args = parser.parse_args()
+
+    for loop in args.loops:
+        convert_csv_to_npz(loop, args.data_dir)

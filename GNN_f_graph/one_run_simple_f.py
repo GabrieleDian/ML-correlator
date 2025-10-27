@@ -12,6 +12,8 @@ import os
 from f_graph_builder import create_simple_dataset_rgcn, quick_dataset_stats
 from training_utils_f import train
 from types import SimpleNamespace
+from load_features_f import get_available_features
+
 
 
 def config_to_namespace(config_dict):
@@ -175,7 +177,16 @@ def main():
     
     print(f"Training on loop orders {train_loop_orders}, testing on loop orders {test_loop_orders} with features: {selected_features}")
     
-        # Build training dataset
+    # === Check feature availability ===
+    available = get_available_features(train_loop_orders[0], base_dir)
+    missing = [f for f in selected_features if f not in available]
+    if missing:
+        print(f"⚠️ Missing features for loop {train_loop_orders[0]}: {missing}")
+        print("You may need to recompute or re-bundle them before training.")
+    else:
+        print("✅ All requested features found in bundle.")
+
+    # Build training dataset
     train_datasets = []
     train_scaler = None
     max_features = None

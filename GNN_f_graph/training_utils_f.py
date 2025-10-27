@@ -147,6 +147,12 @@ def train(config, train_dataset, test_dataset):
             config=config.__dict__,
             reinit=True
         )
+
+       
+    # Preload feature tensors into memory to avoid lazy I/O lag on first GPU batch
+    _ = [data.x for data in train_dataset]
+    print(f"✅ Preloaded {len(train_dataset)} graphs into memory.")
+    
     # Train and test loaders
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=False)
@@ -159,7 +165,6 @@ def train(config, train_dataset, test_dataset):
         num_layers=getattr(config, 'num_layers', 3)
     ).to(device)
     
-
     optimizer = torch.optim.Adam(model.parameters(), lr=config.lr, weight_decay=config.weight_decay)
 
     

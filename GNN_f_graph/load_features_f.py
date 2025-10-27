@@ -10,113 +10,138 @@ from fractions import Fraction
 
 data_dir = '../Graph_Edge_Data'
 # Load features for multi-edge graphs
-def load_saved_features(file_ext, feature_names, data_dir=data_dir):
+def load_saved_features(file_ext, feature_names, data_dir='../Graph_Edge_Data'):
     """
-    Load pre-computed features for a given loop order.
-
-    Args:
-       file_ext: File extension (e.g., '7','7to8', 8)
-        feature_names: List of feature names to load
-        data_dir: Base directory for data
-        extra_train: If True, load features from "features_loop_{loop_order}to"
-                     instead of "features_loop_{loop_order}".
-
-    Returns:
-        features: Dict mapping feature names to numpy arrays
-        labels: List of graph labels
+    Load pre-computed features (supports both bundled .npz and individual .npy files).
+    Returns: features dict, labels list
     """
-    # Select directory based on extra_train flag
-    features_dir = Path(data_dir) / f'f_features_loop_{file_ext}'
+    from fractions import Fraction
+    import numpy as np
+    import pandas as pd
+    from pathlib import Path
 
-    # Load labels (always from the same CSV)
-    csv_path = Path(data_dir) / f'graph_data_{file_ext}.csv'
+    features_dir = Path(data_dir) / f"f_features_loop_{file_ext}"
+    npz_bundle = features_dir.with_suffix(".npz")
+    csv_path = Path(data_dir) / f"graph_data_{file_ext}.csv"
+
+    # Load labels
     df = pd.read_csv(csv_path)
-    true_labels = df['COEFFICIENTS'].tolist()
-    labels = [1 if Fraction(c) != 0 else 0 for c in true_labels] # Binary labels
-    # Load requested features
+    true_labels = df["COEFFICIENTS"].tolist()
+    labels = [1 if Fraction(c) != 0 else 0 for c in true_labels]
+
     features = {}
-    for feature_name in feature_names:
-        feature_path = features_dir / f'{feature_name}.npy'
-        if not feature_path.exists():
-            raise FileNotFoundError(
-                f"Feature {feature_name} not found in {features_dir}. "
-                f"Run compute_features.py first."
-            )
-        features[feature_name] = np.load(feature_path)
-        print(f"Loaded {feature_name}: shape {features[feature_name].shape}")
+
+    if npz_bundle.exists():
+        print(f"✅ Loading bundled features from {npz_bundle.name}")
+        bundle = np.load(npz_bundle, allow_pickle=True)
+        for name in feature_names:
+            if name in bundle.files:
+                features[name] = bundle[name]
+            else:
+                print(f"⚠️ Feature {name} not found in bundle.")
+    else:
+        print(f"⚠️ No bundle found; loading individual .npy files (slower).")
+        for name in feature_names:
+            fpath = features_dir / f"{name}.npy"
+            if not fpath.exists():
+                raise FileNotFoundError(f"Feature {name} not found in {features_dir}")
+            features[name] = np.load(fpath)
+            print(f"Loaded {name}: shape {features[name].shape}")
 
     return features, labels
 
 
 
-def get_available_features(loop_order, data_dir=data_dir):
-    """Get list of available pre-computed features for a loop order."""
-    features_dir = Path(data_dir) / f'f_features_loop_{loop_order}'
-    
-    if not features_dir.exists():
+
+def get_available_features(loop_order, data_dir='../Graph_Edge_Data'):
+    """
+    Return all available features (from .npz or .npy).
+    """
+    from pathlib import Path
+    import numpy as np
+
+    features_dir = Path(data_dir) / f"f_features_loop_{loop_order}"
+    npz_path = features_dir.with_suffix(".npz")
+
+    if npz_path.exists():
+        bundle = np.load(npz_path, allow_pickle=True)
+        available = sorted(bundle.files)
+        print(f"✅ Found {len(available)} features in {npz_path.name}")
+        return available
+
+    elif features_dir.exists():
+        feature_files = list(features_dir.glob("*.npy"))
+        available = sorted([f.stem for f in feature_files])
+        print(f"✅ Found {len(available)} .npy feature files in {features_dir.name}")
+        return available
+
+    else:
+        print(f"⚠️ No features found for loop {loop_order}")
         return []
-    
-    # Check for .npy files
-    feature_files = list(features_dir.glob('*.npy'))
-    feature_names = [f.stem for f in feature_files]
-    
-    return sorted(feature_names)
+
 
 
 def load_graph_structure(file_ext, data_dir=None):
     """
     Load original multi-edge graph edges for creating edge_index for GNNs.
-
     Returns a list of dicts with:
-        'num_nodes': number of nodes
-        'edge_list': list of [i,j] edge indices (bidirectional)
-        'edge_types': list of edge types corresponding to each edge in edge_list
-        'node_labels': original node labels
+        'num_nodes', 'edge_list', 'edge_types', 'node_labels'
     """
-    base_dir = data_dir if data_dir is not None else Path('../Graph_Edge_Data')
-    csv_path = Path(base_dir) / f'graph_data_{file_ext}.csv'
-    df = pd.read_csv(csv_path)
+    base_dir = Path(data_dir or '../Graph_Edge_Data')
+    npz_path = base_dir / f'graph_edges_{file_ext}.npz'
+    csv_path = base_dir / f'graph_data_{file_ext}.csv'
 
-    # Parse edge lists
-    denom_edges_list = [ast.literal_eval(e) for e in df['DEN_EDGES']]
-    numer_edges_list = [ast.literal_eval(e) for e in df['NUM_EDGES']]
+    if npz_path.exists():
+        print(f"✅ Loaded graph structure from {npz_path.name}")
+        data = np.load(npz_path, allow_pickle=True)
+        denom_edges_list = data['denom_edges']
+        numer_edges_list = data['numer_edges']
+    elif csv_path.exists():
+        print(f"⚠️ No preprocessed file found for loop {file_ext}, using CSV (slow).")
+        df = pd.read_csv(csv_path)
+        denom_edges_list = [ast.literal_eval(e) for e in df['DEN_EDGES']]
+        numer_edges_list = [ast.literal_eval(e) for e in df['NUM_EDGES']]
+    else:
+        raise FileNotFoundError(f"Neither {npz_path} nor {csv_path} found.")
 
     graph_infos = []
     for d_edges, n_edges in zip(denom_edges_list, numer_edges_list):
-         # Force both to lists (tuple → list)
         d_edges = list(d_edges)
         n_edges = list(n_edges)
-        nodes = sorted(set([u for u,v in d_edges+n_edges] + [v for u,v in d_edges+n_edges]))
+        nodes = sorted(set([u for u, v in d_edges + n_edges] + [v for u, v in d_edges + n_edges]))
         node_to_idx = {node: i for i, node in enumerate(nodes)}
 
         edge_indices = []
         edge_types = []
+        edge_dict = {}
 
-        # Add denominator edges
+        # Add denominator edges (-1)
         for u, v in d_edges:
-            i, j = node_to_idx[u], node_to_idx[v]
-            edge_indices.append([i, j])
-            edge_indices.append([j, i])  # bidirectional
-            edge_types.extend([0, 0])
+            key = tuple(sorted((u, v)))
+            edge_dict[key] = -1
 
-        # Add numerator edges
+        # Add numerator edges (1, 2, 3, ...)
         for u, v in n_edges:
+            key = tuple(sorted((u, v)))
+            if key in edge_dict and edge_dict[key] == -1:
+                raise ValueError(f"Conflict: both numerator and denominator edge between {key}")
+            edge_dict[key] = edge_dict.get(key, 0) + 1
+
+        for (u, v), etype in edge_dict.items():
             i, j = node_to_idx[u], node_to_idx[v]
-            edge_indices.append([i, j])
-            edge_indices.append([j, i])
-            edge_types.extend([1, 1])
+            edge_indices += [[i, j], [j, i]]
+            edge_types += [etype, etype]
 
         graph_infos.append({
             'num_nodes': len(nodes),
             'edge_list': edge_indices,
             'edge_types': edge_types,
-            'node_labels': nodes
+            'node_labels': nodes,
         })
-    for idx, g in enumerate(graph_infos):
-        if len(g['edge_list']) != len(g['edge_types']):
-         print(f"Graph {idx}: {len(g['edge_list'])} edges vs {len(g['edge_types'])} types")
 
     return graph_infos
+
+
 
 
 

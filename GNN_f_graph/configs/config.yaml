@@ -3,7 +3,7 @@
 # Data configuration
 data:
   base_dir: '../Graph_Edge_Data'  # Path to data directory
-  train_loop_order: '9'         # Which loop to use for training
+  train_loop_order: ['6','7','8']         # Which loop to use for training
   test_loop_order: '9'                 # Which loop to use for testing
 
   # Features to use for training
@@ -11,9 +11,10 @@ data:
    - eigen_1
    - eigen_2
    - eigen_3
-   - degree
    - closeness
-   - graphlet_2
+   - betweenness
+   - degree
+   - graphlet_4
 
   # Computation settings
   chunk_size: 1000
@@ -22,14 +23,14 @@ data:
 # Model configuration
 model:
   name: "rgcn"              # Model architecture: gin, gat, hybrid, planar, simple
-  hidden_channels: 256
+  hidden_channels: 128
   num_layers: 3
-  dropout: 0.5
+  dropout: 0.4
 
 # Training configuration
 training:
   epochs: 100
-  batch_size: 256
+  batch_size: 64
   learning_rate:   0.00028721941495727597
   weight_decay:  0.00003060739988229477
   scheduler_type: "onecycle"  # Options: onecycle, plateau, none
