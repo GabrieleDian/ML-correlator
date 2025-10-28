@@ -19,7 +19,6 @@ features:
   - low_eigen_1
   - low_eigen_2
   - low_eigen_3
-  - graphlet_4
     
 
 # Model configuration

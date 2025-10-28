@@ -46,20 +46,49 @@ def autotune_resources(chunk_size_default=100, n_jobs_default=1):
 
 def load_graph_edges(file_ext='7', base_dir=None):
     """
-    Load graph edges and labels from CSV file.
+    Load graph edges and coefficients for denominator graphs.
+
+    Preferred format:
+        den_graph_data_{file_ext}.npz
+        ├─ edges          → np.array(list of edge lists)
+        └─ coefficients   → np.array of floats/ints
+
+    Fallback format:
+        den_graph_data_{file_ext}.csv
+        ├─ EDGES column         (stringified list of tuples)
+        └─ COEFFICIENTS column  (numeric)
+
+    Returns:
+        edges_list: list of lists of (u, v) tuples
+        coefficients: list of floats or ints
     """
-    if base_dir is None:
-        base_dir = Path('../Graph_Edge_Data')
+    base_dir = Path(base_dir or '../Graph_Edge_Data')
+    npz_path = base_dir / f'den_graph_data_{file_ext}.npz'
+    csv_path = base_dir / f'den_graph_data_{file_ext}.csv'
 
-    edges_list = []
-    labels = []
-    # Only standard graphs
-    file_path = base_dir / f'den_graph_data_{file_ext}.csv'
-    df = pd.read_csv(file_path)
-    edges_list = [ast.literal_eval(e) for e in df['EDGES']]
-    labels = df['COEFFICIENTS'].tolist()
+    # --- Preferred: load from .npz
+    if npz_path.exists():
+        data = np.load(npz_path, allow_pickle=True)
+        edges_list = data['edges'].tolist()
+        coefficients = data['coefficients'].tolist()
+        print(f"📦 Loaded {len(edges_list)} graphs from {npz_path.name}")
+        return edges_list, coefficients
 
-    return edges_list, labels
+    # --- Fallback: load from .csv
+    elif csv_path.exists():
+        print(f"⚠️ Using CSV (no .npz found) for loop {file_ext}")
+        df = pd.read_csv(csv_path)
+
+        if 'EDGES' not in df.columns or 'COEFFICIENTS' not in df.columns:
+            raise ValueError(f"CSV {csv_path} must contain 'EDGES' and 'COEFFICIENTS' columns")
+
+        edges_list = [ast.literal_eval(e) for e in df['EDGES']]
+        coefficients = df['COEFFICIENTS'].tolist()
+        return edges_list, coefficients
+
+    else:
+        raise FileNotFoundError(f"No graph data found for loop {file_ext} in {base_dir}")
+
 
 
 
@@ -240,44 +269,6 @@ def compute_pagerank_features(graphs_batch):
     return features
 
 
-import networkx as nx
-
-def compute_face_count_features(graphs_batch):
-    """Compute face count features for a batch of planar graphs."""
-    features = []
-    
-    for edges in graphs_batch:
-        # Build graph in the same way as your PageRank code
-        G, n_nodes = edges_to_networkx(edges)
-
-        # Check planarity
-        is_planar, embedding = nx.check_planarity(G)
-        if not is_planar:
-            raise ValueError("Graph is not planar!")
-
-        # Collect unique faces
-        seen_faces = set()
-        faces = []
-        for u, v in embedding.edges():
-            face = tuple(embedding.traverse_face(u, v))
-            # Normalize face so duplicates are detected
-            min_idx = face.index(min(face))
-            normalized = face[min_idx:] + face[:min_idx]
-            if normalized not in seen_faces:
-                seen_faces.add(normalized)
-                faces.append(face)
-
-        # Count face participation per node
-        face_count = {n: 0 for n in range(n_nodes)}
-        for face in faces:
-            for n in face:
-                face_count[n] += 1
-
-        # Store as list in node order
-        face_count_list = [face_count[i] for i in range(n_nodes)]
-        features.append(face_count_list)
-
-    return features
 
 
 def compute_graphlet_features(graphs_batch, k=4, sizev=1, sizee=2, connect=True):
@@ -341,7 +332,6 @@ FEATURE_FUNCTIONS = {
     'clustering': compute_clustering_features,
     'closeness': compute_closeness_features,
     'pagerank': compute_pagerank_features,
-    'face_count': compute_face_count_features,
     'graphlet_4': graphlet_4,
     'graphlet_5': graphlet_5
 }
@@ -364,69 +354,113 @@ def pad_features(features_list, max_nodes):
 
 
 
-def compute_and_save_feature(feature_name, file_ext='7',chunk_size=1000, n_jobs=4,base_dir=None):
-    if base_dir is None:
-        base_dir = Path('../Graph_Edge_Data')
+def compute_or_load_features(file_ext, selected_features, base_dir, chunk_size, n_jobs):
+    """
+    Compute or bundle selected node features for denominator graphs.
 
-    # Folder naming
-    folder_name = f"features_loop_{file_ext}" 
-    output_dir = base_dir / folder_name
-    output_dir.mkdir(parents=True, exist_ok=True)
+    Behavior:
+    - If a feature .npy is missing, compute it.
+    - If .npz already exists, load and preserve its stored features.
+    - Add any newly computed or existing .npy features into the .npz.
+    - The .npz file lives inside features_loop_{file_ext}/ and grows cumulatively.
+    """
+    from joblib import Parallel, delayed
 
-    output_file = output_dir / f'{feature_name}.npy'
-    if output_file.exists():
-        print(f"Feature {feature_name} already computed for {folder_name}. Skipping.")
-        return
+    base_dir = Path(base_dir)
+    feat_dir = base_dir / f'features_loop_{file_ext}'
+    feat_dir.mkdir(exist_ok=True)
+    npz_path = feat_dir / f'features_loop_{file_ext}.npz'
 
-    print(f"Computing {feature_name} for {folder_name}...")
+    # ----------------------------------------------------------
+    # Load existing .npz (if any)
+    # ----------------------------------------------------------
+    existing_npz = {}
+    if npz_path.exists():
+        print(f"📂 Found existing {npz_path.name}, loading current features...")
+        with np.load(npz_path, allow_pickle=True) as npz_data:
+            for key in npz_data.files:
+                existing_npz[key] = npz_data[key]
+        print(f"🧩 Existing features in archive: {list(existing_npz.keys())}")
 
-    # Load edges
-    edges_list, _ = load_graph_edges(file_ext, base_dir )
+    # ----------------------------------------------------------
+    # Identify which features need to be computed
+    # ----------------------------------------------------------
+    already_in_npz = set(existing_npz.keys())
+    existing_npys = {f.stem for f in feat_dir.glob("*.npy")}
+    missing_features = [
+        f for f in selected_features
+        if f not in already_in_npz and f not in existing_npys
+    ]
 
-    n_graphs = len(edges_list)
-    max_nodes = max(len(set(u for e in edges for u in e)) for edges in edges_list)
-    print(f"Max nodes in graphs: {max_nodes}")
-    if feature_name not in FEATURE_FUNCTIONS:
-        print(f"Feature {feature_name} not recognized. Skipping.")
-        return
-    compute_func = FEATURE_FUNCTIONS[feature_name]
-    all_features = []
+    if not missing_features:
+        print(f"✅ All requested features already exist (in .npz or as .npy).")
+    else:
+        print(f"🧮 Missing features for loop {file_ext}: {missing_features}")
+        edges_list, _ = load_graph_edges(file_ext, base_dir)
+        n_graphs = len(edges_list)
+        max_nodes = max(len(set(u for e in edges for u in e)) for edges in edges_list)
 
-    for i in tqdm(range(0, n_graphs, chunk_size)):
-        chunk_edges = edges_list[i:i+chunk_size]
-        if n_jobs > 1:
-            sub_chunks = [chunk_edges[j:j+100] for j in range(0, len(chunk_edges), 100)]
-            results = Parallel(n_jobs=n_jobs)(
-                delayed(compute_func)(sub_chunk) for sub_chunk in sub_chunks
-            )
-            # Safely flatten results
-            chunk_features = [f for sublist in results if sublist is not None for f in sublist]
+        for feat in missing_features:
+            if feat not in FEATURE_FUNCTIONS:
+                print(f"⚠️ Unknown feature {feat}, skipping.")
+                continue
+
+            func = FEATURE_FUNCTIONS[feat]
+            all_feat = []
+            for i in tqdm(range(0, n_graphs, chunk_size), desc=f"Computing {feat}"):
+                chunk = edges_list[i:i+chunk_size]
+                if n_jobs > 1:
+                    subchunks = [chunk[j:j+100] for j in range(0, len(chunk), 100)]
+                    results = Parallel(n_jobs=n_jobs)(
+                        delayed(func)(p) for p in subchunks
+                    )
+                    chunk_out = [f for sub in results for f in sub]
+                else:
+                    chunk_out = func(chunk)
+                all_feat.extend(chunk_out)
+
+            arr = pad_features(all_feat, max_nodes)
+            np.save(feat_dir / f"{feat}.npy", arr)
+            existing_npz[feat] = arr
+            print(f"✅ Computed and saved {feat}.npy")
+
+    # ----------------------------------------------------------
+    # Add any requested features from existing .npy files
+    # ----------------------------------------------------------
+    for feat in selected_features:
+        if feat in existing_npz:
+            continue  # already loaded or computed
+        path = feat_dir / f"{feat}.npy"
+        if path.exists():
+            existing_npz[feat] = np.load(path)
+            print(f"📎 Added existing {feat}.npy to archive.")
         else:
-            chunk_features = compute_func(chunk_edges)
-            if chunk_features is None:
-                chunk_features = []
-        all_features.extend(chunk_features)
+            print(f"⚠️ Feature {feat} not found anywhere — skipping.")
 
-    features_array = pad_features(all_features, max_nodes)
-    np.save(output_file, features_array)
-    print(f"Saved {feature_name} features to {output_file}")
-
+    # ----------------------------------------------------------
+    # Save the enriched archive
+    # ----------------------------------------------------------
+    np.savez_compressed(npz_path, **existing_npz)
+    print(f"💾 Updated {npz_path.name} with {len(existing_npz)} total features.")
 
 
-def compute_all_features(file_ext='7', chunk_size=1000, n_jobs=4, base_dir=None):
-    folder_name = f"features_loop_{file_ext}"
-    print(f"Computing all features for {folder_name}...")
 
-    for feature_name in FEATURE_FUNCTIONS.keys():
-        compute_and_save_feature(
-            feature_name,
-            file_ext=file_ext,
-            chunk_size=chunk_size,
-            n_jobs=n_jobs,
-            base_dir=base_dir
-        )
 
-    print(f"All features computed for {folder_name}!")
+def compute_all_features(file_ext='7', base_dir='../Graph_Edge_Data', chunk_size=100, n_jobs=1):
+    """
+    Compute and bundle *all* known features for a given loop order.
+    If they already exist as .npy, reuses them and saves everything in one .npz.
+    """
+    print(f"[ALL FEATURES] Computing all features for loop {file_ext}")
+    all_feats = list(FEATURE_FUNCTIONS.keys())
+    compute_or_load_features(
+        file_ext=file_ext,
+        selected_features=all_feats,
+        base_dir=base_dir,
+        chunk_size=chunk_size,
+        n_jobs=n_jobs
+    )
+
 
 
 if __name__ == "__main__":
@@ -491,11 +525,15 @@ if __name__ == "__main__":
             base_dir=base_dir
         )
     else:
-        for feature_name in config['features']['features_to_compute']:
-            compute_and_save_feature(
-                feature_name,
-                file_ext=file_ext,
-                chunk_size=chunk_size,
-                n_jobs=n_jobs,
-                base_dir=base_dir
-                    )
+        selected_features = config['features'].get('features_to_compute', [])
+        if not selected_features:
+            print("⚠️ No features_to_compute listed in config — computing all available ones.")
+            selected_features = list(FEATURE_FUNCTIONS.keys())
+
+        compute_or_load_features(
+            file_ext=file_ext,
+            selected_features=selected_features,
+            base_dir=base_dir,
+            chunk_size=chunk_size,
+            n_jobs=n_jobs
+        )

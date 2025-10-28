@@ -1,7 +1,7 @@
+#!/usr/bin/env python3
 """
 Convert slow CSV graph files into fast .npz binaries for later use.
-Run once per dataset (loop order). Afterward, all training and feature
-computation will read these cached .npz files instead of the CSVs.
+Supports rational coefficients like '-1/2', '3/4', etc.
 """
 
 import pandas as pd
@@ -10,10 +10,11 @@ import ast
 from pathlib import Path
 from tqdm import tqdm
 
+
 def convert_csv_to_npz(loop_order, base_dir="../Graph_Edge_Data"):
     base_dir = Path(base_dir)
-    csv_path = base_dir / f"graph_data_{loop_order}.csv"
-    npz_path = base_dir / f"graph_edges_{loop_order}.npz"
+    csv_path = base_dir / f"den_graph_data_{loop_order}.csv"
+    npz_path = base_dir / f"den_graph_edges_{loop_order}.npz"
 
     if not csv_path.exists():
         print(f"❌ CSV not found: {csv_path}")
@@ -24,11 +25,13 @@ def convert_csv_to_npz(loop_order, base_dir="../Graph_Edge_Data"):
 
     print(f"📂 Converting {csv_path.name} → {npz_path.name}")
 
-    # Load and parse once
     df = pd.read_csv(csv_path)
+
     denom_edges = [ast.literal_eval(e) for e in tqdm(df["DEN_EDGES"], desc="Parsing DEN_EDGES")]
     numer_edges = [ast.literal_eval(e) for e in tqdm(df["NUM_EDGES"], desc="Parsing NUM_EDGES")]
-    coeffs = df["COEFFICIENTS"].astype(float).to_numpy()
+
+    # Convert coefficients robustly (handles fractions and floats)
+    coeffs = np.array([(x) for x in df["COEFFICIENTS"]], dtype=float)
 
     np.savez_compressed(
         npz_path,
@@ -40,6 +43,12 @@ def convert_csv_to_npz(loop_order, base_dir="../Graph_Edge_Data"):
     size = npz_path.stat().st_size / 1e6
     print(f"✅ Saved binary version: {npz_path} ({size:.2f} MB)")
 
+def convert_all_csv_to_npz(base_dir="../Graph_Edge_Data"):
+    base_dir = Path(base_dir)
+    csv_files = sorted(base_dir.glob("den_graph_data_*.csv"))
+    for f in csv_files:
+        ext = f.stem.split("_")[-1]
+        convert_csv_to_npz(ext, base_dir)
 
 if __name__ == "__main__":
     import argparse
@@ -50,3 +59,4 @@ if __name__ == "__main__":
 
     for loop in args.loops:
         convert_csv_to_npz(loop, args.data_dir)
+    

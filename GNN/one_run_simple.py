@@ -215,7 +215,7 @@ def main():
     print(f"Training on loop orders {train_loop_orders}, testing on loop orders {test_loop_orders} with features: {selected_features}")
     print(f"Validation enabled: {use_val}")
 
-    # --- Load datasets ---
+    # --- Load datasets (now from .npz graph + feature files) ---
     train_datasets = []
     train_scaler = None
     max_features = None
