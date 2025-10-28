@@ -172,15 +172,60 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
     val_loader   = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False) if val_dataset is not None else None
     test_loader  = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=False)
 
-    # Model
+    import itertools
+    from sklearn.preprocessing import StandardScaler
+
+    # --- helpers to iterate graphs out of ConcatDataset or plain lists ---
+    def iter_graphs(ds):
+        if ds is None:
+            return []
+        if isinstance(ds, torch.utils.data.ConcatDataset):
+            return itertools.chain.from_iterable(ds.datasets)
+        return iter(ds)
+
+    # 1) Find the single GLOBAL feature width across all splits
+    all_ds = [train_dataset] + ([val_dataset] if val_dataset is not None else []) + [test_dataset]
+    global_max_features = 0
+    for ds in all_ds:
+        for g in iter_graphs(ds):
+            global_max_features = max(global_max_features, g.x.shape[1])
+
+    # 2) PAD every graph in every split up to that width (never truncate)
+    for ds in all_ds:
+        for g in iter_graphs(ds):
+            n, f = g.x.shape
+            if f < global_max_features:
+                pad = torch.zeros(n, global_max_features - f, dtype=g.x.dtype, device=g.x.device)
+                g.x = torch.cat([g.x, pad], dim=1)
+
+    # 3) (Re-)NORMALIZE consistently after padding (fit on train, apply to all)
+    #    If you already normalized inside create_simple_dataset, this will just refit and reapply.
+    train_feats = torch.cat([g.x for g in iter_graphs(train_dataset)], dim=0).cpu().numpy()
+    scaler = StandardScaler().fit(train_feats)
+
+    for ds in all_ds:
+        for g in iter_graphs(ds):
+            g.x = torch.as_tensor(scaler.transform(g.x.cpu().numpy()), dtype=torch.float32, device=g.x.device)
+
+    # 4) Sanity checks: after padding+norm, every split MUST have one width = global_max_features
+    def widths(ds):
+        ws = sorted({g.x.shape[1] for g in iter_graphs(ds)})
+        return ws
+
+
+    # 5) Build the model with the TRUE input dimension
+    true_in_channels = global_max_features
+    print(f"Detected input feature dimension for model: {true_in_channels}")
+
     model = create_gnn_model(
         config.model_name,
-        num_features=config.in_channels,
+        num_features=true_in_channels,   # <<< key change: use detected width
         hidden_dim=config.hidden_channels,
         num_classes=1,
         dropout=config.dropout,
         num_layers=getattr(config, "num_layers", 3)
     ).to(device)
+
 
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"Model has {num_params} trainable parameters")

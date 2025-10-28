@@ -215,7 +215,7 @@ def main():
     print(f"Training on loop orders {train_loop_orders}, testing on loop orders {test_loop_orders} with features: {selected_features}")
     print(f"Validation enabled: {use_val}")
 
-    # --- Load datasets (now from .npz graph + feature files) ---
+    # --- Load datasets ---
     train_datasets = []
     train_scaler = None
     max_features = None
@@ -231,10 +231,12 @@ def main():
         )
         train_datasets.append(ds)
 
-        if train_scaler is None:
-            train_scaler = scaler
-        if max_features is None:
-            max_features = feats
+    if train_scaler is None:
+        train_scaler = scaler
+    # ✅ new: always keep the largest feature width seen so far
+    if max_features is None or feats > max_features:
+        max_features = feats
+
 
     val_dataset = None  # default
 
@@ -263,9 +265,25 @@ def main():
         # Remove last loop entirely from training (discard its 70% too)
         train_datasets = train_datasets[:-1]
 
+        # ---------------------------------------------------------
+        # After all training loops have been loaded
+        # ---------------------------------------------------------
+        # Find the largest feature width among all already-loaded graphs
+        final_max_features = max(d.x.shape[1] for ds in train_datasets for d in ds)
+        print(f"🔧 Final max feature width across training loops: {final_max_features}")
+
+        # Re-pad every graph in every dataset up to this width
+        for ds in train_datasets:
+            for data in ds:
+                n_nodes, n_feats = data.x.shape
+                if n_feats < final_max_features:
+                    pad = torch.zeros(n_nodes, final_max_features - n_feats)
+                    data.x = torch.cat([data.x, pad], dim=1)
+
         # Combine all earlier loops (excluding the last one)
         train_dataset = torch.utils.data.ConcatDataset(train_datasets) if train_datasets else None
 
+        # Print validation info (only when validation is used)
         print(f"Validation ENABLED: Using 30% of {train_loop_orders[-1]} for validation.")
         print(f"Discarded 70% of {train_loop_orders[-1]} from training.")
         if train_dataset:
@@ -280,6 +298,10 @@ def main():
         train_dataset = torch.utils.data.ConcatDataset(train_datasets)
         print("Validation DISABLED: Training on all training loops.")
         print(f"Total training samples: {len(train_dataset)}")
+        #When validation is disabled, still determine the max feature width
+        final_max_features = max(d.x.shape[1] for ds in train_datasets for d in ds)
+        print(f"🔧 Final max feature width (no validation): {final_max_features}")
+
 
     # =========================================================
     # TEST SET
@@ -291,7 +313,7 @@ def main():
             selected_features=selected_features,
             normalize=True,
             scaler=train_scaler,
-            max_features=max_features,
+            max_features=final_max_features,
             data_dir=base_dir
         )
         test_datasets.append(ds)
@@ -309,17 +331,30 @@ def main():
     
     # Convert config to SimpleNamespace for compatibility
     config = config_to_namespace(config_dict)
-    config.in_channels = train_dataset[0].x.shape[1]
-    
+
+    # --- Detect true input feature dimension (global max) ---
+    import itertools
+    if isinstance(train_dataset, torch.utils.data.ConcatDataset):
+        all_graphs = itertools.chain.from_iterable(train_dataset.datasets)
+    else:
+        all_graphs = train_dataset
+    config.in_channels = max(g.x.shape[1] for g in all_graphs)
+
     # Update experiment name
-    config.experiment_name = f"{config.model_name}_train_loop_{train_loop_orders}_,test_loop_{test_loop_orders}_train_{'_'.join(selected_features)}"
-    
+    config.experiment_name = (
+        f"{config.model_name}_train_loop_{train_loop_orders}_"
+        f"test_loop_{test_loop_orders}_train_{'_'.join(selected_features)}"
+    )
+
+    # Print summary
     print(f"\nTraining configuration:")
     print(f"  Model: {config.model_name}")
-    print(f"  Input features: {config.in_channels}")
+    print(f"  Input features (max detected): {config.in_channels}")
     print(f"  Hidden channels: {config.hidden_channels}")
     print(f"  Epochs: {config.epochs}")
-    
+
+
+
 
     # Train model
     print("\nStarting training...")

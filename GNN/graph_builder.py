@@ -99,98 +99,72 @@ class SimpleGraphBuilder:
         return data
 
 
-def create_simple_dataset(file_ext='7', selected_features=None, normalize=True,
-                          data_dir='Graph_Edge_Data', scaler=None,
+def create_simple_dataset(file_ext='7', selected_features=None, normalize=True, 
+                          data_dir='Graph_Edge_Data', scaler=None, 
                           max_features=None):
     """
-    Create dataset using pre-computed features and graph data stored in .npz files.
-
+    Create dataset using pre-computed features.
     Args:
-        file_ext (str or int): Loop order to load (e.g., '7')
-        selected_features (list[str]): List of feature names to use
-        normalize (bool): Whether to normalize features
-        scaler (StandardScaler or None): Optional pre-fitted scaler
-        max_features (int or None): Force a maximum feature dimension
-
+        file_ext: Loop order(s) to load (int or list of int)
+        selected_features: List of feature names to use
+        normalize: Whether to normalize features
+        scaler: Pre-fitted scaler to use (if None, will fit new scaler when normalize=True)
+        max_features: Force a maximum feature dimension (pads/truncates if needed)
     Returns:
-        dataset (list[torch_geometric.data.Data])
-        scaler (StandardScaler or None)
-        current_max_features (int)
+        dataset: List of PyG Data objects
+        scaler: StandardScaler object (if normalize=True)
+        current_max_features: Maximum feature dimension before padding/truncating
     """
 
     # Default features
     if selected_features is None:
         selected_features = ['degree', 'betweenness', 'clustering']
 
-    feature_source = f"features_loop_{file_ext}"
-    print(f"\n=== Building dataset for loop {file_ext} ===")
-    print(f"→ Loading features: {selected_features}")
-    print(f"→ From: {feature_source}/features_loop_{file_ext}.npz")
+    print(f"Loading features: {selected_features}")
+    dataset = []
+    idx_counter = 0
+    feature_source =  f"features_loop_{file_ext}"
+    print(f"Loading features from {feature_source}...")
 
-    # --- Load precomputed node features (from .npz)
-    features_dict = load_saved_features(file_ext, selected_features, data_dir)
-
-    # --- Load graph structure (edges from den_graph_data_X.npz)
+    features_dict, labels = load_saved_features(file_ext, selected_features, data_dir)
     graph_infos = load_graph_structure(file_ext, data_dir)
 
-    # --- Load coefficients (labels) directly from graph .npz if available
-    import os
-    import pandas as pd
-    import ast
-    from pathlib import Path
-
-    base_dir = Path(data_dir)
-    npz_path = base_dir / f'den_graph_data_{file_ext}.npz'
-    if npz_path.exists():
-        import numpy as np
-        graph_data = np.load(npz_path, allow_pickle=True)
-        labels = graph_data['coefficients'].tolist()
-        print(f"📦 Loaded {len(labels)} coefficients from {npz_path.name}")
-    else:
-        # fallback if user still has only CSV
-        csv_path = base_dir / f'den_graph_data_{file_ext}.csv'
-        if csv_path.exists():
-            df = pd.read_csv(csv_path)
-            labels = df['COEFFICIENTS'].tolist()
-            print(f"⚠️ Using CSV labels (no .npz found)")
-        else:
-            raise FileNotFoundError(f"No label source found for loop {file_ext}")
-
-    # --- Build dataset ---
-    dataset = []
     for local_idx, (graph_info, label) in enumerate(zip(graph_infos, labels)):
         builder = SimpleGraphBuilder(graph_info, features_dict, label, local_idx)
         data = builder.build(selected_features)
         dataset.append(data)
+        idx_counter += 1
 
-    print(f"✅ Created dataset with {len(dataset)} graphs")
-    print(f"Feature dimension example: {dataset[0].x.shape[1]}")
+    print(f"Created dataset with {len(dataset)} graphs")
+    print(f"Feature dimension: {dataset[0].x.shape[1]}")
 
-    # --- Align feature dimensions across all graphs ---
+    # Feature dimension alignment
     feature_dims = [data.x.shape[1] for data in dataset]
     current_max_features = max(feature_dims)
-    target_features = max_features if max_features is not None else current_max_features
+    min_features = min(feature_dims)
+
+    if max_features is None or current_max_features > max_features:
+        max_features = current_max_features
+    target_features = max_features
+
 
     if any(d != target_features for d in feature_dims):
-        print(f"Standardizing to {target_features} features per node...")
+        print(f"Standardizing to {target_features} features (padding only)")
         for data in dataset:
             if data.x.shape[1] < target_features:
-                pad = torch.zeros(data.x.shape[0], target_features - data.x.shape[1])
-                data.x = torch.cat([data.x, pad], dim=1)
-            elif data.x.shape[1] > target_features:
-                data.x = data.x[:, :target_features]
+                padding = torch.zeros(data.x.shape[0], target_features - data.x.shape[1])
+                data.x = torch.cat([data.x, padding], dim=1)
 
-    # --- Normalize (if requested) ---
+    # Normalize
     if normalize:
-        print("Normalizing node features...")
-        all_feats = np.vstack([data.x.numpy() for data in dataset])
-        if scaler is None:
-            scaler = StandardScaler().fit(all_feats)
+        print("Normalizing features...")
+        all_features = np.vstack([data.x.numpy() for data in dataset])
+        scaler = StandardScaler()
+        scaler.fit(all_features)
         for data in dataset:
             data.x = torch.FloatTensor(scaler.transform(data.x.numpy()))
 
     return dataset, scaler, current_max_features
-
 
 
 #Statistics function to quickly summarize dataset
