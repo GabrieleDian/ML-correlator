@@ -179,7 +179,26 @@ if __name__ == "__main__":
     n_jobs = args.n_jobs if args.n_jobs else config['features']['n_jobs']
     base_dir = Path(config['data'].get('base_dir', '../Graph_Edge_Data'))
 
-    # Check what features are available = 7
+    # --- Auto-tune fallback if not passed ---
+    import psutil
+    if not args.n_jobs and config['features']['n_jobs'] <= 1:
+        n_cpus = psutil.cpu_count(logical=True)
+        config['features']['n_jobs'] = int(0.75 * n_cpus)
+    if not args.chunk_size or config['features']['chunk_size'] <= 100:
+        mem_gb = psutil.virtual_memory().total / 1e9
+        if mem_gb < 128:
+            config['features']['chunk_size'] = 2000
+        elif mem_gb < 256:
+            config['features']['chunk_size'] = 5000
+        elif mem_gb < 512:
+            config['features']['chunk_size'] = 10000
+        elif mem_gb < 768:
+            config['features']['chunk_size'] = 20000
+        else:
+            config['features']['chunk_size'] = 30000
+
+    
+    # Check what features are available 
     available = get_available_features(file_ext, data_dir=base_dir)
     print(f"\nAvailable features for loop {file_ext}: {available}")
     
@@ -187,7 +206,7 @@ if __name__ == "__main__":
         # Load some features
         features, labels = load_saved_features(file_ext, ['degree'])
         print(f"\nLoaded {len(labels)} graphs")
-        print(f"First graph degree features: {features['degree'][0]}")
+        print(f"[INFO] Final n_jobs={config['features']['n_jobs']}, chunk_size={config['features']['chunk_size']}")
     
     # Check consistency
     check_feature_consistency(file_ext)
