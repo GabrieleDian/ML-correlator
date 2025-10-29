@@ -126,7 +126,7 @@ def load_graph_structure(file_ext,
         end = min((i + 1) * chunk_size, n_graphs)
         subset = edges_list[start:end]
 
-        results = Parallel(n_jobs=n_jobs, prefer="threads")(
+        results = Parallel(n_jobs=n_jobs,prefer="processes")(
             delayed(process_edges)(edges) for edges in subset
         )
         graph_infos.extend(results)

@@ -184,15 +184,15 @@ def main():
 
     # Scale chunk_size based on available memory
     if mem_gb < 128:
-        auto_chunk_size = 2000
-    elif mem_gb < 256:
-        auto_chunk_size = 5000
-    elif mem_gb < 512:
-        auto_chunk_size = 10000
-    elif mem_gb < 768:
         auto_chunk_size = 20000
+    elif mem_gb < 256:
+        auto_chunk_size = 50000
+    elif mem_gb < 512:
+        auto_chunk_size = 100000
+    elif mem_gb < 768:
+        auto_chunk_size = 200000
     else:
-        auto_chunk_size = 30000  # >= 700 GB, use high-performance setting
+        auto_chunk_size = 300000  # >= 700 GB, use high-performance setting
 
 
     config_dict.setdefault("data", {})
