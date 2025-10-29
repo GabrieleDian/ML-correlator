@@ -216,7 +216,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
     # 5) Build the model with the TRUE input dimension
     true_in_channels = global_max_features
     print(f"Detected input feature dimension for model: {true_in_channels}")
-
+    
     model = create_gnn_model(
         config.model_name,
         num_features=true_in_channels,   # <<< key change: use detected width
@@ -307,6 +307,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                     "train_roc_auc": train_metrics.get("roc_auc"),
                     "train_recall": train_metrics.get("recall"),
                     "lr": optimizer.param_groups[0]["lr"],
+                    "in_channels": true_in_channels
                 }
 
                 if val_dataset is not None:

@@ -166,21 +166,28 @@ def create_simple_dataset(file_ext='7', selected_features=None, normalize=True,
 
     return dataset, scaler, current_max_features
 
+import itertools
+import numpy as np
 
-#Statistics function to quickly summarize dataset
-def quick_dataset_stats(dataset):
-    """Print quick statistics about the dataset."""
-    num_graphs = len(dataset)
-    num_nodes = [data.num_nodes for data in dataset]
-    num_edges = [data.edge_index.shape[1] // 2 for data in dataset]
-    labels = [data.y.item() for data in dataset]
-    
-    print(f"\nDataset Statistics:")
+def print_dataset_stats(ds, name="Dataset"):
+    """Print quick statistics about a dataset (handles ConcatDataset)."""
+    if isinstance(ds, torch.utils.data.ConcatDataset):
+        graphs = list(itertools.chain.from_iterable(ds.datasets))
+    else:
+        graphs = list(ds)
+
+    num_graphs = len(graphs)
+    num_nodes = [g.num_nodes for g in graphs]
+    num_edges = [g.edge_index.shape[1] // 2 for g in graphs]
+    labels = [g.y.item() for g in graphs]
+    feat_dims = sorted({g.x.shape[1] for g in graphs})
+
+    print(f"\n{name} statistics:")
     print(f"  Number of graphs: {num_graphs}")
-    print(f"  Average nodes: {np.mean(num_nodes):.1f} (min: {min(num_nodes)}, max: {max(num_nodes)})")
-    print(f"  Average edges: {np.mean(num_edges):.1f}")
-    print(f"  Label distribution: {sum(labels)} positive, {len(labels)-sum(labels)} negative")
-    print(f"  Feature dimension: {dataset[0].x.shape[1]}")
+    print(f"  Nodes: mean {np.mean(num_nodes):.1f} (min {min(num_nodes)}, max {max(num_nodes)})")
+    print(f"  Edges: mean {np.mean(num_edges):.1f}")
+    print(f"  Labels: {sum(labels)} positive, {num_graphs - sum(labels)} negative")
+    print(f"  Feature dimensions: {feat_dims}")
 
 
 if __name__ == "__main__":
@@ -194,12 +201,4 @@ if __name__ == "__main__":
         normalize=True
     )
     
-    # Print statistics
-    quick_dataset_stats(dataset)
     
-    # Show first graph
-    print(f"\nFirst graph:")
-    print(f"  Nodes: {dataset[0].num_nodes}")
-    print(f"  Edges: {dataset[0].edge_index.shape}")
-    print(f"  Features shape: {dataset[0].x.shape}")
-    print(f"  Label: {dataset[0].y.item()}")

@@ -36,7 +36,7 @@ training:
 # Experiment configuration
 experiment:
   seed: 42
-  use_wandb: false
+  use_wandb: true
   model_dir: "models"
   save_model: false
   wandb_project: train678_test9_big_sweep_models_test

@@ -9,9 +9,10 @@ import wandb
 import os
 
 # Import the simple dataset creator
-from graph_builder import create_simple_dataset, quick_dataset_stats
-from training_utils import train
+from graph_builder import create_simple_dataset, print_dataset_stats
 from types import SimpleNamespace
+from training_utils import train
+
 
 
 """Convert nested config dict to SimpleNamespace for compatibility."""
@@ -322,23 +323,29 @@ def main():
 
     print(f"Test set: {len(test_dataset)} samples (loop orders {test_loop_orders})")
 
-
-    # --- Print dataset statistics ---
-    print("\nDataset statistics:")
     
-    # Print dataset statistics
-    quick_dataset_stats(train_dataset)
     
     # Convert config to SimpleNamespace for compatibility
     config = config_to_namespace(config_dict)
 
-    # --- Detect true input feature dimension (global max) ---
+    # ---------------------------------------------------------
+    # 4. Determine global max feature width across ALL datasets
     import itertools
-    if isinstance(train_dataset, torch.utils.data.ConcatDataset):
-        all_graphs = itertools.chain.from_iterable(train_dataset.datasets)
-    else:
-        all_graphs = train_dataset
-    config.in_channels = max(g.x.shape[1] for g in all_graphs)
+    def iter_graphs(ds):
+        """Helper to safely iterate over Data objects in any dataset type."""
+        if ds is None:
+            return []
+        if isinstance(ds, torch.utils.data.ConcatDataset):
+            return itertools.chain.from_iterable(ds.datasets)
+        return ds
+    # Collect all datasets (some may be None)
+    all_datasets = [train_dataset] + ([val_dataset] if val_dataset else []) + [test_dataset]
+
+    # Compute the global maximum feature width across *all* graphs
+    global_in_channels = max(g.x.shape[1] for ds in all_datasets for g in iter_graphs(ds))
+
+    # Assign it directly to the config (so wandb sees it)
+    config.in_channels = global_in_channels
 
     # Update experiment name
     config.experiment_name = (
@@ -349,10 +356,15 @@ def main():
     # Print summary
     print(f"\nTraining configuration:")
     print(f"  Model: {config.model_name}")
-    print(f"  Input features (max detected): {config.in_channels}")
+    print(f"  Input features (max detected) during training: {config.in_channels}")
     print(f"  Hidden channels: {config.hidden_channels}")
     print(f"  Epochs: {config.epochs}")
 
+    # Print dataset info
+    print_dataset_stats(train_dataset, "Train")
+    if val_dataset:
+        print_dataset_stats(val_dataset, "Validation")
+    print_dataset_stats(test_dataset, "Test")
 
 
 
