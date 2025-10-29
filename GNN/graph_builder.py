@@ -101,7 +101,7 @@ class SimpleGraphBuilder:
 
 def create_simple_dataset(file_ext='7', selected_features=None, normalize=True, 
                           data_dir='Graph_Edge_Data', scaler=None, 
-                          max_features=None):
+                          max_features=None, n_jobs=None, chunk_size=None):
     """
     Create dataset using pre-computed features.
     Args:
@@ -126,8 +126,12 @@ def create_simple_dataset(file_ext='7', selected_features=None, normalize=True,
     feature_source =  f"features_loop_{file_ext}"
     print(f"Loading features from {feature_source}...")
 
-    features_dict, labels = load_saved_features(file_ext, selected_features, data_dir)
-    graph_infos = load_graph_structure(file_ext, data_dir)
+    features_dict, labels = load_saved_features(file_ext, 
+                                                selected_features, 
+                                                data_dir, n_jobs=n_jobs,
+                                                chunk_size=chunk_size
+                                                )
+    graph_infos = load_graph_structure(file_ext, data_dir, n_jobs=n_jobs, chunk_size=chunk_size)
 
     for local_idx, (graph_info, label) in enumerate(zip(graph_infos, labels)):
         builder = SimpleGraphBuilder(graph_info, features_dict, label, local_idx)

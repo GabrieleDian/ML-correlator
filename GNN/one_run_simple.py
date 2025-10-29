@@ -228,7 +228,9 @@ def main():
             normalize=True,
             data_dir=base_dir,
             scaler=train_scaler,
-            max_features=max_features
+            max_features=max_features,
+            n_jobs=auto_n_jobs,
+            chunk_size=auto_chunk_size
         )
         train_datasets.append(ds)
 
@@ -315,7 +317,9 @@ def main():
             normalize=True,
             scaler=train_scaler,
             max_features=final_max_features,
-            data_dir=base_dir
+            data_dir=base_dir,
+            n_jobs=auto_n_jobs,
+            chunk_size=auto_chunk_size
         )
         test_datasets.append(ds)
 

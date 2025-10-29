@@ -6,48 +6,59 @@ import numpy as np
 from pathlib import Path
 import pandas as pd
 import ast
-
+from joblib import Parallel, delayed
+import math
 data_dir = '../Graph_Edge_Data'
 
 
-def load_saved_features(file_ext, feature_names, data_dir=data_dir):
+def load_saved_features(file_ext, feature_names, data_dir="../Graph_Edge_Data",
+                        n_jobs=1, chunk_size=None):
     """
-    Load pre-computed features for a given loop order.
+    Load pre-computed features for a given loop order, possibly in parallel.
 
     Args:
-       file_ext: File extension (e.g., '7','7to8', 8)
-        feature_names: List of feature names to load
-        data_dir: Base directory for data
-        extra_train: If True, load features from "features_loop_{loop_order}to"
-                     instead of "features_loop_{loop_order}".
+        file_ext (str): loop order (e.g., '7', '8', '7to8')
+        feature_names (list): features to load
+        data_dir (str or Path): base directory
+        n_jobs (int): number of parallel workers for loading
+        chunk_size (int, optional): not used here but accepted for API consistency
 
     Returns:
-        features: Dict mapping feature names to numpy arrays
-        labels: List of graph labels
+        features: dict mapping feature names to numpy arrays
+        labels: list of graph labels
     """
-    # Select directory based on extra_train flag
     features_dir = Path(data_dir) / f'features_loop_{file_ext}'
-
-    # Load labels (always from the same CSV)
     csv_path = Path(data_dir) / f'den_graph_data_{file_ext}.csv'
+
+    if not csv_path.exists():
+        raise FileNotFoundError(f"CSV {csv_path} not found.")
+
     df = pd.read_csv(csv_path)
     labels = df['COEFFICIENTS'].tolist()
 
-    # Load requested features
-    features = {}
-    for feature_name in feature_names:
+    def load_one(feature_name):
         feature_path = features_dir / f'{feature_name}.npy'
         if not feature_path.exists():
             raise FileNotFoundError(
                 f"Feature {feature_name} not found in {features_dir}. "
-                f"Run compute_features.py first."
+                "Run compute_features.py first."
             )
+        arr = np.load(feature_path, mmap_mode='r')
+        return feature_name, arr
 
-        features[feature_name] = np.load(feature_path)
-        print(f"Loaded {feature_name}: shape {features[feature_name].shape}")
+    print(f"[INFO] Parallel loading {len(feature_names)} features "
+          f"with n_jobs={n_jobs}")
+    
+    loaded = Parallel(n_jobs=n_jobs)(
+        delayed(load_one)(fname) for fname in feature_names
+    )
+
+    features = dict(loaded)
+
+    for name, arr in features.items():
+        print(f"Loaded {name}: shape {arr.shape}")
 
     return features, labels
-
 
 
 def get_available_features(loop_order, data_dir=data_dir):
@@ -64,49 +75,68 @@ def get_available_features(loop_order, data_dir=data_dir):
     return sorted(feature_names)
 
 
-import glob
 
-def load_graph_structure(file_ext, data_dir=data_dir, extra_train=False):
+def load_graph_structure(file_ext,
+                         data_dir="../Graph_Edge_Data",
+                         n_jobs=1,
+                         chunk_size=1000):
     """
-    Load original graph edges for creating edge_index.
+    Memory-safe, parallel loader for large .npz graph datasets.
 
     Args:
-        file_ext: File extension (e.g., '7','7to8', 8)
-        data_dir: Base directory
-        extra_train: If True, load from all den_graph_data_{loop_order}to*.csv
-                     instead of den_graph_data_{loop_order}.csv
+        file_ext (str): loop order (e.g., '7', '8')
+        data_dir (str or Path): base directory
+        n_jobs (int): number of parallel workers
+        chunk_size (int): how many graphs to process per batch in memory
 
     Returns:
-        graph_infos: List of dicts with keys:
-            - num_nodes
-            - edge_list
-            - node_labels
+        list[dict]: each dict has keys num_nodes, edge_list, node_labels
     """
-    csv_path = Path(data_dir) / f'den_graph_data_{file_ext}.csv'
-    if not csv_path.exists():
-        raise FileNotFoundError(f"File not found: {csv_path}")
-    df = pd.read_csv(csv_path)
+    npz_path = Path(data_dir) / f"den_graph_data_{file_ext}.npz"
+    if not npz_path.exists():
+        raise FileNotFoundError(f"File not found: {npz_path}")
 
-    edges_list = [ast.literal_eval(e) for e in df['EDGES']]
+    print(f"[INFO] Loading large .npz file {npz_path.name} "
+          f"with n_jobs={n_jobs}, chunk_size={chunk_size}")
+
+    data = np.load(npz_path, allow_pickle=True)
+    if "edges" not in data and "edge_list" not in data:
+        raise KeyError("No 'edges' or 'edge_list' found in .npz file.")
+    edges_list = data.get("edges", data.get("edge_list"))
+
+    n_graphs = len(edges_list)
+    print(f"[INFO] Found {n_graphs:,} graphs in {npz_path.name}")
+
+    def process_edges(edges):
+        edge_indices = np.array(edges, dtype=int)
+        rev = edge_indices[:, [1, 0]]
+        edge_indices = np.vstack([edge_indices, rev])
+        edge_indices -= edge_indices.min()   # ensure 0-based indexing
+        nodes = np.unique(edge_indices)
+        return {
+            "num_nodes": len(nodes),
+            "edge_list": edge_indices.tolist(),
+            "node_labels": nodes.tolist(),
+        }
 
     graph_infos = []
-    for edges in edges_list:
-        nodes = sorted(set(u for e in edges for u in e))
-        node_to_idx = {node: i for i, node in enumerate(nodes)}
+    n_chunks = math.ceil(n_graphs / chunk_size)
+    for i in range(n_chunks):
+        start = i * chunk_size
+        end = min((i + 1) * chunk_size, n_graphs)
+        subset = edges_list[start:end]
 
-        edge_indices = []
-        for u, v in edges:
-            i, j = node_to_idx[u], node_to_idx[v]
-            edge_indices.append([i, j])
-            edge_indices.append([j, i])
+        results = Parallel(n_jobs=n_jobs, prefer="threads")(
+            delayed(process_edges)(edges) for edges in subset
+        )
+        graph_infos.extend(results)
 
-        graph_infos.append({
-            'num_nodes': len(nodes),
-            'edge_list': edge_indices,
-            'node_labels': nodes
-        })
+        print(f"[INFO] Processed chunk {i+1}/{n_chunks} "
+              f"({end-start} graphs)")
 
+    print(f"[INFO] Finished loading {len(graph_infos):,} graphs.")
     return graph_infos
+
 
 
 
@@ -179,24 +209,6 @@ if __name__ == "__main__":
     n_jobs = args.n_jobs if args.n_jobs else config['features']['n_jobs']
     base_dir = Path(config['data'].get('base_dir', '../Graph_Edge_Data'))
 
-    # --- Auto-tune fallback if not passed ---
-    import psutil
-    if not args.n_jobs and config['features']['n_jobs'] <= 1:
-        n_cpus = psutil.cpu_count(logical=True)
-        config['features']['n_jobs'] = int(0.75 * n_cpus)
-    if not args.chunk_size or config['features']['chunk_size'] <= 100:
-        mem_gb = psutil.virtual_memory().total / 1e9
-        if mem_gb < 128:
-            config['features']['chunk_size'] = 2000
-        elif mem_gb < 256:
-            config['features']['chunk_size'] = 5000
-        elif mem_gb < 512:
-            config['features']['chunk_size'] = 10000
-        elif mem_gb < 768:
-            config['features']['chunk_size'] = 20000
-        else:
-            config['features']['chunk_size'] = 30000
-
     
     # Check what features are available 
     available = get_available_features(file_ext, data_dir=base_dir)
@@ -206,7 +218,7 @@ if __name__ == "__main__":
         # Load some features
         features, labels = load_saved_features(file_ext, ['degree'])
         print(f"\nLoaded {len(labels)} graphs")
-        print(f"[INFO] Final n_jobs={config['features']['n_jobs']}, chunk_size={config['features']['chunk_size']}")
+        print(f" Final n_jobs={config['features']['n_jobs']}, chunk_size={config['features']['chunk_size']}")
     
     # Check consistency
     check_feature_consistency(file_ext)
