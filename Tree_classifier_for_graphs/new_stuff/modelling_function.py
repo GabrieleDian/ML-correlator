@@ -557,18 +557,39 @@ def run_bayes_shap_for_loop(
         plt.close()
 
         # Deciles
+        # Deciles (robust to ties/duplicates/NaNs/±inf), 1 = best (highest score)
         dfm = pd.DataFrame({"y": y_true, "score": y_score})
-        dfm["decile_rank"] = pd.qcut(-dfm["score"], q=20, labels=range(1, 21), duplicates="drop").astype(int)
-        total_pos = dfm["y"].sum()
-        dec = (
-            dfm.groupby("decile_rank", as_index=False)
-               .agg(n=("y", "size"),
-                    positives=("y", "sum"),
-                    score_min=("score", "min"),
-                    score_max=("score", "max"),
-                    score_mean=("score", "mean"))
-               .sort_values("decile_rank")
+
+        # Clean score for ranking
+        score_clean = (
+            pd.Series(dfm["score"], copy=True)
+            .replace([np.inf, -np.inf], pd.NA)
         )
+
+        # Percentile rank with ties averaged; highest score -> pct near 1.0
+        r_desc = score_clean.rank(pct=True, ascending=False, method="average")
+
+        # Map to deciles 1..20, with 1 = best
+        # r_desc in (0,1]; top -> 1, bottom -> 20
+        decile = (21 - np.ceil(r_desc * 20)).astype("Int64")
+
+        dfm["decile_rank"] = decile  # Int64 keeps <NA> for missing scores
+
+        total_pos = pd.Series(dfm["y"]).sum()
+
+        dec = (
+            dfm.dropna(subset=["decile_rank"])  # drop rows with missing score/decile
+            .groupby("decile_rank", as_index=False)
+            .agg(
+                n=("y", "size"),
+                positives=("y", "sum"),
+                score_min=("score", "min"),
+                score_max=("score", "max"),
+                score_mean=("score", "mean"),
+            )
+            .sort_values("decile_rank")
+        )
+
         dec["negatives"] = dec["n"] - dec["positives"]
         dec["precision"] = dec["positives"] / dec["n"].replace(0, np.nan)
         dec["recall_incremental"] = dec["positives"] / (total_pos if total_pos > 0 else 1)

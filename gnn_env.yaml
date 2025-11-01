@@ -1,35 +1,24 @@
 name: gnn-env
 channels:
-  - pytorch
-  - pyg
   - conda-forge
   - defaults
 dependencies:
   # Python
-  - python
+  - python=3.11
 
-  # Core PyTorch with GPU support
-  - pytorch
-  - torchvision
-  - torchaudio
-  - pytorch-cuda
+  # Essential tools
   - pip
 
-  # PyTorch Geometric and extensions
-  - pyg::torch-geometric
-  - pyg::torch-scatter
-
-  # ML and data science libraries
+  # Core libraries via conda
   - numpy
   - pandas
-  - scikit-learn
-
-  # Graph processing
-  - networkx
-
-  # Visualization
-  - matplotlib
-
-  # Logging and configuration
-  - pyyaml
-  - wandb=0.19.11
+  
+  # Install packages via pip (no torch packages)
+  - pip:
+    - scikit-learn
+    - networkx
+    - matplotlib
+    - pyyaml
+    - wandb==0.19.11
+    - tqdm
+    - joblib
