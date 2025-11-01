@@ -180,7 +180,7 @@ def main():
     mem_gb = psutil.virtual_memory().total / 1e9
 
     # Use ~75 % of CPUs for n_jobs
-    auto_n_jobs = int(0.75 * n_cpus)
+    auto_n_jobs = int(0.25 * n_cpus)
 
     # Scale chunk_size based on available memory
     if mem_gb < 128:

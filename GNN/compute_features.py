@@ -5,7 +5,7 @@ import ast
 from pathlib import Path
 from tqdm import tqdm
 from scipy.linalg import eigh
-
+from scipy.sparse.linalg import eigsh
 # Optimize chunk_size and n_jobs based on system resources
 import psutil
 
@@ -107,76 +107,61 @@ def edges_to_networkx(edges):
     return G, len(nodes)
 
 # Number of eigenvectors to compute
-k=3
-# Compute the top k eigenvectors for the regular Laplacian of each graph
-def compute_ith_eigenvector(graphs_batch, k=k,i=0):
-    """Compute k eigenvectors with the largest eigenvalues for regular Laplacian."""
-    # Initialize list to store k different features
-    features = []
 
-    for edges in graphs_batch:
-        G, n_nodes = edges_to_networkx(edges)
-        
-        # Get the regular Laplacian matrix
-        laplacian_matrix = nx.laplacian_matrix(G).toarray()
-        
-        # Compute eigenvalues and eigenvectors
-        eigenvalues, eigenvectors = eigh(laplacian_matrix)
-        
-        # Sort by eigenvalues in descending order (largest first)
-        idx = np.argsort(np.real(eigenvalues))[::-1]
-        eigenvalues = eigenvalues[idx]
-        eigenvectors = eigenvectors[:, idx]
-
-        # Take the first k eigenvectors (corresponding to largest eigenvalues)
-        top_k_eigenvectors = eigenvectors[:, :k]
-        
-        # Take real parts
-        top_k_eigenvectors = np.round(np.real(top_k_eigenvectors),8)
-        
-        features.append(top_k_eigenvectors[:,i-1].tolist())
-    return features
-
-# Create a function that takes only the i-th output of the top_k_eigenvector function
-def create_eigen_function(i):
-    """Create a function that computes only the i-th eigenvector."""
-    def eigen_function(graphs_batch):
-        return compute_ith_eigenvector(graphs_batch, k=k, i=i)
-    return eigen_function
-# Create a dictionary of functions for each eigenvector
-eigenvector_functions = {f'eigen_{i}': create_eigen_function(i) for i in range(1, k+1)}
-
-
-from scipy.sparse.linalg import eigsh # More efficient function
-
-def compute_lowest_k_eigenvectors(graphs_batch, k=3):
-    """Compute k smallest non-zero Laplacian eigenvectors for each graph."""
+def compute_extreme_eigenvectors(graphs_batch, k_low=3, k_high=3):
+    """
+    Compute the k_low smallest (non-zero) and k_high largest Laplacian eigenvectors for each graph.
+    Returns a list of (n_nodes, k_low + k_high) arrays per graph.
+    """
     feats = []
     for edges in graphs_batch:
         G, n = edges_to_networkx(edges)
         L = nx.laplacian_matrix(G).astype(float)
-        try:
-            vals, vecs = eigsh(L, k=min(k+1, n-1), which='SM')
-        except Exception:
-            vals, vecs = eigh(L.toarray())
-        idx = np.argsort(vals)
-        vals, vecs = vals[idx], vecs[:, idx]
-        nz = np.where(vals > 1e-10)[0][:k]
-        if len(nz) == 0:
-            feats.append(np.zeros((n, k)))
-        else:
-            V = np.zeros((n, k))
-            V[:, :len(nz)] = np.real(vecs[:, nz])
-            feats.append(np.round(V, 8))
-    return feats
 
-# Wrap each column into its own feature function
-def create_lowest_eigen_function(i, k=3):
-    def f(batch): 
-        return [v[:, i-1].tolist() for v in compute_lowest_k_eigenvectors(batch, k=k)]
+        # Try efficient sparse solver; fallback to dense if fails
+        try:
+            # Smallest non-zero and largest eigenvectors
+            vals_low, vecs_low = eigsh(L, k=min(k_low + 1, n-1), which='SM')  # Smallest magnitude
+            vals_high, vecs_high = eigsh(L, k=min(k_high, n-1), which='LM')   # Largest magnitude
+        except Exception:
+            L = L.toarray()
+            vals, vecs = eigh(L)
+            # Sort ascending (low first)
+            idx = np.argsort(vals)
+            vals, vecs = vals[idx], vecs[:, idx]
+            # Separate small and large
+            vals_low, vecs_low = vals, vecs
+            vals_high, vecs_high = vals, vecs
+
+        # Filter out the zero eigenvalue from the low end
+        nz = np.where(vals_low > 1e-10)[0][:k_low]
+        low_vecs = vecs_low[:, nz] if len(nz) > 0 else np.zeros((n, k_low))
+
+        # Take top k_high largest
+        high_vecs = vecs_high[:, -k_high:] if vecs_high.shape[1] >= k_high else np.zeros((n, k_high))
+
+        # Combine and round for numerical stability
+        combined = np.round(np.real(np.hstack([low_vecs, high_vecs])), 8)
+        feats.append(combined)
+
+    return feats
+# Create eigenvector functions for different k values
+def create_eigen_feature_function(i, kind='low', k_low=3, k_high=3):
+    """
+    Create function returning a specific eigenvector column (low_i or high_i).
+    """
+    def f(batch):
+        all_feats = compute_extreme_eigenvectors(batch, k_low=k_low, k_high=k_high)
+        if kind == 'low':
+            return [feat[:, i-1].tolist() for feat in all_feats]
+        else:
+            offset = k_low  # offset into the combined array
+            return [feat[:, offset + i - 1].tolist() for feat in all_feats]
     return f
 
-lowest_eigenvector_functions = {f'low_eigen_{i}': create_lowest_eigen_function(i) for i in range(1, 4)}
+low_eigenvector_functions = {f'low_eigen_{i}': create_eigen_feature_function(i, 'low') for i in range(1, 4)}
+eigenvector_functions = {f'eigen_{i}': create_eigen_feature_function(i, 'high') for i in range(1, 4)}
+
 
 
 # Compute degree features for a batch of graphs
@@ -309,6 +294,9 @@ def compute_graphlet_features(graphs_batch, k=4, sizev=1, sizee=2, connect=True)
 
     return features
 # Wrapper functions for specific graphlet sizes
+def graphlet_3(graphs_batch):
+    return compute_graphlet_features(graphs_batch, k=3)
+
 def graphlet_4(graphs_batch):
     return compute_graphlet_features(graphs_batch, k=4)
 
@@ -322,7 +310,7 @@ def graphlet_5(graphs_batch):
 # Dictionary mapping feature names to their computation functions
 FEATURE_FUNCTIONS = {
     **eigenvector_functions,  # Add eigenvector functions 
-    **lowest_eigenvector_functions,
+    **low_eigenvector_functions,
     'identity_columns': identity_column_features,
     'adjacency_columns': adjacency_column_features,
     'degree': compute_degree_features,
