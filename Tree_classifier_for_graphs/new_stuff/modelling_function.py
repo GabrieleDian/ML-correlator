@@ -658,13 +658,30 @@ def run_bayes_shap_for_loop(
     dfs = pd.read_csv(csv_path)
     dfs["loops"] = i
 
+    centrality_cols = ['Centrality_betweenness_max',
+    'Centrality_betweenness_mean',
+    'Centrality_betweenness_skew',
+    'Centrality_betweenness_std',
+    'Centrality_closeness_max',
+    'Centrality_closeness_max_norm',
+    'Centrality_closeness_mean',
+    'Centrality_closeness_mean_norm',
+    'Centrality_closeness_skew',
+    'Centrality_closeness_std',
+    'Centrality_eigenvector_max',
+    'Centrality_eigenvector_mean',
+    'Centrality_eigenvector_skew',
+    'Centrality_eigenvector_std']
+
     if column_defs is None:
         all_cols = [x for x in dfs.columns if x not in ["loops", "COEFFICIENTS"]]
         cols0 = [x for x in dfs.columns if ('motif' in x.lower()) or ('eig_' in x.lower() and 'centrality' not in x.lower())]
+        cols00 = cols0 + centrality_cols
         cols1 = [x for x in dfs.columns if 'motif' in x.lower()]
         cols5 = [x for x in dfs.columns if ('eig_' in x.lower() and 'centrality' not in x.lower())]
         cols2 = [x for x in dfs.columns if ('eig_' in x.lower() and 'centrality' not in x.lower()) or ('spectral' in x.lower() and 'centrality' not in x.lower())]
-        column_defs = {"all_columns":all_cols, "motifs_eig": cols0, "motifs": cols1, "spectral": cols2,"eig":cols5}
+        column_defs = {"all_columns":all_cols, "motifs_eig": cols0, "motifs": cols1, "spectral": cols2,"eig":cols5,\
+            "motifs_eig_centrality": cols00}
 
     output_root = Path(output_root)
     (output_root / f"loop{i}").mkdir(parents=True, exist_ok=True)
