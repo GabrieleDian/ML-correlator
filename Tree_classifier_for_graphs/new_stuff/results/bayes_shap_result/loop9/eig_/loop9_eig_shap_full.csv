@@ -1,0 +1,11 @@
+feature,importance,mean_signed_shap
+Spectral_lap_eig_1,1.1414051,-0.32839027
+Spectral_lap_eig_2,0.33091658,-0.046706114
+Spectral_lap_eig_3,0.26303232,-0.017904319
+Spectral_lap_eig_6,0.2342395,-0.01327855
+Spectral_lap_eig_4,0.22702402,-0.014617392
+Spectral_lap_eig_9,0.20080355,-0.011005455
+Spectral_lap_eig_8,0.19619618,0.004875107
+Spectral_lap_eig_7,0.19056483,-0.013781739
+Spectral_lap_eig_5,0.12086269,-0.010313133
+Spectral_lap_eig_0,0.087697275,-0.004914773

@@ -1,7 +1,7 @@
 from modelling_function_faster import run_bayes_shap_for_loop
 
 
-for i in [6,7]:   
+for i in [6,7, 8, 9, 10, 11]:   
     run_bayes_shap_for_loop(
         i,
         input_csv_template="/home/ec2-user/ML-correlator/Tree_classifier_for_graphs/new_stuff/features/merged/new_merged/{i}loops_merged.csv",

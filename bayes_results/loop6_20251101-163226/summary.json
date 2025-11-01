@@ -1,0 +1,27 @@
+{
+  "loop": 6,
+  "timestamp": "20251101-163226",
+  "n_calls": 20,
+  "n_splits": 5,
+  "n_workers": 4,
+  "random_state": 42,
+  "feature_count": 96,
+  "best_params": {
+    "n_estimators": 434,
+    "max_depth": 17,
+    "learning_rate": 0.03238930251315189,
+    "subsample": 0.8855458494371262,
+    "colsample_bytree": 0.7530953104577995,
+    "reg_alpha": 0.0,
+    "reg_lambda": 2.0546499823987263
+  },
+  "best_cv_score": 0.8,
+  "cv_auc_mean": 0.8,
+  "cv_auc_std": 0.20976176963403032,
+  "paths": {
+    "run_dir": "/home/ec2-user/ML-correlator/bayes_results/loop6_20251101-163226",
+    "history_csv": "/home/ec2-user/ML-correlator/bayes_results/loop6_20251101-163226/history.csv",
+    "thresholds_csv": "/home/ec2-user/ML-correlator/bayes_results/loop6_20251101-163226/thresholds.csv",
+    "plot_png": "/home/ec2-user/ML-correlator/bayes_results/loop6_20251101-163226/metrics.png"
+  }
+}
