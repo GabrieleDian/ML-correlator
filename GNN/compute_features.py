@@ -22,15 +22,15 @@ def autotune_resources(chunk_size_default=100, n_jobs_default=1):
 
     # Adaptive chunk_size scaling based on memory
     if mem_gb < 128:
-        chunk_size = 2000
+        chunk_size = 70000
     elif mem_gb < 256:
-        chunk_size = 5000
+        chunk_size = 120000
     elif mem_gb < 512:
-        chunk_size = 10000
+        chunk_size = 250000
     elif mem_gb < 768:
-        chunk_size = 20000
+        chunk_size = 500000
     else:
-        chunk_size = 30000  # ≥700 GB nodes
+        chunk_size = 1000000  # ≥700 GB nodes
 
     # Fall back to defaults if machine is tiny
     chunk_size = max(chunk_size, chunk_size_default)
