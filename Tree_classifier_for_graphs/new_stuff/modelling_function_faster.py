@@ -509,7 +509,7 @@ def get_global_feature_direction(shap_values, feature_names):
 def run_bayes_shap_for_loop(
     i: int,
     *,
-    input_csv_template="/Users/rezadoobary/Documents/MLCORRELATORS/ML-correlator/Tree_classifier_for_graphs/new_stuff/features/merged/new_merged/{i}loops_merged.csv",
+    input_csv_template="/Users/rezadoobary/Documents/MLCORRELATORS/ML-correlator/Tree_classifier_for_graphs/new_stuff/features/merged/new2_merged/{i}loops_merged.csv",
     output_root="/home/ec2-user/ML-correlator/Tree_classifier_for_graphs/new_stuff/results/bayes_shap_result",
     n_calls=20,
     n_splits=5,
