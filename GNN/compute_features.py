@@ -318,6 +318,7 @@ FEATURE_FUNCTIONS = {
     'clustering': compute_clustering_features,
     'closeness': compute_closeness_features,
     'pagerank': compute_pagerank_features,
+    'graphket_3': graphlet_3,
     'graphlet_4': graphlet_4,
     'graphlet_5': graphlet_5
 }
