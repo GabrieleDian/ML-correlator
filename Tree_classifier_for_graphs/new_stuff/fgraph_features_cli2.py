@@ -1334,7 +1334,11 @@ def main():
 
     # Non-batched mode
     if args.batch_size <= 0:
-        df = pd.read_csv(args.input)
+        df = pd.read_csv(args.input, header = None)
+
+        #df = pd.read_csv(f"/Users/rezadoobary/Downloads/den_graph_data_12_{i}.csv", header = None)
+        df.columns = ['EDGES','COEFFICIENTS']
+        
         feat_df = compute_batch_df(
             df,
             groups=groups,

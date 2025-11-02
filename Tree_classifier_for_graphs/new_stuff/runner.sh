@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-for i in 6; do
+outdir="/Users/rezadoobary/Documents/MLCORRELATORS/ML-correlator/Tree_classifier_for_graphs/new_stuff/features/12loops"
+mkdir -p "$outdir"
+
+for i in {1..20}; do
   echo ">> Processing i=$i"
-  python "/Users/rezadoobary/Documents/MLCorrelator2/ML-correlator/Tree_classifier_for_graphs/new_stuff/fgraph_features_cli2.py" \
-    --input "/Users/rezadoobary/Documents/MLCorrelator2/ML-correlator/Graph_Edge_Data/graph_data_${i}.csv" \
-    --output "/Users/rezadoobary/Documents/MLCorrelator2/ML-correlator/Tree_classifier_for_graphs/new_stuff/features/fgraphs/${i}loops.csv" \
-    --groups connectivity,centrality,spectral_laplacian,motifs34,motifs5,induced4,induced5
+  python "/Users/rezadoobary/Documents/MLCORRELATORS/ML-correlator/Tree_classifier_for_graphs/new_stuff/fgraph_features_cli2.py" \
+    --input "/Users/rezadoobary/Downloads/den_graph_data_12_${i}.csv" \
+    --output "$outdir/${i}part.csv" \
+    --groups centrality
 done
 
 echo "✓ All runs complete."
