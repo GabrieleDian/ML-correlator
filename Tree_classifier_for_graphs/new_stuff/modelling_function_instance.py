@@ -779,7 +779,7 @@ def run_bayes_shap_for_loop(
             #"all_columns": all_cols,
             "motifs_eig": cols0,
             "motifs": cols1,
-            "spectral": cols2,
+            #"spectral": cols2,
             "eig": cols5,
             "motifs_eig_centrality": cols00
         }

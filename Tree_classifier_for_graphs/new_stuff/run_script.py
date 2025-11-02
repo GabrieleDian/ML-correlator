@@ -1,8 +1,8 @@
-from modelling_function_instance import run_bayes_shap_for_loop
+from modelling_function_instance_faster import run_bayes_shap_for_loop
 
 
 #for i in [10, 11]:   
-for i in [10,11]:
+for i in [11]:
     run_bayes_shap_for_loop(
         i,
         input_csv_template="/home/ec2-user/ML-correlator/Tree_classifier_for_graphs/new_stuff/features/new_features/new2_merged/{i}loops_merged.csv",
