@@ -1,0 +1,47 @@
+name: ml-correlator
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Python
+  - python
+
+  # Core scientific computing
+  - numpy
+  - scipy
+  
+  # Data manipulation and analysis
+  - pandas
+  
+  # Machine learning (non-PyTorch)
+  - scikit-learn
+  
+  # Graph processing
+  - networkx
+  
+  # Visualization
+  - matplotlib
+  
+  # Configuration and utilities
+  - pyyaml
+  - pip
+  
+  # Progress bars and parallel processing
+  - tqdm
+  - joblib
+  
+  # System monitoring
+  - psutil
+  
+  # Optional packages used in notebooks
+  - xgboost
+  - sympy
+  
+  # Parquet support for pandas
+  - pyarrow
+  
+  # Logging and experiment tracking
+  - pip:
+    - wandb==0.19.11
+    - shap
+
