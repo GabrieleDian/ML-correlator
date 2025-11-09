@@ -852,7 +852,7 @@ if __name__ == "__main__":
     # Specify which consecutive loop orders to use
     # Example: range(5, 12) uses loops 5, 6, 7, 8, 9, 10, 11
     # Loops must be consecutive integers (e.g., [5, 6, 7, 8, 9, 10, 11])
-    LOOPS_TO_USE = [5,6,7]  # Change this to specify your desired loops
+    LOOPS_TO_USE = [5,6,7, 8, 9, 10, 11]  # Change this to specify your desired loops
     
     config = BayesConfig(
         n_calls=30,
