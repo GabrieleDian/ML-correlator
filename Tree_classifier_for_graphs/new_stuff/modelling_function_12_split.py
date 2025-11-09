@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.metrics import roc_auc_score
+from sklearn.utils import resample
 
 import xgboost as xgb
 from xgboost import XGBClassifier
@@ -36,6 +37,19 @@ except ImportError:
     from skopt import gp_minimize
     from skopt.space import Real, Integer
     from skopt.utils import use_named_args
+
+# SHAP (install if missing)
+try:
+    import shap
+except ImportError:
+    print("Installing shap...")
+    import subprocess
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "shap"])
+    except subprocess.CalledProcessError:
+        print("Standard pip install failed, trying with --no-build-isolation...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-build-isolation", "shap"])
+    import shap
 
 try:
     import pyarrow  # noqa
@@ -233,6 +247,7 @@ class BayesConfig:
     holdout_size: float = 0.1
     device: str = "cpu"  # "cuda" if you have a GPU
     use_oof_memmap: bool = True  # write OOF arrays to disk instead of RAM
+    shap_sample_size: int = 10000  # Number of samples for SHAP computation
 
 def bayes_opt_on_merged_stratified(
     df: pd.DataFrame,
@@ -241,17 +256,41 @@ def bayes_opt_on_merged_stratified(
     loop_col: str = "loops",
     cfg: BayesConfig = BayesConfig()
 ):
+    """
+    Bayesian optimization with stratified K-fold cross-validation.
+    """
+    logging.info("="*70)
+    logging.info("Starting Bayesian optimization with stratified K-fold validation")
+    logging.info("="*70)
+    
     # Build arrays once, compact, and free the frame
+    logging.info("Preparing data arrays...")
+    print("Preparing data arrays...", flush=True)
     data_cols = [c for c in df.columns if c not in {target_col, loop_col}]
+    logging.info(f"Feature columns: {len(data_cols)}")
     df[data_cols] = df[data_cols].astype(np.float32)
     X_all = np.ascontiguousarray(df[data_cols].to_numpy(), dtype=np.float32)
     y_all = df[target_col].to_numpy(dtype=np.int8, copy=True).ravel()
     strat_all = (df[loop_col].astype(str) + "_" + pd.Series(y_all, index=df.index).astype(str)).to_numpy()
+    # Capture loop information before deleting dataframe
+    loop_all = df[loop_col].to_numpy(dtype=np.int16, copy=True)
+    unique_loops = sorted(np.unique(loop_all).tolist())
+    
+    logging.info(f"Data arrays prepared: X shape={X_all.shape}, y shape={y_all.shape}")
+    logging.info(f"Loop distribution: {dict(zip(*np.unique(loop_all, return_counts=True)))}")
+    print(f"Data arrays prepared: {X_all.shape[0]:,} samples, {X_all.shape[1]} features", flush=True)
+    
     del df; gc.collect()
+    logging.info("DataFrame deleted, memory freed")
 
     ts = datetime.now().strftime("%Y%m%d-%H%M%S")
-    run_dir = Path(cfg.results_dir) / f"merged_{ts}"
+    run_dir = Path(cfg.results_dir) / f"merged_stratified_{ts}"
     run_dir.mkdir(parents=True, exist_ok=True)
+    logging.info(f"Results directory: {run_dir}")
+    print(f"Results directory: {run_dir}", flush=True)
+    
+    logging.info(f"Using {cfg.n_splits}-fold stratified cross-validation")
+    print(f"Using {cfg.n_splits}-fold stratified cross-validation", flush=True)
 
     # === SAME SEARCH SPACE (unchanged) ===
     dimensions = [
@@ -306,8 +345,9 @@ def bayes_opt_on_merged_stratified(
             return 1.0
 
     logging.info("\n" + "="*70)
-    logging.info("Starting MERGED Bayesian Hyperparameter Optimization (serial, ultra-lean, no scaling)")
-    logging.info("=" * 70)
+    logging.info("Starting Bayesian Hyperparameter Optimization")
+    logging.info("="*70)
+    print("\nStarting Bayesian optimization...", flush=True)
 
     result = gp_minimize(
         func=objective,
@@ -439,18 +479,124 @@ def bayes_opt_on_merged_stratified(
 
     with open(run_dir / "feature_names.json", "w") as f: json.dump(list(data_cols), f, indent=2)
     with open(run_dir / "decision_threshold.txt", "w") as f: f.write(f"{best_thr:.6f}\n")
+    
+    # ---------- SHAP COMPUTATION ----------
+    logging.info("\n" + "="*70)
+    logging.info("Computing SHAP values for final model")
+    logging.info("="*70)
+    print("\n" + "="*70, flush=True)
+    print("Computing SHAP values for final model", flush=True)
+    print("="*70, flush=True)
+    
+    try:
+        shap_results = calculate_shap_values_for_final_model(
+            model=final_model,
+            X_all=X_all,
+            feature_names=data_cols,
+            results_dir=run_dir,
+            shap_sample_size=cfg.shap_sample_size,
+            random_state=cfg.random_state
+        )
+        logging.info("SHAP computation completed successfully")
+        print("SHAP computation completed successfully", flush=True)
+    except Exception as e:
+        logging.error(f"SHAP computation failed: {e}")
+        print(f"ERROR: SHAP computation failed: {e}", flush=True)
+        import traceback
+        logging.error(traceback.format_exc())
+        shap_results = None
+    
+    # ---------- FINAL RETRAIN ON ENTIRE DATASET FOR INFERENCE ----------
+    logging.info("\n" + "="*70)
+    logging.info("Retraining model on ENTIRE dataset for inference on unseen loop orders")
+    logging.info("="*70)
+    print("\n" + "="*70, flush=True)
+    print("Retraining model on ENTIRE dataset for inference", flush=True)
+    print("="*70, flush=True)
+    
+    logging.info(f"Training on all available loops: {unique_loops}")
+    logging.info(f"Total samples: {X_all.shape[0]:,}")
+    print(f"Training on all available loops: {unique_loops}", flush=True)
+    print(f"Total samples: {X_all.shape[0]:,}", flush=True)
+    
+    # Use the best parameters from optimization
+    inference_params = dict(best_params)
+    
+    # Determine best n_estimators using holdout split
+    logging.info("Determining optimal number of estimators for full dataset training...")
+    print("Determining optimal number of estimators...", flush=True)
+    X_tr, X_val, y_tr, y_val, strat_tr, strat_val = train_test_split(
+        X_all, y_all, strat_all, test_size=cfg.holdout_size, random_state=cfg.random_state, stratify=strat_all
+    )
+    model_tmp = XGBClassifier(
+        eval_metric='logloss', random_state=cfg.random_state, n_jobs=1,
+        tree_method="hist", max_bin=256, device=cfg.device, **best_params
+    )
+    _fit_xgb_with_early_stop(model_tmp, X_tr, y_tr, X_val, y_val, early_rounds=50)
+    best_iter = getattr(model_tmp, "best_iteration", None)
+    if best_iter is None: best_iter = best_params["n_estimators"] - 1
+    logging.info(f"Best iteration determined: {best_iter + 1}")
+    print(f"Best iteration: {best_iter + 1}", flush=True)
+    del model_tmp, X_tr, X_val, y_tr, y_val; gc.collect()
+    
+    inference_params["n_estimators"] = int(best_iter + 1)
+    
+    # Train on ENTIRE dataset
+    logging.info(f"Training inference model with n_estimators={inference_params['n_estimators']} on ALL {X_all.shape[0]:,} samples...")
+    print(f"Training inference model (n_estimators={inference_params['n_estimators']}) on ALL {X_all.shape[0]:,} samples...", flush=True)
+    inference_model = XGBClassifier(
+        eval_metric='logloss', random_state=cfg.random_state, n_jobs=1,
+        tree_method="hist", max_bin=256, device=cfg.device, **inference_params
+    )
+    inference_model.fit(X_all, y_all)
+    logging.info("Inference model training completed")
+    print("Inference model training completed", flush=True)
+    
+    # Save inference model
+    logging.info("Saving inference model artifacts...")
+    print("Saving inference model artifacts...", flush=True)
+    try:
+        import joblib
+        joblib.dump(inference_model, run_dir / "inference_model_sklearn.pkl")
+        inference_model.get_booster().save_model(str(run_dir / "inference_model_booster.json"))
+        logging.info("Inference model saved successfully (joblib)")
+        print("Inference model saved successfully", flush=True)
+    except Exception as e:
+        logging.warning(f"joblib/xgboost save failed: {e}; falling back to pickle.")
+        print(f"Warning: joblib save failed, using pickle...", flush=True)
+        import pickle
+        with open(run_dir / "inference_model_sklearn.pkl", "wb") as f: 
+            pickle.dump(inference_model, f)
+        try: 
+            inference_model.get_booster().save_model(str(run_dir / "inference_model_booster.json"))
+        except Exception: 
+            pass
+    
+    # Update inference readme
     with open(run_dir / "inference_readme.txt", "w") as f:
         f.write(
+            "INFERENCE MODEL (for unseen loop orders):\n"
+            "==========================================\n"
+            "This model was trained on the ENTIRE dataset (all available loops).\n"
+            "Use this model for prediction on unseen loop orders (e.g., loop 12, 13, etc.).\n\n"
             "Inference recipe:\n"
-            "1) Load final_model_sklearn.pkl\n"
+            "1) Load inference_model_sklearn.pkl\n"
             "2) Ensure input columns match feature_names.json order\n"
             "3) Convert input to float32 ndarray with same column order\n"
             "4) p = model.predict_proba(X)[:,1]\n"
-            f"5) y_hat = (p >= {best_thr:.6f}).astype(int)\n"
+            f"5) y_hat = (p >= {best_thr:.6f}).astype(int)\n\n"
+            "Trained on loops: " + ", ".join(map(str, unique_loops)) + "\n"
+            f"Total training samples: {X_all.shape[0]:,}\n"
+            f"Model parameters: n_estimators={inference_params['n_estimators']}, "
+            f"max_depth={inference_params['max_depth']}, "
+            f"learning_rate={inference_params['learning_rate']:.6f}\n"
         )
+    
+    logging.info("Inference model ready for use on unseen loop orders")
+    print("Inference model ready for use on unseen loop orders", flush=True)
 
     summary = {
-        "mode": "merged_parquet",
+        "mode": "merged_stratified",
         "timestamp": ts,
         "n_calls": int(cfg.n_calls),
         "n_splits": int(cfg.n_splits),
@@ -463,6 +609,9 @@ def bayes_opt_on_merged_stratified(
         "selected_threshold": float(best_thr),
         "selected_threshold_score": float(best_thr_val),
         "final_model_n_estimators": int(final_params["n_estimators"]),
+        "inference_model_n_estimators": int(inference_params["n_estimators"]),
+        "inference_model_trained_on_loops": unique_loops,
+        "inference_model_total_samples": int(X_all.shape[0]),
         "paths": {
             "run_dir": str(run_dir.resolve()),
             "history_csv": str((run_dir / 'history.csv').resolve()),
@@ -470,11 +619,32 @@ def bayes_opt_on_merged_stratified(
             "plot_png": str(plot_path.resolve()) if plot_path else None,
             "final_model_sklearn_pkl": str((run_dir / "final_model_sklearn.pkl").resolve()),
             "final_model_booster_json": str((run_dir / "final_model_booster.json").resolve()),
+            "inference_model_sklearn_pkl": str((run_dir / "inference_model_sklearn.pkl").resolve()),
+            "inference_model_booster_json": str((run_dir / "inference_model_booster.json").resolve()),
             "feature_names_json": str((run_dir / "feature_names.json").resolve()),
             "decision_threshold_txt": str((run_dir / "decision_threshold.txt").resolve()),
+            "inference_readme_txt": str((run_dir / "inference_readme.txt").resolve()),
         }
     }
+    
+    if shap_results:
+        summary["paths"]["shap_full_csv"] = shap_results.get("shap_full_path")
+        summary["paths"]["shap_summary_png"] = shap_results.get("shap_summary_png")
+        summary["paths"]["shap_sample_csv"] = shap_results.get("shap_sample_path")
+    
+    logging.info("Saving summary.json...")
+    print("Saving summary.json...", flush=True)
     with open(run_dir / "summary.json", "w") as f: json.dump(summary, f, indent=2, default=_json_safe)
+    logging.info(f"Summary saved to: {run_dir / 'summary.json'}")
+
+    logging.info("\n" + "="*70)
+    logging.info("PIPELINE COMPLETED SUCCESSFULLY")
+    logging.info("="*70)
+    logging.info(f"All artifacts saved to: {run_dir}")
+    print("\n" + "="*70, flush=True)
+    print("PIPELINE COMPLETED SUCCESSFULLY", flush=True)
+    print(f"All artifacts saved to: {run_dir}", flush=True)
+    print("="*70, flush=True)
 
     return {
         'best_params': best_params,
@@ -484,8 +654,177 @@ def bayes_opt_on_merged_stratified(
         'artifacts_dir': str(run_dir.resolve()),
         'feature_names': list(data_cols),
         'decision_threshold': float(best_thr),
-        'final_model_paths': summary["paths"]
+        'final_model_paths': summary["paths"],
+        'shap_results': shap_results
     }
+
+# ---------- SHAP computation functions ----------
+def calculate_shap_values_for_final_model(
+    model,
+    X_all: np.ndarray,
+    feature_names: list[str],
+    results_dir: Path,
+    shap_sample_size: int = 10000,
+    random_state: int = 42
+):
+    """Calculate SHAP values for the final trained model."""
+    logging.info(f"Computing SHAP values on {X_all.shape[0]} samples...")
+    print(f"Computing SHAP values on {X_all.shape[0]} samples...", flush=True)
+    
+    # Ensure X is float32
+    if X_all.dtype != np.float32:
+        X_all = X_all.astype(np.float32, copy=False)
+    
+    # Create SHAP explainer
+    logging.info("Creating SHAP TreeExplainer...")
+    print("Creating SHAP TreeExplainer...", flush=True)
+    
+    try:
+        # Try using booster from sklearn model
+        if hasattr(model, 'get_booster'):
+            booster = model.get_booster()
+            explainer = shap.TreeExplainer(booster)
+            logging.info("Using XGBoost booster from sklearn model")
+        else:
+            explainer = shap.TreeExplainer(model)
+            logging.info("Using sklearn model directly")
+    except Exception as e:
+        logging.error(f"Failed to create SHAP TreeExplainer: {e}")
+        raise
+    
+    # Sample data if needed
+    if shap_sample_size is not None and X_all.shape[0] > shap_sample_size:
+        logging.info(f"Sampling {shap_sample_size} rows from {X_all.shape[0]} total rows...")
+        print(f"Sampling {shap_sample_size} rows from {X_all.shape[0]} total rows...", flush=True)
+        np.random.seed(random_state)
+        sample_indices = np.random.choice(X_all.shape[0], size=shap_sample_size, replace=False)
+        X_sample = X_all[sample_indices]
+        logging.info(f"Computing SHAP values on {X_sample.shape[0]} samples (this may take several minutes)...")
+        print(f"Computing SHAP values on {X_sample.shape[0]} samples (this may take several minutes)...", flush=True)
+        print("Progress: Starting SHAP computation...", flush=True)
+        
+        # For large samples, compute in batches with progress updates
+        if X_sample.shape[0] > 1000:
+            batch_size = 1000
+            n_batches = (X_sample.shape[0] + batch_size - 1) // batch_size
+            logging.info(f"Computing SHAP in {n_batches} batches of ~{batch_size} samples each...")
+            print(f"Computing SHAP in {n_batches} batches of ~{batch_size} samples each...", flush=True)
+            
+            shap_batches = []
+            for i in range(n_batches):
+                start_idx = i * batch_size
+                end_idx = min((i + 1) * batch_size, X_sample.shape[0])
+                batch = X_sample[start_idx:end_idx]
+                
+                logging.info(f"Processing batch {i+1}/{n_batches} (samples {start_idx+1}-{end_idx})...")
+                print(f"Progress: Batch {i+1}/{n_batches} (samples {start_idx+1}-{end_idx})...", flush=True)
+                
+                batch_shap = explainer.shap_values(batch)
+                shap_batches.append(batch_shap)
+                
+                # Progress update
+                if (i + 1) % max(1, n_batches // 10) == 0 or i == n_batches - 1:
+                    progress_pct = ((i + 1) / n_batches) * 100
+                    logging.info(f"Progress: {progress_pct:.1f}% complete ({i+1}/{n_batches} batches)")
+                    print(f"Progress: {progress_pct:.1f}% complete ({i+1}/{n_batches} batches)", flush=True)
+            
+            # Concatenate batches
+            shap_values = np.concatenate(shap_batches, axis=0)
+            logging.info("All batches processed, concatenating results...")
+            print("All batches processed, concatenating results...", flush=True)
+        else:
+            shap_values = explainer.shap_values(X_sample)
+            print("SHAP computation completed!", flush=True)
+        
+        X_used = X_sample
+    else:
+        logging.info(f"Computing SHAP values on full dataset ({X_all.shape[0]} samples)...")
+        print(f"Computing SHAP values on full dataset ({X_all.shape[0]} samples)...", flush=True)
+        print("Progress: Starting SHAP computation (this may take a while)...", flush=True)
+        shap_values = explainer.shap_values(X_all)
+        print("SHAP computation completed!", flush=True)
+        X_used = X_all
+    
+    logging.info(f"SHAP values computed. Shape: {np.array(shap_values).shape}")
+    print(f"SHAP values computed. Shape: {np.array(shap_values).shape}", flush=True)
+    
+    # Get feature importance and direction
+    logging.info("Computing feature importance...")
+    print("Computing feature importance...", flush=True)
+    importance_df = get_global_feature_importance(shap_values, feature_names)
+    direction_df = get_global_feature_direction(shap_values, feature_names)
+    
+    # Merge importance and direction
+    shap_full = importance_df.merge(direction_df, on="feature")
+    shap_full_path = results_dir / "shap_full.csv"
+    shap_full.to_csv(shap_full_path, index=False)
+    logging.info(f"Saved SHAP full results to: {shap_full_path}")
+    print(f"Saved SHAP full results to: {shap_full_path}", flush=True)
+    
+    # Create SHAP summary plot
+    logging.info("Creating SHAP summary plot...")
+    print("Creating SHAP summary plot...", flush=True)
+    plt.figure(figsize=(12, 8))
+    shap.summary_plot(shap_values, X_used, feature_names=feature_names, max_display=20, show=False)
+    plt.title("SHAP Summary (Stratified Model)")
+    shap_png_path = results_dir / "shap_summary.png"
+    plt.savefig(shap_png_path, bbox_inches='tight', dpi=200)
+    plt.close()
+    logging.info(f"Saved SHAP summary plot to: {shap_png_path}")
+    print(f"Saved SHAP summary plot to: {shap_png_path}", flush=True)
+    
+    # Save SHAP sample CSV
+    logging.info("Saving SHAP sample CSV...")
+    print("Saving SHAP sample CSV...", flush=True)
+    if shap_sample_size is not None and len(shap_values) <= shap_sample_size:
+        shap_sample = pd.DataFrame(shap_values, columns=feature_names)
+        shap_sample["sample_index"] = np.arange(len(shap_sample))
+    else:
+        n_samples = min(shap_sample_size, len(shap_values)) if shap_sample_size else len(shap_values)
+        shap_sample = resample(
+            pd.DataFrame(shap_values, columns=feature_names),
+            n_samples=n_samples,
+            random_state=random_state
+        )
+        shap_sample["sample_index"] = np.arange(len(shap_sample))
+    
+    shap_sample_path = results_dir / "shap_sample.csv"
+    shap_sample.to_csv(shap_sample_path, index=False)
+    logging.info(f"Saved SHAP sample CSV to: {shap_sample_path}")
+    print(f"Saved SHAP sample CSV to: {shap_sample_path}", flush=True)
+    
+    # Log top features
+    logging.info("\n" + "="*60)
+    logging.info("Top 20 Features by SHAP Importance")
+    logging.info("="*60)
+    logging.info(shap_full.head(20).to_string(index=False))
+    
+    return {
+        'shap_values': shap_values,
+        'explainer': explainer,
+        'shap_full_df': shap_full,
+        'shap_full_path': str(shap_full_path),
+        'shap_summary_png': str(shap_png_path),
+        'shap_sample_path': str(shap_sample_path)
+    }
+
+def get_global_feature_importance(shap_values, feature_names):
+    """Get global feature importance from SHAP values."""
+    global_importance = np.mean(np.abs(shap_values), axis=0)
+    importance_df = pd.DataFrame({
+        'feature': feature_names,
+        'importance': global_importance
+    }).sort_values('importance', ascending=False)
+    return importance_df
+
+def get_global_feature_direction(shap_values, feature_names):
+    """Get mean signed SHAP values (feature direction)."""
+    mean_shap = np.mean(shap_values, axis=0)
+    df = pd.DataFrame({
+        'feature': feature_names,
+        'mean_signed_shap': mean_shap
+    }).sort_values('mean_signed_shap', ascending=False)
+    return df
 
 # ---------- runner ----------
 def run_bayes_on_merged_parquet(
@@ -494,7 +833,7 @@ def run_bayes_on_merged_parquet(
     log_root="/home/ec2-user/ML-correlator/Tree_classifier_for_graphs/new_stuff/bayes_results/bayes_results_merged",
     cfg: BayesConfig = BayesConfig()
 ):
-    setup_logging(log_root, log_prefix="merged_bayes_ultralean_noscale")
+    setup_logging(log_root, log_prefix="merged_bayes_stratified")
     logging.info(f"Loading parquet dataset from: {dataset_dir}")
     merged = load_and_align_parquet_dataset_lean(dataset_dir, loops=list(loops))
     logging.info(f"Merged shape: {merged.shape}")
@@ -503,13 +842,18 @@ def run_bayes_on_merged_parquet(
 
     out = bayes_opt_on_merged_stratified(merged, target_col="COEFFICIENTS", loop_col="loops", cfg=cfg)
     logging.info("\n" + "="*90)
-    logging.info("Merged / loop+label-stratified optimization complete.")
+    logging.info("Stratified optimization complete.")
     logging.info(f"Best CV AUC: {out['best_cv_auc']:.4f}")
     logging.info(f"Artifacts dir: {out['artifacts_dir']}")
     logging.info("="*90)
     return out
 
 if __name__ == "__main__":
+    # Specify which consecutive loop orders to use
+    # Example: range(5, 12) uses loops 5, 6, 7, 8, 9, 10, 11
+    # Loops must be consecutive integers (e.g., [5, 6, 7, 8, 9, 10, 11])
+    LOOPS_TO_USE = [5,6,7]  # Change this to specify your desired loops
+    
     config = BayesConfig(
         n_calls=30,
         n_splits=5,
@@ -519,14 +863,16 @@ if __name__ == "__main__":
         threshold_metric="f1",
         holdout_size=0.1,
         device="cpu",          # switch to "cuda" if your instance has a GPU
-        use_oof_memmap=True
+        use_oof_memmap=True,
+        shap_sample_size=10000
     )
-    _lf = setup_logging(config.results_dir, log_prefix="merged_bayes_ultralean_noscale")
+    _lf = setup_logging(config.results_dir, log_prefix="merged_bayes_stratified")
     print(f"Log file: {_lf}")
+    print(f"Using loops: {list(LOOPS_TO_USE)}")
 
     out = run_bayes_on_merged_parquet(
         dataset_dir="/home/ec2-user/ML-correlator/Tree_classifier_for_graphs/new_stuff/features/merged/dataset/dataset",
-        loops=range(5, 12),
+        loops=LOOPS_TO_USE,
         log_root=config.results_dir,
         cfg=config
     )
