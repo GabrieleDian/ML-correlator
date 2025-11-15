@@ -12,4 +12,4 @@ fi
 
 echo "Copying $LOCAL_PATH to Academic:$REMOTE_PATH ..."
 scp -i /Users/rezadoobary/Downloads/Academic2.pem -r "$LOCAL_PATH" ec2-user@54.234.21.255:"$REMOTE_PATH"
-echo "✅ Transfer complete."
+echo "✅ Transfer complete. "
