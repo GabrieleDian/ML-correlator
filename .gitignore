@@ -19,3 +19,6 @@ __pycache__/
 wandb/
 /Tree_classifier_for_graphs/mixed_loops/features/
 /Tree_classifier_for_graphs/new_stuff/features/GNN/models/
+# Ignore large pickle files
+*.pkl
+*.pickle
