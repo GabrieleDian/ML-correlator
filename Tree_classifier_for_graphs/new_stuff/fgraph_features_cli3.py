@@ -1,39 +1,21 @@
 #!/usr/bin/env python3
-# fgraph_features_cli.py
+# fgraph_features_selected_cli.py
 # -------------------------------------------------------------
-# Full-feature graph extractor (single- or two-layer) with:
-# - All feature groups ON by default (use --groups to filter)
-# - Robust handling of empty/missing DEN/NUM layers
-# - Cross-layer metrics (when both DEN & NUM exist)
-# - Batching with resume (--batch-size, --batch-dir, --from-batch)
-# - Manifest JSON emission
-# - Row-level parallelism (--workers) + intra-row parallelism (--intra-workers)
-# - Approx betweenness (--betweenness-k)
-# - NetLSD controls (--netlsd-points, --netlsd-tmin, --netlsd-tmax)
-# - Progress bars via tqdm (disable with --no-progress)
+# Graph feature extractor restricted to a specific feature set.
+# It merges logic from:
+#   - fgraph_features_cli.py (full feature extractor)
+#   - motif_features_cli.py (motif + spectral variants)
 #
-# Input CSV:
-#   - Either EDGES (single layer) OR DEN_EDGES + NUM_EDGES (two-layer)
-#   - Edge lists must be Python-like, e.g. "[(0,1),(1,2)]"
-#   - Optional COEFFICIENTS column is preserved (can be kept first)
+# It outputs exactly the following columns (in this order):
+#   DESIRED_COLUMNS (see definition below)
 #
-# Groups (use --groups all OR a comma list):
-#   basic,connectivity,centrality,core,robustness,cycles,
-#   spectral_laplacian,spectral_adjacency,netlsd,planarity,symmetry,
-#   community,motifs34,motifs5,induced4,induced5,tda,cross_layer
-#
-# Examples:
-#   Everything (default):
-#     python fgraph_features_cli.py --input data.csv --output feats.parquet
-#
-#   Spectral only:
-#     --groups spectral_laplacian,spectral_adjacency,netlsd
-#
-#   Batched with resume:
-#     --batch-size 5000 --batch-dir out_batches --from-batch 3
-#
-#   Fast-ish but rich:
-#     --groups basic,connectivity,centrality,core,robustness,community,motifs34,spectral_laplacian
+# Supports:
+#   - Single-layer graphs via EDGES
+#   - Two-layer graphs via DEN_EDGES + NUM_EDGES
+#   - Optional COEFFICIENTS and Unnamed: 0 columns (carried through)
+#   - Batching with resume
+#   - Manifest JSON
+#   - Row-level parallelism + intra-row parallelism
 # -------------------------------------------------------------
 
 import os, argparse, ast, warnings, math, random, json
@@ -88,12 +70,254 @@ try:
 except Exception:
     _HAS_WL = False
 
-# TDA (optional)
-try:
-    from ripser import ripser
-    _HAS_RIPSER = True
-except Exception:
-    _HAS_RIPSER = False
+# ========================= Desired feature set =========================
+DESIRED_COLUMNS = [
+ 'Adjacency_energy',
+ 'Adjacency_energy_over_fro',
+ 'Adjacency_energy_per_node',
+ 'Adjacency_estrada_index',
+ 'Adjacency_estrada_per_node',
+ 'Adjacency_moment_2',
+ 'Adjacency_moment_2_over_avgdeg',
+ 'Adjacency_moment_3',
+ 'Adjacency_moment_3_over_avgdeg3',
+ 'Adjacency_moment_4',
+ 'Adjacency_moment_4_over_avgdeg4',
+ 'Assortativity_degree',
+ 'Basic_avg_degree',
+ 'Basic_avg_degree_norm',
+ 'Basic_degree_entropy',
+ 'Basic_degree_entropy_norm',
+ 'Basic_degree_skew',
+ 'Basic_degree_std',
+ 'Basic_density',
+ 'Basic_edge_to_node_ratio',
+ 'Basic_max_degree',
+ 'Basic_min_degree',
+ 'Basic_num_edges',
+ 'Basic_num_nodes',
+ 'COEFFICIENTS',
+ 'Centrality_betweenness_max',
+ 'Centrality_betweenness_mean',
+ 'Centrality_betweenness_skew',
+ 'Centrality_betweenness_std',
+ 'Centrality_closeness_max',
+ 'Centrality_closeness_max_norm',
+ 'Centrality_closeness_mean',
+ 'Centrality_closeness_mean_norm',
+ 'Centrality_closeness_skew',
+ 'Centrality_closeness_std',
+ 'Centrality_eigenvector_max',
+ 'Centrality_eigenvector_mean',
+ 'Centrality_eigenvector_skew',
+ 'Centrality_eigenvector_std',
+ 'Clustering_frac_one',
+ 'Clustering_frac_zero',
+ 'Clustering_mean',
+ 'Clustering_q10',
+ 'Clustering_q50',
+ 'Clustering_q90',
+ 'Comm_count',
+ 'Comm_internal_edge_frac',
+ 'Comm_modularity',
+ 'Comm_size_gini',
+ 'Comm_size_max',
+ 'Connectivity_avg_shortest_path_length',
+ 'Connectivity_diameter',
+ 'Connectivity_diameter_norm',
+ 'Connectivity_is_connected',
+ 'Connectivity_num_components',
+ 'Connectivity_num_components_per_node',
+ 'Connectivity_radius',
+ 'Connectivity_radius_norm',
+ 'Connectivity_wiener_index',
+ 'Core_core_index_mean',
+ 'Core_max_core_index',
+ 'Cycle_num_cycles_len_5',
+ 'Cycle_num_cycles_len_6',
+ 'Degree_gini',
+ 'Ecc_mean',
+ 'Ecc_q90',
+ 'Eff_diameter_p90',
+ 'Kirchhoff_index',
+ 'Motif_4_cliques',
+ 'Motif_4_cliques_per_Cn4',
+ 'Motif_4_cycles',
+ 'Motif_4_cycles_per_Cn4',
+ 'Motif_induced_C4',
+ 'Motif_induced_C4_per_Cn4',
+ 'Motif_induced_Diamond',
+ 'Motif_induced_Diamond_per_Cn4',
+ 'Motif_induced_K1_3',
+ 'Motif_induced_K1_3_per_Cn4',
+ 'Motif_induced_K4',
+ 'Motif_induced_K4_per_Cn4',
+ 'Motif_induced_P4',
+ 'Motif_induced_P4_per_Cn4',
+ 'Motif_induced_TailedTriangle',
+ 'Motif_induced_TailedTriangle_per_Cn4',
+ 'Motif_induced_connected_per_4set',
+ 'Motif_square_clustering_proxy',
+ 'Motif_triangle_edge_frac_ge2',
+ 'Motif_triangle_edge_frac_zero',
+ 'Motif_triangle_edge_incidence_mean',
+ 'Motif_triangle_edge_incidence_median',
+ 'Motif_triangle_edge_incidence_q90',
+ 'Motif_triangle_edge_incidence_std',
+ 'Motif_triangles',
+ 'Motif_triangles_per_Cn3',
+ 'Motif_wedges',
+ 'Motif_wedges_per_max',
+ 'NetLSD_mean',
+ 'NetLSD_q10',
+ 'NetLSD_q90',
+ 'NetLSD_std',
+ 'Planarity_face_size_max',
+ 'Planarity_face_size_mean',
+ 'Planarity_face_size_mean_norm',
+ 'Planarity_num_faces',
+ 'Planarity_num_faces_over_upperbound',
+ 'Robust_articulation_points',
+ 'Robust_articulation_points_per_node',
+ 'Robust_bridge_count',
+ 'Robust_bridge_count_per_edge',
+ 'Spectral_algebraic_connectivity',
+ 'Spectral_algebraic_connectivity_over_avgdeg',
+ 'Spectral_lap_eig_0',
+ 'Spectral_lap_eig_1',
+ 'Spectral_lap_eig_2',
+ 'Spectral_lap_eig_3',
+ 'Spectral_lap_eig_4',
+ 'Spectral_lap_eig_5',
+ 'Spectral_lap_eig_6',
+ 'Spectral_lap_eig_7',
+ 'Spectral_lap_eig_8',
+ 'Spectral_lap_eig_9',
+ 'Spectral_laplacian_heat_trace_t0.1',
+ 'Spectral_laplacian_heat_trace_t0.1_per_node',
+ 'Spectral_laplacian_heat_trace_t1.0',
+ 'Spectral_laplacian_heat_trace_t1.0_per_node',
+ 'Spectral_laplacian_heat_trace_t5.0',
+ 'Spectral_laplacian_heat_trace_t5.0_per_node',
+ 'Spectral_laplacian_mean',
+ 'Spectral_laplacian_skew',
+ 'Spectral_laplacian_std',
+ 'Spectral_spectral_gap',
+ 'Spectral_spectral_gap_rel',
+ 'Symmetry_aut_size_log_over_log_nfact',
+ 'Symmetry_automorphism_group_order',
+ 'Symmetry_num_orbits',
+ 'Symmetry_num_orbits_per_node',
+ 'Symmetry_orbit_size_max',
+ 'Symmetry_orbit_size_max_per_node',
+ 'TDA_Betti0_at_q25',
+ 'TDA_Betti0_at_q25_per_node',
+ 'TDA_Betti0_at_q50',
+ 'TDA_Betti0_at_q50_per_node',
+ 'TDA_Betti0_at_q75',
+ 'TDA_Betti0_at_q75_per_node',
+ 'TDA_Betti1_at_q25',
+ 'TDA_Betti1_at_q25_per_node',
+ 'TDA_Betti1_at_q50',
+ 'TDA_Betti1_at_q50_per_node',
+ 'TDA_Betti1_at_q75',
+ 'TDA_Betti1_at_q75_per_node',
+ 'TDA_H0_count',
+ 'TDA_H0_count_per_node',
+ 'TDA_H0_max_persistence',
+ 'TDA_H0_max_persistence_over_diam',
+ 'TDA_H0_mean_birth',
+ 'TDA_H0_mean_birth_over_diam',
+ 'TDA_H0_mean_death',
+ 'TDA_H0_mean_death_over_diam',
+ 'TDA_H0_mean_persistence',
+ 'TDA_H0_mean_persistence_over_diam',
+ 'TDA_H0_persistence_entropy',
+ 'TDA_H0_total_persistence',
+ 'TDA_H0_total_persistence_over_diam',
+ 'TDA_H1_count',
+ 'TDA_H1_count_per_node',
+ 'TDA_H1_max_persistence',
+ 'TDA_H1_max_persistence_over_diam',
+ 'TDA_H1_mean_birth',
+ 'TDA_H1_mean_birth_over_diam',
+ 'TDA_H1_mean_death',
+ 'TDA_H1_mean_death_over_diam',
+ 'TDA_H1_mean_persistence',
+ 'TDA_H1_mean_persistence_over_diam',
+ 'TDA_H1_persistence_entropy',
+ 'TDA_H1_total_persistence',
+ 'TDA_H1_total_persistence_over_diam',
+ 'Unnamed: 0',
+ 'Wiener_mean_distance',
+ 'log_Adjacency_estrada_per_node',
+ 'Motif_5_cliques',
+ 'Motif_5_cliques_per_Cn5',
+ 'Motif_5_cycles',
+ 'Motif_5_cycles_per_Cn5',
+ 'Motif_5_cycles_per_Kn',
+ 'Motif_induced5_g_0_5',
+ 'Motif_induced5_g_0_5_per_Cn5',
+ 'Motif_induced5_g_10_5',
+ 'Motif_induced5_g_10_5_per_Cn5',
+ 'Motif_induced5_g_11_5',
+ 'Motif_induced5_g_11_5_per_Cn5',
+ 'Motif_induced5_g_12_5',
+ 'Motif_induced5_g_12_5_per_Cn5',
+ 'Motif_induced5_g_13_5',
+ 'Motif_induced5_g_13_5_per_Cn5',
+ 'Motif_induced5_g_14_5',
+ 'Motif_induced5_g_14_5_per_Cn5',
+ 'Motif_induced5_g_15_5',
+ 'Motif_induced5_g_15_5_per_Cn5',
+ 'Motif_induced5_g_16_5',
+ 'Motif_induced5_g_16_5_per_Cn5',
+ 'Motif_induced5_g_17_5',
+ 'Motif_induced5_g_17_5_per_Cn5',
+ 'Motif_induced5_g_18_5',
+ 'Motif_induced5_g_18_5_per_Cn5',
+ 'Motif_induced5_g_1_5',
+ 'Motif_induced5_g_1_5_per_Cn5',
+ 'Motif_induced5_g_20_5',
+ 'Motif_induced5_g_20_5_per_Cn5',
+ 'Motif_induced5_g_2_5',
+ 'Motif_induced5_g_2_5_per_Cn5',
+ 'Motif_induced5_g_3_5',
+ 'Motif_induced5_g_3_5_per_Cn5',
+ 'Motif_induced5_g_4_5',
+ 'Motif_induced5_g_4_5_per_Cn5',
+ 'Motif_induced5_g_5_5',
+ 'Motif_induced5_g_5_5_per_Cn5',
+ 'Motif_induced5_g_6_5',
+ 'Motif_induced5_g_6_5_per_Cn5',
+ 'Motif_induced5_g_7_5',
+ 'Motif_induced5_g_7_5_per_Cn5',
+ 'Motif_induced5_g_8_5',
+ 'Motif_induced5_g_8_5_per_Cn5',
+ 'Motif_induced5_g_9_5',
+ 'Motif_induced5_g_9_5_per_Cn5',
+ 'Motif_induced_connected_per_5set',
+ 'Motif_induced_g_1_4',
+ 'Motif_induced_g_1_4_per_Cn4',
+ 'Motif_induced_g_2_4',
+ 'Motif_induced_g_2_4_per_Cn4',
+ 'Motif_induced_g_3_4',
+ 'Motif_induced_g_3_4_per_Cn4',
+ 'Motif_induced_g_4_4',
+ 'Motif_induced_g_4_4_per_Cn4',
+ 'Motif_induced_g_5_4',
+ 'Motif_induced_g_5_4_per_Cn4',
+ 'Motif_induced_g_6_4',
+ 'Motif_induced_g_6_4_per_Cn4',
+ 'Spectral_adjacency_energy',
+ 'Spectral_adjacency_estrada_index',
+ 'Spectral_adjacency_moment_2',
+ 'Spectral_adjacency_moment_3',
+ 'Spectral_adjacency_moment_4',
+ 'Spectral_kirchhoff_index',
+ 'Spectral_laplacian_heat_trace_t0.5',
+ 'Spectral_laplacian_heat_trace_t2.0',
+]
 
 # ========================= Feature groups =========================
 ALL_GROUPS = [
@@ -266,7 +490,7 @@ def _square_clustering_proxy(G, A=None):
         return np.nan
     return float(4.0 * c4 / denom)
 
-# ---- induced 4-node ----
+# ---- induced 4-node (original classification) ----
 def _classify_induced4(G_sub):
     if not nx.is_connected(G_sub): return None
     m = G_sub.number_of_edges()
@@ -312,6 +536,12 @@ def _adjacency_spectrum_features(A):
     return energy, estrada, m2, m3, m4
 
 # ========================= TDA helpers =========================
+try:
+    from ripser import ripser
+    _HAS_RIPSER = True
+except Exception:
+    _HAS_RIPSER = False
+
 def _tda_vr_h_summary_from_spdm(G):
     out = {
         "TDA_H0_count": np.nan, "TDA_H0_total_persistence": np.nan,
@@ -446,8 +676,9 @@ def _five_cycle_count(G):
                             count += 1
     return int(count)
 
-# ========================= induced 5-node (WL) =========================
+# ========================= induced 5-node (WL, g_*_5 naming) =========================
 _G5_REPS = []; _G5_HASH2NAME = {}; _G5_NAMES = []
+
 def _init_g5_representatives():
     global _G5_REPS, _G5_HASH2NAME, _G5_NAMES
     if _G5_REPS or not _HAS_WL:
@@ -460,7 +691,38 @@ def _init_g5_representatives():
             if not any(nx.is_isomorphic(g, r) for r in reps):
                 reps.append(nx.convert_node_labels_to_integers(g, ordering="sorted"))
         reps.sort(key=lambda H: (H.number_of_edges(), sorted([d for _, d in H.degree()])))
-        names = [f"G5_{i:02d}" for i in range(len(reps))]
+
+        names = []
+        for i, rep in enumerate(reps):
+            m = rep.number_of_edges()
+            degs = sorted([d for _, d in rep.degree()])
+            if m == 4:
+                if degs == [1,1,1,1,4]: names.append("g_0_5")
+                else: names.append(f"g_{i}_5")
+            elif m == 5:
+                if degs == [1,1,1,2,3]: names.append("g_1_5")
+                elif degs == [1,1,2,2,2]: names.append("g_2_5")
+                else: names.append(f"g_{i}_5")
+            elif m == 6:
+                if degs == [1,1,2,2,2]: names.append("g_3_5")
+                elif degs == [1,2,2,2,3]: names.append("g_4_5")
+                elif degs == [2,2,2,2,2]: names.append("g_7_5")
+                else: names.append(f"g_{i}_5")
+            elif m == 7:
+                if degs == [1,2,2,2,4]: names.append("g_5_5")
+                elif degs == [2,2,2,3,3]: names.append("g_6_5")
+                elif degs == [2,2,2,2,3]: names.append("g_8_5")
+                else: names.append(f"g_{i}_5")
+            elif m == 8:
+                # For m==8 we don't distinguish all shapes here; keep unique ids
+                names.append(f"g_{i}_5")
+            elif m == 9:
+                names.append("g_17_5")
+            elif m == 10:
+                names.append("g_20_5")
+            else:
+                names.append(f"g_{i}_5")
+
         hash2name = {}
         for name, rep in zip(names, reps):
             h = wl_hash(rep)
@@ -468,6 +730,7 @@ def _init_g5_representatives():
         _G5_REPS, _G5_HASH2NAME, _G5_NAMES = reps, hash2name, names
     except Exception:
         _G5_REPS, _G5_HASH2NAME, _G5_NAMES = [], {}, []
+
 try:
     _init_g5_representatives()
 except Exception:
@@ -534,7 +797,7 @@ def _induced5_counts(G, *, sample_fraction: float = 1.0, random_state: int = 42,
         connected_total = 0
         for S in part:
             H = G.subgraph(S)
-            if not nx.is_connected(H): 
+            if not nx.is_connected(H):
                 continue
             connected_total += 1
             try:
@@ -635,7 +898,7 @@ def extract_features_single_graph(
 ) -> Dict[str, Any]:
 
     rnd = random.Random(seed)
-    enabled = lambda k: groups.get(k, False)
+    enabled = lambda k: groups.get(k, True) if groups else True
     feats: Dict[str, Any] = {}
     n = G.number_of_nodes(); m = G.number_of_edges()
 
@@ -747,17 +1010,21 @@ def extract_features_single_graph(
             feats.update({f"Spectral_lap_eig_{i}": float(pad[i]) for i in range(K)})
             nonzero = leigs[leigs > 1e-12]
             feats["Kirchhoff_index"] = float(n * np.sum(1.0 / nonzero)) if len(nonzero) >= 1 else np.nan
+            feats["Spectral_kirchhoff_index"] = feats["Kirchhoff_index"]
         except Exception:
+            K = max(1, int(lap_eigs_k))
             feats.update({
                 "Spectral_algebraic_connectivity": np.nan,
                 "Spectral_spectral_gap":           np.nan,
                 "Spectral_laplacian_mean":         np.nan,
                 "Spectral_laplacian_std":          np.nan,
                 "Spectral_laplacian_skew":         np.nan,
-                **{f"Spectral_lap_eig_{i}": np.nan for i in range(max(1, int(lap_eigs_k)))},
+                **{f"Spectral_lap_eig_{i}": np.nan for i in range(K)},
                 "Kirchhoff_index": np.nan,
+                "Spectral_kirchhoff_index": np.nan,
             })
-        feats.update(_laplacian_heat_traces(leigs, ts=(0.1, 1.0, 5.0)))
+        # Heat traces at multiple times
+        feats.update(_laplacian_heat_traces(leigs, ts=(0.1, 0.5, 1.0, 2.0, 5.0)))
 
     # NETLSD summaries
     if enabled("netlsd"):
@@ -773,19 +1040,18 @@ def extract_features_single_graph(
             feats["NetLSD_std"]  = float(np.std(heat))
             feats["NetLSD_q10"]  = float(np.quantile(heat, 0.10))
             feats["NetLSD_q90"]  = float(np.quantile(heat, 0.90))
-            feats["NetLSD_vector_json"] = json.dumps([float(x) for x in heat])
         else:
             feats["NetLSD_mean"] = np.nan
             feats["NetLSD_std"]  = np.nan
             feats["NetLSD_q10"]  = np.nan
             feats["NetLSD_q90"]  = np.nan
-            feats["NetLSD_vector_json"] = json.dumps([])
 
     # PLANARITY
     if enabled("planarity"):
         try:
             planar, emb = nx.check_planarity(G)
-            feats["Planarity_is_planar"] = bool(planar)
+            # Planarity_is_planar removed per user request
+            # feats["Planarity_is_planar"] = bool(planar)
             if planar:
                 face_list = extract_faces(emb)
                 f_sizes = [len(face) for face in face_list]
@@ -797,7 +1063,8 @@ def extract_features_single_graph(
                 feats["Planarity_face_size_mean"] = np.nan
                 feats["Planarity_face_size_max"]  = np.nan
         except Exception:
-            feats["Planarity_is_planar"] = np.nan
+            # Planarity_is_planar removed per user request
+            # feats["Planarity_is_planar"] = np.nan
             feats["Planarity_num_faces"]      = np.nan
             feats["Planarity_face_size_mean"] = np.nan
             feats["Planarity_face_size_max"]  = np.nan
@@ -851,12 +1118,24 @@ def extract_features_single_graph(
         if n > ind4_exact_nmax:
             max_samples = ind4_max_samples if ind4_max_samples > 0 else 50000
         ind4 = _induced4_counts(G, max_samples=max_samples, rng=rnd, n_jobs=intra_workers)
+        # Original naming
         for k, v in ind4.items():
             feats[f"Motif_induced_{k}"] = float(v)
+        # g_*_4 naming mapped from original
+        g_map = {
+            "P4": "g_1_4",
+            "K1_3": "g_2_4",
+            "C4": "g_3_4",
+            "TailedTriangle": "g_4_4",
+            "Diamond": "g_5_4",
+            "K4": "g_6_4",
+        }
+        for old_name, g_name in g_map.items():
+            feats[f"Motif_induced_{g_name}"] = float(ind4.get(old_name, 0.0))
         total_4sets = safe_comb(n, 4) if n >= 4 else np.nan
         feats["Motif_induced_connected_per_4set"] = float(sum(ind4.values()) / total_4sets) if (total_4sets and total_4sets==total_4sets) else np.nan
 
-    # INDUCED 5 (WL)
+    # INDUCED 5 (g_*_5)
     if enabled("induced5"):
         ind5_counts, connected5 = _induced5_counts(G, sample_fraction=ind5_sample_frac, random_state=seed, n_jobs=intra_workers)
         for name, val in ind5_counts.items():
@@ -874,6 +1153,12 @@ def extract_features_single_graph(
         feats["Adjacency_moment_2"]      = m2
         feats["Adjacency_moment_3"]      = m3
         feats["Adjacency_moment_4"]      = m4
+        # Duplicate names with Spectral_ prefix
+        feats["Spectral_adjacency_energy"]        = energy
+        feats["Spectral_adjacency_estrada_index"] = estrada
+        feats["Spectral_adjacency_moment_2"]      = m2
+        feats["Spectral_adjacency_moment_3"]      = m3
+        feats["Spectral_adjacency_moment_4"]      = m4
 
     # TDA
     if enabled("tda"):
@@ -913,6 +1198,10 @@ def extract_features_single_graph(
             for key in ["K1_3","P4","C4","TailedTriangle","Diamond","K4"]:
                 raw = feats.get(f"Motif_induced_{key}", np.nan)
                 feats[f"Motif_induced_{key}_per_Cn4"] = raw/Cn4 if Cn4 and Cn4==Cn4 else np.nan
+            # g_*_4 per_Cn4
+            for old, gname in {"P4":"g_1_4","K1_3":"g_2_4","C4":"g_3_4","TailedTriangle":"g_4_4","Diamond":"g_5_4","K4":"g_6_4"}.items():
+                raw = feats.get(f"Motif_induced_{gname}", np.nan)
+                feats[f"Motif_induced_{gname}_per_Cn4"] = raw/Cn4 if Cn4 and Cn4==Cn4 else np.nan
         if enabled("motifs5"):
             c5 = feats.get("Motif_5_cycles", np.nan)
             k5 = feats.get("Motif_5_cliques", np.nan)
@@ -1007,13 +1296,6 @@ def parse_edge_list(x):
     return []
 
 def build_graphs_from_row(row):
-    """
-    Returns one of:
-      {"SINGLE": G}                        -- if EDGES provided (or all empty)
-      {"DEN": G_DEN, "NUM": G_NUM, "TOTAL": G_DEN ∪ G_NUM}  -- if both non-empty
-      {"DEN": G_DEN}                       -- if only DEN non-empty
-      {"NUM": G_NUM}                       -- if only NUM non-empty
-    """
     if "EDGES" in row and pd.notna(row["EDGES"]):
         E = parse_edge_list(row["EDGES"])
         G = nx.Graph(); G.add_edges_from(E)
@@ -1039,7 +1321,6 @@ def build_graphs_from_row(row):
         G_NUM = nx.Graph(); G_NUM.add_edges_from(num_list)
         return {"NUM": G_NUM}
 
-    # All empty -> return empty graph so we still produce a row
     return {"SINGLE": nx.Graph()}
 
 def count_cross_layer_motifs(G_den, G_num, motif="triangle"):
@@ -1109,17 +1390,31 @@ def extract_features_row(
             distance_exact_if_leq=distance_exact_if_leq,
             seed=seed, intra_workers=intra_workers, betweenness_k=betweenness_k,
         )
-        if "COEFFICIENTS" in row: feats["COEFFICIENTS"] = row["COEFFICIENTS"]
+        for meta_col in ("COEFFICIENTS", "Unnamed: 0"):
+            if meta_col in row:
+                feats[meta_col] = row[meta_col]
         return feats
 
     # Layered path (DEN/NUM[/TOTAL]), possibly partial
     out: Dict[str, Any] = {}
+    
+    has_den = "DEN" in graphs
+    has_num = "NUM" in graphs
+    has_both = has_den and has_num
+    
+    # Check if we have DEN_EDGES or NUM_EDGES columns (even if empty)
+    # This determines if we should use suffixed features
+    # We check if the column exists in the row, regardless of whether it has a value
+    has_den_edges_col = "DEN_EDGES" in row.index
+    has_num_edges_col = "NUM_EDGES" in row.index
+    has_layered_columns = has_den_edges_col or has_num_edges_col
 
-    # Compute for whichever layers exist
-    for tag in ("DEN","NUM","TOTAL"):
-        if tag in graphs:
-            feats_tag = extract_features_single_graph(
-                graphs[tag], groups,
+    if has_layered_columns:
+        # We have DEN_EDGES or NUM_EDGES columns: use suffixed features
+        # Only create features for graphs that actually exist (non-empty)
+        if has_den:
+            feats_den = extract_features_single_graph(
+                graphs["DEN"], groups,
                 lap_eigs_k=lap_eigs_k, netlsd_points=netlsd_points,
                 netlsd_tmin=netlsd_tmin, netlsd_tmax=netlsd_tmax,
                 ind4_exact_nmax=ind4_exact_nmax, ind4_max_samples=ind4_max_samples,
@@ -1128,9 +1423,52 @@ def extract_features_row(
                 distance_exact_if_leq=distance_exact_if_leq,
                 seed=seed, intra_workers=intra_workers, betweenness_k=betweenness_k,
             )
-            out.update({f"{k}_{tag}": v for k, v in feats_tag.items()})
+            out.update({f"{k}_DEN": v for k, v in feats_den.items()})
+        
+        if has_num:
+            feats_num = extract_features_single_graph(
+                graphs["NUM"], groups,
+                lap_eigs_k=lap_eigs_k, netlsd_points=netlsd_points,
+                netlsd_tmin=netlsd_tmin, netlsd_tmax=netlsd_tmax,
+                ind4_exact_nmax=ind4_exact_nmax, ind4_max_samples=ind4_max_samples,
+                ind5_sample_frac=ind5_sample_frac,
+                distance_max_sources=distance_max_sources,
+                distance_exact_if_leq=distance_exact_if_leq,
+                seed=seed, intra_workers=intra_workers, betweenness_k=betweenness_k,
+            )
+            out.update({f"{k}_NUM": v for k, v in feats_num.items()})
+        
+        # Only create TOTAL if both DEN and NUM exist
+        if has_both and "TOTAL" in graphs:
+            feats_total = extract_features_single_graph(
+                graphs["TOTAL"], groups,
+                lap_eigs_k=lap_eigs_k, netlsd_points=netlsd_points,
+                netlsd_tmin=netlsd_tmin, netlsd_tmax=netlsd_tmax,
+                ind4_exact_nmax=ind4_exact_nmax, ind4_max_samples=ind4_max_samples,
+                ind5_sample_frac=ind5_sample_frac,
+                distance_max_sources=distance_max_sources,
+                distance_exact_if_leq=distance_exact_if_leq,
+                seed=seed, intra_workers=intra_workers, betweenness_k=betweenness_k,
+            )
+            out.update({f"{k}_TOTAL": v for k, v in feats_total.items()})
+    else:
+        # Single-layer graph (EDGES column): compute features without suffix
+        # This shouldn't happen here since SINGLE is handled above, but keep for safety
+        for tag in ("DEN", "NUM"):
+            if tag in graphs:
+                feats = extract_features_single_graph(
+                    graphs[tag], groups,
+                    lap_eigs_k=lap_eigs_k, netlsd_points=netlsd_points,
+                    netlsd_tmin=netlsd_tmin, netlsd_tmax=netlsd_tmax,
+                    ind4_exact_nmax=ind4_exact_nmax, ind4_max_samples=ind4_max_samples,
+                    ind5_sample_frac=ind5_sample_frac,
+                    distance_max_sources=distance_max_sources,
+                    distance_exact_if_leq=distance_exact_if_leq,
+                    seed=seed, intra_workers=intra_workers, betweenness_k=betweenness_k,
+                )
+                out.update(feats)
+                break
 
-    # Cross-layer metrics only if BOTH DEN and NUM exist
     if groups.get("cross_layer", False) and ("DEN" in graphs) and ("NUM" in graphs):
         G_DEN, G_NUM = graphs["DEN"], graphs["NUM"]
         G_TOTAL = nx.compose(G_DEN, G_NUM)
@@ -1138,11 +1476,12 @@ def extract_features_row(
         e_den, e_num = G_DEN.number_of_edges(), G_NUM.number_of_edges()
         union_edges = set(G_DEN.edges()) | set(G_NUM.edges())
         inter_edges = set(G_DEN.edges()) & set(G_NUM.edges())
-        out["Edge_ratio_DEN_NUM"] = e_den / max(e_num, 1)
+        # Edge_ratio_DEN_NUM and Edge_overlap_frac removed per user request
+        # out["Edge_ratio_DEN_NUM"] = e_den / max(e_num, 1)
         out["Edge_overlap_count"] = len(inter_edges)
         out["Edge_jaccard"] = len(inter_edges) / max(len(union_edges), 1)
-        out["Edge_overlap_frac_DEN"] = len(inter_edges) / max(e_den, 1)
-        out["Edge_overlap_frac_NUM"] = len(inter_edges) / max(e_num, 1)
+        # out["Edge_overlap_frac_DEN"] = len(inter_edges) / max(e_den, 1)
+        # out["Edge_overlap_frac_NUM"] = len(inter_edges) / max(e_num, 1)
         out["Node_overlap_frac"] = len(set(G_DEN.nodes()) & set(G_NUM.nodes())) / max(n, 1)
 
         cross_tri = count_cross_layer_motifs(G_DEN, G_NUM, "triangle")
@@ -1170,7 +1509,9 @@ def extract_features_row(
         out["Cross_diamonds_mixed_per_Cn4"]  = cross_dia / Cn4 if Cn4 and Cn4 == Cn4 else np.nan
         out["Cross_K4_mixed_per_Cn4"]        = cross_k4  / Cn4 if Cn4 and Cn4 == Cn4 else np.nan
 
-    if "COEFFICIENTS" in row: out["COEFFICIENTS"] = row["COEFFICIENTS"]
+    for meta_col in ("COEFFICIENTS", "Unnamed: 0"):
+        if meta_col in row:
+            out[meta_col] = row[meta_col]
     return out
 
 # ========================= Batch core =========================
@@ -1179,6 +1520,53 @@ def _safe_extract_row(row, **kwargs):
         return extract_features_row(row, **kwargs)
     except Exception as e:
         return {"__error__": str(e)}
+
+def _finalize_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Ensure all DESIRED_COLUMNS are present, add missing ones as NaN,
+    but keep all computed columns (including suffixed ones like _DEN, _NUM, _TOTAL).
+    
+    If we have layered graphs (suffixed columns), we don't add unsuffixed DESIRED_COLUMNS.
+    If we have single-layer graphs (unsuffixed columns), we add missing DESIRED_COLUMNS.
+    
+    Order: DESIRED_COLUMNS first (if applicable), then any additional computed columns.
+    """
+    # Check if we have layered graphs (suffixed columns)
+    has_suffixed = any(col.endswith(('_DEN', '_NUM', '_TOTAL')) for col in df.columns)
+    
+    if has_suffixed:
+        # Layered graphs: don't add unsuffixed DESIRED_COLUMNS, just keep what we computed
+        # Remove any unsuffixed columns that are in DESIRED_COLUMNS (they shouldn't be there)
+        # But preserve meta columns like COEFFICIENTS and Unnamed: 0
+        meta_cols = {"COEFFICIENTS", "Unnamed: 0"}
+        cols_to_keep = [col for col in df.columns if not (col in DESIRED_COLUMNS and col not in meta_cols and not col.endswith(('_DEN', '_NUM', '_TOTAL')))]
+        df = df[cols_to_keep]
+        # Sort columns: meta columns first, then suffixed columns grouped by feature name, then any extras
+        meta_cols_present = [col for col in meta_cols if col in df.columns]
+        other_cols = [col for col in df.columns if col not in meta_cols]
+        all_cols = meta_cols_present + sorted(other_cols)
+        return df.reindex(columns=all_cols)
+    else:
+        # Single-layer graphs: add missing DESIRED_COLUMNS as NaN
+        missing = [col for col in DESIRED_COLUMNS if col not in df.columns]
+        
+        if missing:
+            # Create a DataFrame of all missing columns at once
+            missing_block = pd.DataFrame(
+                {col: np.nan for col in missing},
+                index=df.index,
+            )
+            df = pd.concat([df, missing_block], axis=1)
+        
+        # Get all columns: DESIRED_COLUMNS first, then any extras
+        desired_set = set(DESIRED_COLUMNS)
+        extra_cols = [col for col in df.columns if col not in desired_set]
+        extra_cols.sort()
+        all_cols = DESIRED_COLUMNS + extra_cols
+        
+        return df.reindex(columns=all_cols)
+
+
 
 def compute_batch_df(
     df: pd.DataFrame,
@@ -1201,10 +1589,12 @@ def compute_batch_df(
     progress: bool,
 ) -> pd.DataFrame:
 
+    # ---------- serial path ----------
     if workers is None or workers <= 0 or not _HAS_JOBLIB:
         rows = []
         it = df.iterrows()
-        it = _tqdm(it, total=len(df), desc="Rows") if progress else it
+        if progress:
+            it = _tqdm(it, total=len(df), desc="Rows")
         for _, r in it:
             rows.append(_safe_extract_row(
                 r,
@@ -1222,11 +1612,13 @@ def compute_batch_df(
                 intra_workers=intra_workers,
                 betweenness_k=betweenness_k,
             ))
-        return pd.DataFrame(rows)
+        df_rows = pd.DataFrame(rows)
+        return _finalize_columns(df_rows)
 
-    iterator = (
-        _safe_extract_row(
-            r,
+    # ---------- parallel path ----------
+    def _job(row: pd.Series):
+        return _safe_extract_row(
+            row,
             groups=groups,
             lap_eigs_k=lap_eigs_k,
             netlsd_points=netlsd_points,
@@ -1241,18 +1633,22 @@ def compute_batch_df(
             intra_workers=intra_workers,
             betweenness_k=betweenness_k,
         )
-        for _, r in df.iterrows()
-    )
+
+    iterator = (r for _, r in df.iterrows())
+
     if progress and _HAS_TQDM_JOBLIB:
         with tqdm_joblib(_tqdm(total=len(df), desc="Rows (parallel)")):
             results = Parallel(n_jobs=workers, backend=backend)(
-                delayed(lambda x: x)(x) for x in iterator
+                delayed(_job)(row) for row in iterator
             )
     else:
         results = Parallel(n_jobs=workers, backend=backend)(
-            list(delayed(lambda x: x)(x) for x in iterator)
+            delayed(_job)(row) for row in iterator
         )
-    return pd.DataFrame(results)
+
+    df_rows = pd.DataFrame(results)
+    return _finalize_columns(df_rows)
+
 
 # ========================= IO helpers / manifest =========================
 def infer_out_format(path: str, override: Optional[str]) -> str:
@@ -1280,7 +1676,7 @@ def save_manifest(path: str, manifest: dict):
 # ========================= CLI =========================
 def main():
     ap = argparse.ArgumentParser(
-        description="Full-feature graph extractor with groups, batching, resume, manifest, parallelism."
+        description="Graph feature extractor restricted to a specific feature set."
     )
     ap.add_argument("--input", required=True, help="Input CSV with EDGES or DEN_EDGES+NUM_EDGES.")
     ap.add_argument("--output", required=True, help="Output file path (csv or parquet). In batched mode, used for format inference.")
@@ -1336,9 +1732,8 @@ def main():
     if args.batch_size <= 0:
         df = pd.read_csv(args.input)
 
-        #df = pd.read_csv(f"/Users/rezadoobary/Downloads/den_graph_data_12_{i}.csv", header = None)
-        #df.columns = ['DEN_EDGES','NUM_EDGES','COEFFICIENTS']
-        
+    
+
         feat_df = compute_batch_df(
             df,
             groups=groups,
@@ -1412,8 +1807,7 @@ def main():
     total_rows = count_data_rows(args.input)
     n_batches = (total_rows + args.batch_size - 1) // args.batch_size if args.batch_size > 0 else 0
 
-    # Load existing manifest on resume
-    manifest_path = os.path.join(batch_dir, "manifest.json")                    
+    manifest_path = os.path.join(batch_dir, "manifest.json")
     manifest = {"mode":"batched","input":os.path.abspath(args.input),"batch_dir":os.path.abspath(batch_dir),
                 "out_format": out_fmt,"rows_total": total_rows,"batch_size": args.batch_size,
                 "settings":{
@@ -1437,7 +1831,6 @@ def main():
         except Exception:
             pass
 
-    # Iterate chunks with resume
     start_row = args.from_batch * args.batch_size if args.from_batch > 0 else 0
     chunk_iter = pd.read_csv(args.input, chunksize=args.batch_size, skiprows=range(1, start_row+1)) \
                  if start_row > 0 else pd.read_csv(args.input, chunksize=args.batch_size)
@@ -1452,16 +1845,14 @@ def main():
             chunk = next(chunk_iter)
         except StopIteration:
             break
-        # Compute row span for this chunk
+
         start_idx = total_rows_seen
         end_idx = start_idx + len(chunk) - 1
 
-        # File path for this batch
         fname = f"feats_batch_{batch_idx:05d}_{start_idx:06d}-{end_idx:06d}.{('parquet' if out_fmt=='parquet' else 'csv')}"
         out_path = os.path.join(batch_dir, fname)
 
         if os.path.exists(out_path):
-            # Already processed, register if missing in manifest
             if not any(b.get("file")==os.path.abspath(out_path) for b in manifest.get("batches", [])):
                 manifest["batches"].append({
                     "index": int(batch_idx),
@@ -1469,13 +1860,11 @@ def main():
                     "file": os.path.abspath(out_path),
                 })
                 save_manifest(manifest_path, manifest)
-            # Skip
             total_rows_seen += len(chunk)
             batch_idx += 1
             if batch_pbar: batch_pbar.update(1)
             continue
 
-        # Compute features for this chunk
         feat_df = compute_batch_df(
             chunk,
             groups=groups,
@@ -1502,7 +1891,6 @@ def main():
 
         write_frame(feat_df, out_path, out_fmt)
 
-        # Update manifest
         manifest["batches"].append({
             "index": int(batch_idx),
             "rows": {"start": int(start_idx), "end": int(end_idx), "count": int(len(chunk))},
