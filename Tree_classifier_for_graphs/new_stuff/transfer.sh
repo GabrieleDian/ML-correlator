@@ -2,8 +2,8 @@
 # Usage: ./copy_to_academic.sh <local_path> <remote_path>
 # Example: ./copy_to_academic.sh ./myfolder /home/ec2-user/
 
-LOCAL_PATH=/Users/rezadoobary/Documents/MLCORRELATORS/ML-correlator/Tree_classifier_for_graphs/new_stuff/features/merged/dataset
-REMOTE_PATH=/home/ec2-user/ML-correlator/Tree_classifier_for_graphs/new_stuff/features/merged/dataset
+LOCAL_PATH=/Users/rezadoobary/Downloads/graf/
+REMOTE_PATH=/home/ec2-user/ML-correlator/Tree_classifier_for_graphs/new_stuff/features/merged/dataset/dataset/fgraphs/fgraphs
 
 if [ -z "$LOCAL_PATH" ] || [ -z "$REMOTE_PATH" ]; then
   echo "Usage: $0 <local_path> <remote_path>"
