@@ -4,7 +4,8 @@
 \contentsline {section}{\numberline {3}Methodology}{3}{section.3}%
 \contentsline {subsection}{\numberline {3.1}Modelling}{3}{subsection.3.1}%
 \contentsline {subsection}{\numberline {3.2}Hyperparameter tuning}{4}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Feature considerations}{4}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.3}Interpretatbility considerations}{4}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Feature considerations}{4}{subsection.3.4}%
 \contentsline {section}{\numberline {4}Intra-loop modelling}{4}{section.4}%
-\contentsline {section}{\numberline {5}Cross-loop modelling : predicing 12-loops}{4}{section.5}%
-\contentsline {section}{\numberline {A}Complete Feature Descriptions}{4}{appendix.A}%
+\contentsline {section}{\numberline {5}Cross-loop modelling : predicing 12-loops}{5}{section.5}%
+\contentsline {section}{\numberline {A}Complete Feature Descriptions}{5}{appendix.A}%

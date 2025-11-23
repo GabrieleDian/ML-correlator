@@ -9,6 +9,7 @@
 \usepackage{siunitx}
 \usepackage{bookmark}
 \usepackage[a4paper, left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
+\usepackage{xcolor}
 
 \title{Graph Coefficients in $\mathcal{N} = 4 $ SYM via Tree Based Machine Learning}
 \author{}
@@ -122,17 +123,22 @@ Within each block we perform various subsets of the full feature set where appli
 \subsection{Hyperparameter tuning}
 
 We used bayesian optimisation.
+\subsection{Interpretatbility considerations}
+
+We use SHAP values to exmplain models.
 
 \subsection{Feature considerations}
 
 We used the following feature groups:
 
 \begin{itemize}
-\item All Features
-\item Lowest 10 laplacian eigenvalues
-\item Lowest 10 laplacian eigenvalues and all motifs of 3,4 and 5 vertices.
-\item all motifs of 3,4 and 5 vertices.
-\item Lowest 10 laplacian eigenvalues, all motifs of 3,4 and 5 vertices and centrality measures.
+\item All Features - \verb|{all}| - 243
+\item Lowest 10 laplacian eigenvalues  \verb|{eig}| - 10
+\item Lowest 10 laplacian eigenvalues and all motifs of 3,4 and 5 vertices.  \verb|{eig, motifs}| - 84
+\item all motifs of 3,4 and 5 vertices. \verb|{motifs}| - 74
+\item all spectral features (which include eigenvalues as a subset). \verb|{spectral}| - 31
+\item eigenvalues, all motifs of 3,4 and 5 vertices and centrality measures. - 98
+\verb|{eig, motifs, centrality}|
 
 \end{itemize}
 
@@ -142,6 +148,46 @@ We are very interested in the laplacian eigenvalues which are standard permutati
 
 
 \section{Intra-loop modelling}
+
+Using 5-fold cross validation. 
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.25}
+
+\begin{tabular}{c|cccccc}
+\hline
+\textbf{Loop} &
+\verb|{eig}| &
+\verb|{spectral}| &
+\verb|{motifs}| &
+\verb|{eig, motifs}| &
+\verb|{eig, motifs, centrality}| &
+\verb|{all}| \\
+\hline
+
+6  & \textbf{0.7500} & {\color{red}0.7292} & 0.5744 & 0.6607 & 0.4702 & 0.6905 \\
+
+7  & 0.7163 & {\color{red}0.8078} & 0.7464 & 0.7768 & 0.7859 & \textbf{0.8590} \\
+
+8  & 0.8174 & 0.8469 & 0.8081 & 0.8525 & {\color{red}0.8785} & \textbf{0.9064} \\
+
+9  & 0.8555 & 0.8839 & 0.8622 & 0.8998 & {\color{red}0.9252} & \textbf{0.9456} \\
+
+10 & 0.8714 & {\color{red}0.8990} & 0.8842 & 0.9169 & \textbf{0.9452} & -- \\
+
+11 & 0.8827 & {\color{red}0.9149} & 0.8765 & 0.9149 & \textbf{0.9478} & -- \\
+
+\hline
+\end{tabular}
+
+\caption{AUC scores across feature column sets and loop orders. Best value per loop in bold; second-best highlighted in red. We did not bother persuing all columns for 10 and 11 loops as these took quite some time.}
+\label{tab:asz}
+\end{table}
+
+\footnote{For final presentation - we probably do not want to show all columns at all, instead qualitatively argue all other columns types - also need to argue for 10 eigenvalues.}Our key observation from table~\ref{tab:asz} is that after 
+considering all possible features, the next most performant feature space is \verb|{eig, motifs, centrality}|. We also observe that the \verb|{motifs}| feature space starts to become more relevant as the
+loop level increases.
 
 
 \section{Cross-loop modelling : predicing 12-loops}
