@@ -17,9 +17,14 @@ FEATURE_COST = {
     "betweenness":  0.07,
     "clustering":   0.07,
     "eigen_1":      1.0,
-    "eigen":        1.0,
-    "graphlet_4":   156.0,
-    "graphlet_5":   250.0,   # placeholder until benchmarked
+    "eigen_2":      1.0,
+    "eigen_3":      1.0,
+    "low_eigen_1":  1.0,
+    "low_eigen_2":  1.0,
+    "low_eigen_3":  1.0,
+    "graphlet_3":   15,
+    "graphlet_4":   150.0,
+    "graphlet_5":   500.0,   # placeholder until benchmarked
 }
 
 def autotune_resources(feature_name,
@@ -492,11 +497,12 @@ if __name__ == "__main__":
     parser.add_argument('--n-jobs', type=int, help='Number of jobs (overrides config)')
     args = parser.parse_args()
 
-    # Default config
+    # ---------------- Default config ----------------
     config = {
         'data': {
             'file_ext': 7,
-            'base_dir': '../Graph_Edge_Data',        },
+            'base_dir': '../Graph_Edge_Data',
+        },
         'features': {
             'chunk_size': 100,
             'n_jobs': 1,
@@ -505,7 +511,7 @@ if __name__ == "__main__":
         }
     }
 
-    # Load YAML config if provided
+    # ---------------- Load YAML config (if any) ----------------
     if args.config:
         with open(args.config, 'r') as f:
             user_config = yaml.safe_load(f)
@@ -515,43 +521,77 @@ if __name__ == "__main__":
             else:
                 config[section] = user_config[section]
 
-    # Set chunk_size, n_jobs, base_dir and file_ext
-    file_ext = args.file_ext if args.file_ext else config['data']['file_ext']
-    # --- Auto-tune if user didn't override from command line ---
-    if args.chunk_size or args.n_jobs:
-        # Respect explicit user settings
-        chunk_size = args.chunk_size or config['features']['chunk_size']
-        n_jobs = args.n_jobs or config['features']['n_jobs']
-    else:
-        # Auto-detect based on hardware
-        chunk_size, n_jobs = autotune_resources(
-        feature_name=args.feature,
-        chunk_size_default=config['features']['chunk_size'],
-        n_jobs_default=config['features']['n_jobs']
-        )
-
-
+    # ---------------- Basic paths ----------------
     base_dir = Path(config['data'].get('base_dir', '../Graph_Edge_Data'))
+    file_ext = args.file_ext if args.file_ext else config['data']['file_ext']
 
-    
-            # Compute multiple or all features
-    if config['features']['compute_all']:
-        compute_all_features(
-            file_ext=file_ext,
-            chunk_size=chunk_size,
-            n_jobs=n_jobs,
-            base_dir=base_dir
-        )
+    # ---------------- Determine which features to run ----------------
+    if args.feature:
+        # CLI override: single feature
+        features_to_run = [args.feature]
     else:
-        selected_features = config['features'].get('features_to_compute', [])
-        if not selected_features:
-            print("⚠️ No features_to_compute listed in config — computing all available ones.")
-            selected_features = list(FEATURE_FUNCTIONS.keys())
+        feats = config['features'].get('features_to_compute', [])
+
+        if config['features'].get('compute_all'):
+            # Compute all known features
+            features_to_run = list(FEATURE_FUNCTIONS.keys())
+        elif feats:
+            # Use list from config
+            features_to_run = feats
+        else:
+            # Fallback: no list given → compute all available
+            print("⚠️ No features_to_compute listed in config — defaulting to all available features.")
+            features_to_run = list(FEATURE_FUNCTIONS.keys())
+
+    print(f"[CONFIG] Features to compute: {features_to_run}")
+
+        # ---------------- Loop over requested features ----------------
+    import time
+
+    for feature_name in features_to_run:
+        print(f"\n=== Computing feature: {feature_name} ===")
+
+        # Determine chunk_size and n_jobs for THIS feature
+        if args.chunk_size is not None or args.n_jobs is not None:
+            chunk_size = (
+                args.chunk_size
+                if args.chunk_size is not None
+                else config['features']['chunk_size']
+            )
+            n_jobs = (
+                args.n_jobs
+                if args.n_jobs is not None
+                else config['features']['n_jobs']
+            )
+        else:
+            # Auto-tune per feature
+            chunk_size, n_jobs = autotune_resources(
+                feature_name=feature_name,
+                chunk_size_default=config['features']['chunk_size'],
+                n_jobs_default=config['features']['n_jobs']
+            )
+
+        print(f"[CONFIG] feature={feature_name}, chunk_size={chunk_size}, n_jobs={n_jobs}")
+
+        # ---------------- Timing wrapper ----------------
+        t0 = time.perf_counter()
 
         compute_or_load_features(
             file_ext=file_ext,
-            selected_features=selected_features,
+            selected_features=[feature_name],
             base_dir=base_dir,
             chunk_size=chunk_size,
             n_jobs=n_jobs
         )
+
+        t1 = time.perf_counter()
+        elapsed = t1 - t0
+
+        # Nicely formatted time output
+        if elapsed < 60:
+            print(f"[TIME] Finished computing {feature_name} in {elapsed:.2f} seconds")
+        else:
+            minutes = elapsed / 60
+            print(f"[TIME] Finished computing {feature_name} in "
+                  f"{minutes:.2f} minutes ({elapsed:.2f} seconds)")
+
