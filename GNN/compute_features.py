@@ -9,6 +9,9 @@ from scipy.sparse.linalg import eigsh
 # Optimize chunk_size and n_jobs based on system resources
 import psutil
 
+import psutil
+
+# Relative computational costs (normalized to eigen_1 = 1.0)
 FEATURE_COST = {
     "degree":       0.07,
     "betweenness":  0.07,
@@ -16,25 +19,53 @@ FEATURE_COST = {
     "eigen_1":      1.0,
     "eigen":        1.0,
     "graphlet_4":   156.0,
-    "graphlet_5":   250.0,  # placeholder, measure later
+    "graphlet_5":   250.0,   # placeholder until benchmarked
 }
 
-def autotune(feature):
-    cost = FEATURE_COST.get(feature, 1.0)
+def autotune_resources(feature_name,
+                       chunk_size_default=100,
+                       n_jobs_default=1):
+    """
+    Auto-tune chunk_size and n_jobs based on:
+    - feature computational cost
+    - available CPU threads
+    - available RAM
+    - default fallbacks provided by YAML or command line
+    """
+
+    # Get cost; fallback to medium if unknown
+    cost = FEATURE_COST.get(feature_name, 1.0)
+
+    # Hardware specs
     n_cpus = psutil.cpu_count(logical=True)
     mem_gb = psutil.virtual_memory().total / 1e9
 
-    # ---- n_jobs rule ----
-    # α = 0.8 gives ~80% CPU utilization for cheap work
-    n_jobs = int(0.8 * n_cpus / (cost ** 0.5))
+    # ----------------------------------------------------
+    # 1. Determine n_jobs
+    # ----------------------------------------------------
+    # Heavy features: use fewer jobs
+    # Light features: use more jobs
+    # Scaling rule: jobs ∝ 1/sqrt(cost)
+    alpha = 0.8  # max 80% CPU utilization for light work
+    n_jobs = int(alpha * n_cpus / (cost ** 0.5))
+
+    # Enforce safe bounds + defaults
+    n_jobs = max(n_jobs_default, n_jobs)
     n_jobs = max(1, n_jobs)
 
-    # ---- chunk_size rule ----
-    # β = 3000 was calibrated empirically to your benchmarks
-    chunk_size = int(3000 * mem_gb / cost)
-    chunk_size = max(chunk_size, 10)
+    # ----------------------------------------------------
+    # 2. Determine chunk_size
+    # ----------------------------------------------------
+    # Scaling rule: chunk_size ∝ RAM / cost
+    beta = 3000
+    chunk_size = int(beta * mem_gb / cost)
 
-    print(f"[AUTOTUNE] feature={feature} → cost={cost:.2f}, "
+    # Respect default minimum (YAML)
+    chunk_size = max(chunk_size_default, chunk_size)
+    chunk_size = max(1, chunk_size)
+
+    print(f"[AUTOTUNE] Feature={feature_name}, cost={cost:.2f}, "
+          f"Detected {n_cpus} CPUs, {mem_gb:.1f} GB RAM → "
           f"n_jobs={n_jobs}, chunk_size={chunk_size}")
 
     return chunk_size, n_jobs
@@ -494,9 +525,11 @@ if __name__ == "__main__":
     else:
         # Auto-detect based on hardware
         chunk_size, n_jobs = autotune_resources(
-            chunk_size_default=config['features']['chunk_size'],
-            n_jobs_default=config['features']['n_jobs']
+        feature_name=args.feature,
+        chunk_size_default=config['features']['chunk_size'],
+        n_jobs_default=config['features']['n_jobs']
         )
+
 
     base_dir = Path(config['data'].get('base_dir', '../Graph_Edge_Data'))
 
