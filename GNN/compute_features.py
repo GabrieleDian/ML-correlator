@@ -9,34 +9,32 @@ from scipy.sparse.linalg import eigsh
 # Optimize chunk_size and n_jobs based on system resources
 import psutil
 
-def autotune_resources(chunk_size_default=100, n_jobs_default=1):
-    """
-    Auto-adjust chunk_size and n_jobs based on node CPU and memory specs.
-    Returns (chunk_size, n_jobs) optimized for current environment.
-    """
+FEATURE_COST = {
+    "degree":       0.07,
+    "betweenness":  0.07,
+    "clustering":   0.07,
+    "eigen_1":      1.0,
+    "eigen":        1.0,
+    "graphlet_4":   156.0,
+    "graphlet_5":   250.0,  # placeholder, measure later
+}
+
+def autotune(feature):
+    cost = FEATURE_COST.get(feature, 1.0)
     n_cpus = psutil.cpu_count(logical=True)
     mem_gb = psutil.virtual_memory().total / 1e9
 
-    # Use ~75% of available CPUs
-    n_jobs = max(1, int(0.75 * n_cpus))
+    # ---- n_jobs rule ----
+    # α = 0.8 gives ~80% CPU utilization for cheap work
+    n_jobs = int(0.8 * n_cpus / (cost ** 0.5))
+    n_jobs = max(1, n_jobs)
 
-    # Adaptive chunk_size scaling based on memory
-    if mem_gb < 128:
-        chunk_size = 70000
-    elif mem_gb < 256:
-        chunk_size = 120000
-    elif mem_gb < 512:
-        chunk_size = 250000
-    elif mem_gb < 768:
-        chunk_size = 500000
-    else:
-        chunk_size = 1000000  # ≥700 GB nodes
+    # ---- chunk_size rule ----
+    # β = 3000 was calibrated empirically to your benchmarks
+    chunk_size = int(3000 * mem_gb / cost)
+    chunk_size = max(chunk_size, 10)
 
-    # Fall back to defaults if machine is tiny
-    chunk_size = max(chunk_size, chunk_size_default)
-    n_jobs = max(n_jobs, n_jobs_default)
-
-    print(f"[AUTOTUNE] Detected {n_cpus} CPUs, {mem_gb:.1f} GB RAM → "
+    print(f"[AUTOTUNE] feature={feature} → cost={cost:.2f}, "
           f"n_jobs={n_jobs}, chunk_size={chunk_size}")
 
     return chunk_size, n_jobs
