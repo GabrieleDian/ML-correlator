@@ -194,6 +194,55 @@ loop level increases.
 
 
 
+Having established that a good feature set from our choice is Eigenvalues$\cup$Graphlets$\cup$Centrality, we perform that same training paradigm for testing at 12 loops using our hierarchal approach.
+
+\begin{table}[ht]
+\centering
+
+\begin{tabular}{c|c|c|c|c}
+\hline
+\textbf{Train Loops} & \textbf{Validation Loop} & \textbf{ROC--AUC} & \textbf{Train Size} & \textbf{Validation Size} \\
+\hline
+
+{[5, 6]} & 7  & 0.7664 & 38      & 164       \\
+{[5, 6, 7]} & 8  & 0.8073 & 202     & 1432      \\
+{[5, 6, 7, 8]} & 9  & 0.8416 & 1634    & 13972     \\
+{[5, 6, 7, 8, 9]} & 10 & 0.8668 & 15606   & 153252    \\
+{[5, 6, 7, 8, 9, 10]} & 11 & 0.8861 & 168858  & 1697302   \\
+
+\hline
+\end{tabular}
+
+\caption{Out-of-distribution performance across increasing loop orders. Training is performed on all lower loops, and evaluation is done on unseen higher-loop data. The overall cross-validation AUC is \textbf{0.8336.}}
+\label{tab:gbdt_cross_loop_results}
+\end{table}
+
+
+This approach picks our the following hyperparameters for our GBDT model.
+\begin{table}[h!]
+\centering
+\begin{tabular}{l|c}
+\hline
+\textbf{Parameter} & \textbf{Value} \\
+\hline
+n\_estimators      & 454 \\
+max\_depth         & 6 \\
+learning\_rate     & 0.0187 \\
+subsample          & 0.6246 \\
+colsample\_bytree  & 0.6002 \\
+reg\_alpha         & 1.6358 \\
+reg\_lambda        & 4.3745 \\
+\hline
+\end{tabular}
+\caption{Optimised hyperparameters from model tuning.}
+\label{tab:best_params}
+\end{table}
+
+
+This yields an ROC--AUC score of \textbf{0.9064} for our 12-loops planar graph dataset.
+
+
+
 
 
 
@@ -216,6 +265,23 @@ loop level increases.
         %\subsubsection{Shap Analysis}
 
         %\subsection{Ensemble learning}
+\section{f-graphs}
+
+
+\subsection{contributing graphs}
+
+\subsection{coefficients}
+
+
+Can take the quarter plus approach
+
+Note that there is only 1 example of the coefficient as a catalan number. Meaning we can only get through loop order modelling.
+
+Option of non-signed.
+
+
+
+
 
 \appendix
 
