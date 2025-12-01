@@ -1,0 +1,28 @@
+{
+  "loop": 6,
+  "timestamp": "20251201-155429",
+  "n_calls": 20,
+  "n_splits": 5,
+  "n_workers": 1,
+  "random_state": 42,
+  "feature_count": 10,
+  "best_params": {
+    "n_estimators": 94,
+    "max_depth": 12,
+    "learning_rate": 0.07750368872478823,
+    "subsample": 0.6362425738131283,
+    "colsample_bytree": 0.847354403733235,
+    "reg_alpha": 1.9123099563358141,
+    "reg_lambda": 9.832308858067885
+  },
+  "best_cv_score": 0.7333333333333333,
+  "cv_auc_mean": 0.7333333333333333,
+  "cv_auc_std": 0.08579691784155835,
+  "holdout_auc": 0.8,
+  "paths": {
+    "run_dir": "/Users/rezadoobary/Documents/MLCORRELATORS/ML-correlator/Tree_classifier_for_graphs/new_stuff/bayes_results/loop6_20251201-155429",
+    "history_csv": "/Users/rezadoobary/Documents/MLCORRELATORS/ML-correlator/Tree_classifier_for_graphs/new_stuff/bayes_results/loop6_20251201-155429/history.csv",
+    "thresholds_csv": "/Users/rezadoobary/Documents/MLCORRELATORS/ML-correlator/Tree_classifier_for_graphs/new_stuff/bayes_results/loop6_20251201-155429/thresholds.csv",
+    "plot_png": "/Users/rezadoobary/Documents/MLCORRELATORS/ML-correlator/Tree_classifier_for_graphs/new_stuff/bayes_results/loop6_20251201-155429/metrics.png"
+  }
+}

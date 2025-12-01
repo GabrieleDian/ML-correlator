@@ -1,0 +1,28 @@
+{
+  "loop": 6,
+  "timestamp": "20251201-165525",
+  "n_calls": 20,
+  "n_splits": 5,
+  "n_workers": 1,
+  "random_state": 42,
+  "feature_count": 74,
+  "best_params": {
+    "n_estimators": 50,
+    "max_depth": 10,
+    "learning_rate": 0.01,
+    "subsample": 0.8534642423259002,
+    "colsample_bytree": 0.9552518809741165,
+    "reg_alpha": 0.10600059510164395,
+    "reg_lambda": 0.4626923240138417
+  },
+  "best_cv_score": 0.6916666666666667,
+  "cv_auc_mean": 0.6916666666666667,
+  "cv_auc_std": 0.2438123139721299,
+  "holdout_auc": 0.4,
+  "paths": {
+    "run_dir": "/Users/rezadoobary/Documents/MLCORRELATORS/ML-correlator/bayes_results/loop6_20251201-165525",
+    "history_csv": "/Users/rezadoobary/Documents/MLCORRELATORS/ML-correlator/bayes_results/loop6_20251201-165525/history.csv",
+    "thresholds_csv": "/Users/rezadoobary/Documents/MLCORRELATORS/ML-correlator/bayes_results/loop6_20251201-165525/thresholds.csv",
+    "plot_png": "/Users/rezadoobary/Documents/MLCORRELATORS/ML-correlator/bayes_results/loop6_20251201-165525/metrics.png"
+  }
+}
