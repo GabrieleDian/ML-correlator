@@ -15,7 +15,7 @@ import os, time
 
 
 # ==============================================================
-# Basic metrics helper
+# Basic metrics helper, ansatz fraction calculator
 # ==============================================================
 def compute_metrics(y_true, y_pred):
     y_true = y_true.cpu().numpy()
@@ -28,6 +28,33 @@ def compute_metrics(y_true, y_pred):
         "confusion_matrix": cm,
     }
 
+def compute_safe_ansatz_fraction(labels, probs):
+    """
+    labels: tensor (N,) of {0,1}, on CPU
+    probs: tensor (N,) of predicted probabilities in [0,1], on CPU
+
+    Returns float in [0,1]: fraction of total graphs needed to 
+    guarantee all true 1-graphs are included.
+    """
+
+    labels = labels.detach().cpu()
+    probs = probs.detach().cpu()
+
+    # Extract only probabilities of true positives
+    true_one_probs = probs[labels == 1]
+
+    # Edge case: if the dataset has zero positive examples
+    if true_one_probs.numel() == 0:
+        return 0.0
+
+    # Minimum probability among true 1s
+    t_min = true_one_probs.min().item()
+
+    # All graphs predicted above this threshold
+    selected = (probs >= t_min).sum().item()
+
+    # Fraction of ansatz kept
+    return 1-selected / len(probs)
 
 # ==============================================================
 # Training for one epoch
@@ -74,6 +101,7 @@ def train_epoch(model, train_loader, optimizer, device,
     all_preds = torch.cat(all_preds)
     all_labels = torch.cat(all_labels)
 
+
     metrics = compute_metrics(all_labels, all_preds)
    # Move to CPU before converting to numpy
     labels_np = all_labels.detach().cpu().numpy()
@@ -82,6 +110,9 @@ def train_epoch(model, train_loader, optimizer, device,
     metrics["roc_auc"] = roc_auc_score(labels_np, probs_np)
     prec, rec, _ = precision_recall_curve(labels_np, probs_np)
     metrics["pr_auc"] = auc(rec, prec)
+    safe_fraction = compute_safe_ansatz_fraction(all_labels, all_probs)
+    metrics["safe_ansatz_fraction"] = safe_fraction
+
     return avg_loss, accuracy, metrics
 
 
@@ -106,8 +137,8 @@ def evaluate(model, loader, device, pos_weight=None,
 
             all_probs.append(probs.cpu())
             all_preds.append(preds.cpu())
-            all_labels.append(batch.y.float())
-
+            all_labels.append(batch.y.float().cpu().float())
+        
             correct += preds.eq(batch.y.float()).sum().item()
             total += batch.y.size(0)
             total_loss += loss.item() * batch.y.size(0)
@@ -147,6 +178,11 @@ def evaluate(model, loader, device, pos_weight=None,
 # print(f"{split_name.capitalize()} → "
 #       f"Loss: {avg_loss:.4f}, Acc: {accuracy:.4f}, "
 #       f"ROC-AUC: {metrics['roc_auc']:.4f}, PR-AUC: {metrics['pr_auc']:.4f}")
+
+    # Compute your safe-ansatz metric
+    safe_fraction = compute_safe_ansatz_fraction(all_labels, all_probs)
+    metrics["safe_ansatz_fraction"] = safe_fraction
+
     return avg_loss, accuracy, metrics
 
 
@@ -306,6 +342,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                     "train_pr_auc": train_metrics.get("pr_auc"),
                     "train_roc_auc": train_metrics.get("roc_auc"),
                     "train_recall": train_metrics.get("recall"),
+                    "train_safe_ansatz_fraction": train_metrics.get("safe_ansatz_fraction"),
                     "lr": optimizer.param_groups[0]["lr"],
                     "in_channels": true_in_channels
                 }
@@ -317,6 +354,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                         "val_pr_auc": val_metrics.get("pr_auc"),
                         "val_roc_auc": val_metrics.get("roc_auc"),
                         "val_recall": val_metrics.get("recall"),
+                        "val_safe_ansatz_fraction": val_metrics.get("safe_ansatz_fraction"),
                     })
 
                 wandb.log(log_dict, step=epoch)
@@ -346,6 +384,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                     "train_pr_auc": train_metrics["pr_auc"],
                     "train_roc_auc": train_metrics["roc_auc"],
                     "train_recall": train_metrics["recall"],
+                    "train_safe_ansatz_fraction": train_metrics.get("safe_ansatz_fraction"),
                     "lr": optimizer.param_groups[0]["lr"]
                 }, step=epoch)
 
@@ -373,6 +412,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
             "test_pr_auc": test_metrics.get("pr_auc"),
             "test_roc_auc": test_metrics.get("roc_auc"),
             "test_recall": test_metrics.get("recall"),
+            "test_safe_ansatz_fraction": test_metrics.get("safe_ansatz_fraction"),
             "total_time": total_time,
             "number of parameters": num_params
         })
@@ -397,6 +437,8 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         "train_pr_auc": train_metrics.get("pr_auc"),
         "train_roc_auc": train_metrics.get("roc_auc"),
         "train_recall": train_metrics.get("recall"),
+        'train_safe_ansatz_fraction': train_metrics.get("safe_ansatz_fraction"),
+
 
         # --- VAL metrics (if available) ---
         "val_loss": val_loss if val_dataset is not None else None,
@@ -404,6 +446,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         "val_pr_auc": val_metrics.get("pr_auc") if val_dataset is not None else None,
         "val_roc_auc": val_metrics.get("roc_auc") if val_dataset is not None else None,
         "val_recall": val_metrics.get("recall") if val_dataset is not None else None,
+        'val_safe_ansatz_fraction': val_metrics.get("safe_ansatz_fraction") if val_dataset is not None else None,
 
         # --- TEST metrics ---
         "test_loss": test_loss,
@@ -411,10 +454,11 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         "test_pr_auc": test_metrics.get("pr_auc"),
         "test_roc_auc": test_metrics.get("roc_auc"),
         "test_recall": test_metrics.get("recall"),
-
+        'test_safe_ansatz_fraction': test_metrics.get("safe_ansatz_fraction"),
         # --- Runtime ---
         "total_time": total_time
         }
+    
 
 
     return results

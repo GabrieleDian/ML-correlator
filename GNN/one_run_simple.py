@@ -412,6 +412,12 @@ def main():
         print(f"  Val:   {safe_fmt(results.get('val_recall'))}")
     print(f"  Test:  {safe_fmt(results.get('test_recall'))}\n")
 
+    print("=== Ansatz reduction ===")
+    print(f"  Train: {safe_fmt(results.get('train_safe_ansatz_fraction'))}")
+    if has_val:
+        print(f"  Val:   {safe_fmt(results.get('val_safe_ansatz_fraction'))}")
+    print(f"  Test:  {safe_fmt(results.get('test_safe_ansatz_fraction'))}\n")
+
 
     # ---------------------------------------------------------
     # Final WandB logging — ONLY test summary (no duplicates)
