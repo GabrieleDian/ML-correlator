@@ -396,9 +396,6 @@ def compute_or_load_features(file_ext, selected_features, base_dir, chunk_size, 
             return "npz"
         return "missing"
 
-    # =====================================================
-    # STEP 4 — merge partial function
-    # =====================================================
     def try_merge_partials(feat):
         parts = partial_map.get(feat, [])
         if not parts:
@@ -418,10 +415,10 @@ def compute_or_load_features(file_ext, selected_features, base_dir, chunk_size, 
         if not ranges:
             return None
 
-        # Sort by start
+        # Sort by chunk start index
         ranges.sort(key=lambda x: x[0])
 
-        # Must cover exactly [0, total_graphs]
+        # Must cover exactly the full range [0, total_graphs]
         if ranges[0][0] != 0:
             return None
         for (_, end1, _), (start2, _, _) in zip(ranges, ranges[1:]):
@@ -432,12 +429,27 @@ def compute_or_load_features(file_ext, selected_features, base_dir, chunk_size, 
 
         print(f"🔧 Merging {len(ranges)} partials for {feat}...")
 
+        # Load each partial block
         blocks = [np.load(p) for _, _, p in ranges]
         merged = np.concatenate(blocks, axis=0)
 
-        np.save(feat_dir / f"{feat}.npy", merged)
-        print(f"✨ Saved full merged feature → {feat}.npy")
+        # Save full merged output
+        out_path = feat_dir / f"{feat}.npy"
+        np.save(out_path, merged)
+        print(f"✨ Saved full merged feature → {out_path}")
+
+        # ==============================
+        # CLEANUP: delete all partials
+        # ==============================
+        for _, _, p in ranges:
+            try:
+                p.unlink()
+                print(f"🧹 Removed partial file: {p.name}")
+            except Exception as e:
+                print(f"⚠️ Could not remove {p.name}: {e}")
+
         return merged
+
 
     # =====================================================
     # STEP 5 — compute feature helper
