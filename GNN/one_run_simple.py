@@ -306,26 +306,31 @@ def main():
         print(f"🔧 Final max feature width (no validation): {final_max_features}")
 
 
-    # =========================================================
-    # TEST SET
-    # =========================================================
-    test_datasets = []
-    for file_ext in test_loop_orders:
-        ds, _, _ = create_simple_dataset(
-            file_ext=file_ext,
-            selected_features=selected_features,
-            normalize=True,
-            scaler=train_scaler,
-            max_features=final_max_features,
-            data_dir=base_dir,
-            n_jobs=auto_n_jobs,
-            chunk_size=auto_chunk_size
-        )
-        test_datasets.append(ds)
 
-    test_dataset = torch.utils.data.ConcatDataset(test_datasets)
+    # =========================================================
+    # TEST SET (SKIPPED WHEN VALIDATION ENABLED)
+    # =========================================================
+    if use_val:
+        print("Validation ENABLED → Skipping test set loading.")
+        test_dataset = None
+    else:
+        test_datasets = []
+        for file_ext in test_loop_orders:
+            ds, _, _ = create_simple_dataset(
+                file_ext=file_ext,
+                selected_features=selected_features,
+                normalize=True,
+                scaler=train_scaler,
+                max_features=final_max_features,
+                data_dir=base_dir,
+                n_jobs=auto_n_jobs,
+                chunk_size=auto_chunk_size
+            )
+            test_datasets.append(ds)
 
-    print(f"Test set: {len(test_dataset)} samples (loop orders {test_loop_orders})")
+        test_dataset = torch.utils.data.ConcatDataset(test_datasets)
+        print(f"Test set: {len(test_dataset)} samples (loop orders {test_loop_orders})")
+
 
     
     
@@ -343,7 +348,12 @@ def main():
             return itertools.chain.from_iterable(ds.datasets)
         return ds
     # Collect all datasets (some may be None)
-    all_datasets = [train_dataset] + ([val_dataset] if val_dataset else []) + [test_dataset]
+    all_datasets = [train_dataset]
+    if val_dataset is not None:
+        all_datasets.append(val_dataset)
+    if test_dataset is not None:
+        all_datasets.append(test_dataset)
+
 
     # Compute the global maximum feature width across *all* graphs
     global_in_channels = max(g.x.shape[1] for ds in all_datasets for g in iter_graphs(ds))
@@ -366,9 +376,15 @@ def main():
 
     # Print dataset info
     print_dataset_stats(train_dataset, "Train")
-    if val_dataset:
+
+    if val_dataset is not None:
         print_dataset_stats(val_dataset, "Validation")
-    print_dataset_stats(test_dataset, "Test")
+
+    if test_dataset is not None:
+        print_dataset_stats(test_dataset, "Test")
+    else:
+        print("Test: SKIPPED (validation enabled)")
+
 
 
 
@@ -392,31 +408,47 @@ def main():
     print(f"  Train: {safe_fmt(results.get('train_acc'))}")
     if has_val:
         print(f"  Val:   {safe_fmt(results.get('val_acc'))}")
-    print(f"  Test:  {safe_fmt(results.get('test_acc'))}\n")
+    if test_dataset is not None:
+        print(f"  Test:  {safe_fmt(results.get('test_acc'))}\n")
+    else:
+        print(f"  Test:  SKIPPED\n")
 
     print("=== PR AUC ===")
     print(f"  Train: {safe_fmt(results.get('train_pr_auc'))}")
     if has_val:
         print(f"  Val:   {safe_fmt(results.get('val_pr_auc'))}")
-    print(f"  Test:  {safe_fmt(results.get('test_pr_auc'))}\n")
+    if test_dataset is not None:
+        print(f"  Test:  {safe_fmt(results.get('test_pr_auc'))}\n")
+    else:
+        print("  Test:  SKIPPED\n")
 
     print("=== ROC AUC ===")
     print(f"  Train: {safe_fmt(results.get('train_roc_auc'))}")
     if has_val:
         print(f"  Val:   {safe_fmt(results.get('val_roc_auc'))}")
-    print(f"  Test:  {safe_fmt(results.get('test_roc_auc'))}\n")
+    if test_dataset is not None:
+        print(f"  Test:  {safe_fmt(results.get('test_roc_auc'))}\n")
+    else:
+        print("  Test:  SKIPPED\n")
 
     print("=== Recall ===")
     print(f"  Train: {safe_fmt(results.get('train_recall'))}")
     if has_val:
         print(f"  Val:   {safe_fmt(results.get('val_recall'))}")
-    print(f"  Test:  {safe_fmt(results.get('test_recall'))}\n")
+    if test_dataset is not None:
+        print(f"  Test:  {safe_fmt(results.get('test_recall'))}\n")
+    else:
+        print("  Test:  SKIPPED\n")
 
     print("=== Ansatz reduction ===")
     print(f"  Train: {safe_fmt(results.get('train_safe_ansatz_fraction'))}")
     if has_val:
         print(f"  Val:   {safe_fmt(results.get('val_safe_ansatz_fraction'))}")
-    print(f"  Test:  {safe_fmt(results.get('test_safe_ansatz_fraction'))}\n")
+    if test_dataset is not None:
+        print(f"  Test:  {safe_fmt(results.get('test_safe_ansatz_fraction'))}\n")
+    else:
+        print("  Test:  SKIPPED\n")
+
 
 
     # ---------------------------------------------------------
@@ -425,31 +457,44 @@ def main():
     import contextlib, io
 
     if use_wandb and wandb.run is not None:
-        print("Logging final TEST metrics to WandB...")
-        wandb.log({
-            "test_loss": results.get("test_loss", 0),
-            "test_acc": results.get("test_acc", 0),
-            "test_pr_auc": results.get("test_pr_auc", 0),
-            "test_roc_auc": results.get("test_roc_auc", 0),
-            "test_recall": results.get("test_recall", 0),
-            "total_time": results.get("total_time", 0)
-        })
-        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
-            wandb.finish()
-    else:
-        print("WandB inactive or run missing — skipping final logging.")
+        if test_dataset is not None:
+            print("Logging final TEST metrics to WandB...")
+            wandb.log({
+                "test_loss": results.get("test_loss", 0),
+                "test_acc": results.get("test_acc", 0),
+                "test_pr_auc": results.get("test_pr_auc", 0),
+                "test_roc_auc": results.get("test_roc_auc", 0),
+                "test_recall": results.get("test_recall", 0),
+                "total_time": results.get("total_time", 0)
+            })
+        else:
+            print("Validation mode → skipping WandB TEST logging.")
 
 
 
-    # Save model if requested
+
+        # Save model if requested
     save_model = config_dict.get('experiment', {}).get('save_model', False)
+
     if save_model:
-        model_dir = config_dict.get('experiment', {}).get('model_dir', 'models')
+        exp_cfg = config_dict.get('experiment', {})
+        model_dir = exp_cfg.get('model_dir', 'models')
+        model_name = exp_cfg.get('model_name', None)  # <-- new entry
+
         save_dir = Path(model_dir)
         save_dir.mkdir(exist_ok=True)
-        model_path = save_dir / f"{config.experiment_name}_best.pt"
+
+        # Determine final filename
+        if model_name is not None:
+            filename = f"{model_name}.pt"
+        else:
+            filename = f"{config.experiment_name}_best.pt"
+
+        model_path = save_dir / filename
+
         torch.save(results['model_state'], model_path)
         print(f"Model saved to: {model_path}")
+
     
 
 

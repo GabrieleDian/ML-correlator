@@ -62,6 +62,7 @@ def compute_safe_ansatz_fraction(labels, probs):
 def train_epoch(model, train_loader, optimizer, device,
                 scheduler=None, pos_weight=None,
                 scheduler_type=None, threshold=0.5):
+    pos_weight = torch.tensor([9.0]).to(device)
     model.train()
     total_loss, correct, total = 0.0, 0, 0
     all_probs, all_preds, all_labels = [], [], []
@@ -121,6 +122,18 @@ def train_epoch(model, train_loader, optimizer, device,
 # ==============================================================
 def evaluate(model, loader, device, pos_weight=None,
              threshold=0.5, log_threshold_curves=False, split_name="val"):
+    # --------------------------------------------------------------
+    # EARLY EXIT: When test set is skipped or loader is None
+    # --------------------------------------------------------------
+    if loader is None:
+        return 0.0, 0.0, { 
+            "roc_auc": None,
+            "pr_auc": None,
+            "recall": None,
+            "accuracy": None,
+            "safe_ansatz_fraction": None
+        }
+    pos_weight = torch.tensor([9.0]).to(device)
     model.eval()
     total_loss, correct, total = 0.0, 0, 0
     all_probs, all_preds, all_labels = [], [], []
@@ -206,7 +219,8 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
     # Data loaders
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     val_loader   = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False) if val_dataset is not None else None
-    test_loader  = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=False)if test_dataset is not None else None
+
 
     import itertools
     from sklearn.preprocessing import StandardScaler
@@ -220,7 +234,12 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         return iter(ds)
 
     # 1) Find the single GLOBAL feature width across all splits
-    all_ds = [train_dataset] + ([val_dataset] if val_dataset is not None else []) + [test_dataset]
+    all_ds = [train_dataset]
+    if val_dataset is not None:
+        all_ds.append(val_dataset)
+    if test_dataset is not None:
+        all_ds.append(test_dataset)
+
     global_max_features = 0
     for ds in all_ds:
         for g in iter_graphs(ds):
@@ -394,28 +413,39 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
     model.load_state_dict(best_state)
 
     # Evaluate on test set
-    test_loss, test_acc, test_metrics = evaluate(
-        model, test_loader, device,
-        threshold=config.threshold,
-        log_threshold_curves=config.log_threshold_curves,
-        split_name="test"
+    if test_loader is not None:
+        test_loss, test_acc, test_metrics = evaluate(
+            model, test_loader, device,
+            threshold=config.threshold,
+            log_threshold_curves=config.log_threshold_curves,
+            split_name="test"
     )
+    else:
+        test_loss, test_acc, test_metrics = None, None, {
+            "pr_auc": None,
+            "roc_auc": None,
+            "recall": None,
+            "safe_ansatz_fraction": None
+        }
+
 
     total_time = time.time() - start_time
     print(f"Training completed in {total_time:.1f}s.")
 
     # Final Test metrics logging
-    if use_wandb and wandb.run is not None:
+    if use_wandb and wandb.run is not None and test_loader is not None:
         wandb.log({
-            "test_loss": test_loss,
-            "test_acc": test_acc,
-            "test_pr_auc": test_metrics.get("pr_auc"),
-            "test_roc_auc": test_metrics.get("roc_auc"),
-            "test_recall": test_metrics.get("recall"),
-            "test_safe_ansatz_fraction": test_metrics.get("safe_ansatz_fraction"),
-            "total_time": total_time,
-            "number of parameters": num_params
-        })
+        "test_loss": test_loss,
+        "test_acc": test_acc,
+        "test_pr_auc": test_metrics.get("pr_auc"),
+        "test_roc_auc": test_metrics.get("roc_auc"),
+        "test_recall": test_metrics.get("recall"),
+        "test_safe_ansatz_fraction": test_metrics.get("safe_ansatz_fraction"),
+        "total_time": total_time,
+        "number of parameters": num_params})
+    elif use_wandb and wandb.run is not None:
+        wandb.log({"total_time": total_time})
+
 
     # Optional W&B threshold curves
     if wandb.run is not None and config.log_threshold_curves and "thresholds" in test_metrics:
@@ -449,12 +479,13 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         'val_safe_ansatz_fraction': val_metrics.get("safe_ansatz_fraction") if val_dataset is not None else None,
 
         # --- TEST metrics ---
-        "test_loss": test_loss,
-        "test_acc": test_acc,
-        "test_pr_auc": test_metrics.get("pr_auc"),
-        "test_roc_auc": test_metrics.get("roc_auc"),
-        "test_recall": test_metrics.get("recall"),
-        'test_safe_ansatz_fraction': test_metrics.get("safe_ansatz_fraction"),
+        "test_loss": test_loss if test_loader is not None else None,
+        "test_acc": test_acc if test_loader is not None else None,
+        "test_pr_auc": test_metrics.get("pr_auc") if test_loader is not None else None,
+        "test_roc_auc": test_metrics.get("roc_auc") if test_loader is not None else None,
+        "test_recall": test_metrics.get("recall") if test_loader is not None else None,
+        "test_safe_ansatz_fraction": (test_metrics.get("safe_ansatz_fraction") if test_loader is not None else None),
+
         # --- Runtime ---
         "total_time": total_time
         }
