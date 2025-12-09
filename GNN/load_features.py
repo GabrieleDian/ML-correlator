@@ -11,54 +11,146 @@ import math
 data_dir = '../Graph_Edge_Data'
 
 
+import psutil
+
+def autotune_resources():
+    """
+    Automatically determine (n_jobs, chunk_size) based on hardware capacity.
+
+    Strategy:
+    - Use more workers on large-memory, many-core machines (HPC nodes).
+    - Increase chunk_size aggressively when RAM is abundant.
+    - Constrain chunk_size on machines with <64 GB RAM to avoid OOM.
+    - Ensure that chunk_size is always large enough to keep workers busy.
+    """
+
+    import psutil
+
+    cpu = psutil.cpu_count(logical=True)
+    mem_gb = psutil.virtual_memory().total / (1024**3)
+
+    # -----------------------------
+    # Base heuristics for n_jobs
+    # -----------------------------
+    if mem_gb < 16:
+        # Laptop / low-end workstation
+        n_jobs = max(1, cpu // 4)
+    elif mem_gb < 64:
+        # Mid-range workstation
+        n_jobs = max(2, cpu // 2)
+    elif mem_gb < 128:
+        # Larger workstation or small compute node
+        n_jobs = max(4, int(cpu * 0.75))
+    else:
+        # HPC node with plenty of RAM
+        n_jobs = cpu
+
+    # -----------------------------
+    # Base heuristics for chunk_size
+    # -----------------------------
+    # In your pipeline, a graph’s edge list is small (typically ~100 bytes).
+    # The real memory cost comes from Python overhead + processed dicts.
+    #
+    # Safe rules:
+    # - 1,000 graphs ≈ 0.1–0.3 GB peak
+    # - 5,000 graphs ≈ 0.4–0.7 GB peak
+    # - 20,000 graphs ≈ 1.5–3.0 GB peak
+    # - 50,000 graphs ≈ 4–7 GB peak
+    #
+    # Use these empirical values to avoid RAM exhaustion.
+    #
+
+    if mem_gb < 16:
+        chunk_size = 2000      # conservative
+    elif mem_gb < 32:
+        chunk_size = 5000
+    elif mem_gb < 64:
+        chunk_size = 8000
+    elif mem_gb < 128:
+        chunk_size = 20000     # safe for large nodes
+    elif mem_gb < 256:
+        chunk_size = 40000     # HPC-class
+    else:
+        chunk_size = 60000     # extreme machines (≥256 GB)
+
+    # --------------------------------------------
+    # Additional safety margin:
+    # Avoid chunk_size so large that it overwhelms
+    # parallel workers or the Python GIL overhead.
+    # --------------------------------------------
+    chunk_size = int(min(chunk_size, 3 * cpu * 1000))  # safety cap
+
+    print(f"[AUTO] mem_gb={mem_gb:.1f}, cpu={cpu} → n_jobs={n_jobs}, chunk_size={chunk_size}")
+    return n_jobs, chunk_size
+
+
+
 def load_saved_features(file_ext, feature_names, data_dir="../Graph_Edge_Data",
-                        n_jobs=1, chunk_size=None):
+                        n_jobs=None, chunk_size=None):
     """
-    Load pre-computed features for a given loop order, possibly in parallel.
-
-    Args:
-        file_ext (str): loop order (e.g., '7', '8', '7to8')
-        feature_names (list): features to load
-        data_dir (str or Path): base directory
-        n_jobs (int): number of parallel workers for loading
-        chunk_size (int, optional): not used here but accepted for API consistency
-
-    Returns:
-        features: dict mapping feature names to numpy arrays
-        labels: list of graph labels
+    Load pre-computed features for a given loop order, and load labels either
+    from the CSV (if available) or from the NPZ (preferred for large datasets).
     """
-    features_dir = Path(data_dir) / f'features_loop_{file_ext}'
-    csv_path = Path(data_dir) / f'den_graph_data_{file_ext}.csv'
 
-    if not csv_path.exists():
-        raise FileNotFoundError(f"CSV {csv_path} not found.")
+    data_dir = Path(data_dir)
 
-    df = pd.read_csv(csv_path)
-    labels = df['COEFFICIENTS'].tolist()
+    # Auto compute n_jobs and chunk_size if not provided
+    if n_jobs is None:
+        n_jobs, chunk_size = autotune_resources()
+
+    # ---------------------------
+    # 1. Find matching NPZ file
+    # ---------------------------
+    npz_candidates = list(data_dir.glob(f"den_graph_data_{file_ext}*.npz"))
+    if len(npz_candidates) == 0:
+        raise FileNotFoundError(
+            f"No den_graph_data_{file_ext}*.npz found in {data_dir}"
+        )
+    npz_path = npz_candidates[0]
+
+    # ---------------------------
+    # 2. Load labels from NPZ
+    # ---------------------------
+    data = np.load(npz_path, allow_pickle=True)
+    
+   # Strict uniformity: labels must come from 'coefficients'
+    if "coefficients" not in data:
+        raise KeyError(
+            f"'coefficients' array not found inside {npz_path}. "
+            "Dataset must contain 'edges' and 'coefficients'."
+        )
+
+    labels = data["coefficients"].tolist()
+
+
+    # ---------------------------
+    # 3. Load feature arrays normally
+    # ---------------------------
+    features_dir = data_dir / f"features_loop_{file_ext}"
 
     def load_one(feature_name):
-        feature_path = features_dir / f'{feature_name}.npy'
+        feature_path = features_dir / f"{feature_name}.npy"
         if not feature_path.exists():
             raise FileNotFoundError(
                 f"Feature {feature_name} not found in {features_dir}. "
                 "Run compute_features.py first."
             )
-        arr = np.load(feature_path, mmap_mode='r')
+        arr = np.load(feature_path, mmap_mode="r")
         return feature_name, arr
 
-    print(f"[INFO] Parallel loading {len(feature_names)} features "
-          f"with n_jobs={n_jobs}")
-    
+    print(f"[INFO] Parallel loading {len(feature_names)} features with n_jobs={n_jobs}")
+
     loaded = Parallel(n_jobs=n_jobs)(
         delayed(load_one)(fname) for fname in feature_names
     )
-
     features = dict(loaded)
 
     for name, arr in features.items():
         print(f"Loaded {name}: shape {arr.shape}")
 
     return features, labels
+
+
 
 
 def get_available_features(loop_order, data_dir=data_dir):
@@ -78,8 +170,8 @@ def get_available_features(loop_order, data_dir=data_dir):
 
 def load_graph_structure(file_ext,
                          data_dir="../Graph_Edge_Data",
-                         n_jobs=1,
-                         chunk_size=1000):
+                         n_jobs=None,
+                         chunk_size=None):
     """
     Memory-safe, parallel loader for large .npz graph datasets.
 
@@ -92,6 +184,9 @@ def load_graph_structure(file_ext,
     Returns:
         list[dict]: each dict has keys num_nodes, edge_list, node_labels
     """
+    # Auto compute n_jobs and chunk_size if not provided
+    if n_jobs is None:
+        n_jobs, chunk_size = autotune_resources()
     npz_path = Path(data_dir) / f"den_graph_data_{file_ext}.npz"
     if not npz_path.exists():
         raise FileNotFoundError(f"File not found: {npz_path}")

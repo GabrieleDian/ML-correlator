@@ -62,11 +62,10 @@ def compute_safe_ansatz_fraction(labels, probs):
 def train_epoch(model, train_loader, optimizer, device,
                 scheduler=None, pos_weight=None,
                 scheduler_type=None, threshold=0.5):
-    pos_weight = torch.tensor([9.0]).to(device)
     model.train()
     total_loss, correct, total = 0.0, 0, 0
     all_probs, all_preds, all_labels = [], [], []
-    loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    loss_fn = nn.BCEWithLogitsLoss()
 
     for batch in train_loader:
         batch = batch.to(device)
@@ -133,11 +132,10 @@ def evaluate(model, loader, device, pos_weight=None,
             "accuracy": None,
             "safe_ansatz_fraction": None
         }
-    pos_weight = torch.tensor([9.0]).to(device)
     model.eval()
     total_loss, correct, total = 0.0, 0, 0
     all_probs, all_preds, all_labels = [], [], []
-    loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    loss_fn = nn.BCEWithLogitsLoss()
 
     with torch.no_grad():
         for batch in loader:
