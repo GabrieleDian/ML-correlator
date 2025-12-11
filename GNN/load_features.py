@@ -69,9 +69,9 @@ def autotune_resources():
     elif mem_gb < 128:
         chunk_size = 20000     # safe for large nodes
     elif mem_gb < 256:
-        chunk_size = 40000     # HPC-class
+        chunk_size = 70000     # HPC-class
     else:
-        chunk_size = 60000     # extreme machines (≥256 GB)
+        chunk_size = 200000     # extreme machines (≥256 GB)
 
     # --------------------------------------------
     # Additional safety margin:
@@ -99,14 +99,16 @@ def load_saved_features(file_ext, feature_names, data_dir="../Graph_Edge_Data",
         n_jobs, chunk_size = autotune_resources()
 
     # ---------------------------
-    # 1. Find matching NPZ file
+    # 1. Match NPZ file exactly
     # ---------------------------
-    npz_candidates = list(data_dir.glob(f"den_graph_data_{file_ext}*.npz"))
-    if len(npz_candidates) == 0:
+    npz_path = Path(data_dir) / f"den_graph_data_{file_ext}.npz"
+
+    if not npz_path.exists():
         raise FileNotFoundError(
-            f"No den_graph_data_{file_ext}*.npz found in {data_dir}"
+            f"Expected NPZ file not found: {npz_path}\n"
+            f"Ensure you have den_graph_data_{file_ext}.npz in {data_dir}"
         )
-    npz_path = npz_candidates[0]
+
 
     # ---------------------------
     # 2. Load labels from NPZ
