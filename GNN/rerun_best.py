@@ -137,10 +137,18 @@ def main():
 
         print(f"[INFO] Model will be saved to: {save_folder}/{run_name_clean}.pt")
 
-        # Save YAML
-        yaml_path = out_dir / f"{safe_name}.yaml"
+        # ==========================
+        # Save configs under configs/<project_name>/
+        # ==========================
+        project_configs_dir = Path("configs") / args.project
+        project_configs_dir.mkdir(parents=True, exist_ok=True)
+
+        yaml_path = project_configs_dir / f"{safe_name}.yaml"
         with open(yaml_path, "w") as f:
             yaml.dump(final_cfg, f)
+
+        print(f"[INFO] Saved combined config to: {yaml_path}")
+
 
         print(f"[INFO] Saved: {yaml_path}")
         print("[DEBUG] features:", final_cfg["features"]["selected_features"])
