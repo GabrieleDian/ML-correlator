@@ -134,7 +134,8 @@ def main():
         # Assign model save directory + filename
         final_cfg["experiment"]["model_dir"] = str(save_folder)
         final_cfg["experiment"]["model_name"] = run_name_clean
-
+        final_cfg["experiment"]["wandb_name"] = f"rerun_{safe_name}"
+    
         print(f"[INFO] Model will be saved to: {save_folder}/{run_name_clean}.pt")
 
         # ==========================
