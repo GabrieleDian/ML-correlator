@@ -117,6 +117,25 @@ def main():
             train_loop_override=args.train_loop,
             test_loop_override=args.test_loop,
         )
+        # --------------------------------------------------------
+        # Create dedicated folder: models/<project>/<sweep_id>/
+        # --------------------------------------------------------
+
+        # Extract wandb sweep ID (last part of sweep_path)
+        sweep_id = args.sweep_path.strip().split("/")[-1]
+        project_name = args.project
+        run_name_clean = safe_name  # run.name already cleaned above
+        save_folder = Path("models") / project_name / sweep_id
+        save_folder.mkdir(parents=True, exist_ok=True)
+
+        # Make sure experiment block exists
+        final_cfg.setdefault("experiment", {})
+
+        # Assign model save directory + filename
+        final_cfg["experiment"]["model_dir"] = str(save_folder)
+        final_cfg["experiment"]["model_name"] = run_name_clean
+
+        print(f"[INFO] Model will be saved to: {save_folder}/{run_name_clean}.pt")
 
         # Save YAML
         yaml_path = out_dir / f"{safe_name}.yaml"
