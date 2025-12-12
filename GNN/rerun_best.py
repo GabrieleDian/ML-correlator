@@ -166,17 +166,17 @@ def main():
 
         # Slurm job
         job_script = f"""#!/bin/bash
-#SBATCH --job-name=rerun_{idx}
-#SBATCH --output=slurm_rerun_{idx}.out
-#SBATCH --error=slurm_rerun_{idx}.err
-#SBATCH --partition=maxcpu
-#SBATCH --time=48:00:00
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=16G
+        #SBATCH --job-name=rerun_{idx}
+        #SBATCH --output=slurm_rerun_{idx}.out
+        #SBATCH --error=slurm_rerun_{idx}.err
+        #SBATCH --partition=maxgpu
+        #SBATCH --time=1-00:00:00    # 1 days
+        #SBATCH --cpus-per-task=70
+        #SBATCH --mem=700G
 
-cd {GNN_DIR}
-python one_run_simple.py --config {yaml_path}
-"""
+        cd {GNN_DIR}
+        python one_run_simple.py --config {yaml_path}
+        """
 
         slurm_path = out_dir / f"rerun_{idx}.sbatch"
         with open(slurm_path, "w") as f:
