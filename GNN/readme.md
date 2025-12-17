@@ -17,6 +17,8 @@ It is designed for research on **planar and f-graph structures**  and supports f
 ├── training_utils.py         # Train/evaluate GNNs with metrics and W&B logging
 ├── one_run_simple.py         # Main script to run one training experiment
 ├── model_output.py           # Load trained model and generate predictions
+├── configs/                  # Configuration files for experiments
+├── rerun_best.py             # Script to rerun best experiments from saved configs
 ├── restore_wandbs.py         # Restore old W&B runs or sweeps
 └── Graph_Edge_Data/          # Data directory containing input CSVs and saved features
 ```
@@ -119,13 +121,14 @@ The training script:
 After training, you can run inference on a dataset using `model_output.py`:
 
 ```bash
-python model_output.py
+python model_output.py --model_name blooming-sweep.pt --data_file ../Graph_Edge_Data/den_graph_data_8.csv --config configs/train_6789_val_top_eigen_scalar_graphlet/blooming-sweep-187.yaml
 ```
 
-This script loads the saved model checkpoint and outputs a CSV with  
-`y_true` and `y_pred` values for each graph.
+## 6. Rerunning Best Experiments
+To rerun the best experiments given a sweep_path, project_name, number of epochs, and a base_config file used for the corresponding sweep::
 
----
+```bash
+python rerun_best.py --sweep_path aliajrigers-desydeutsches-elektronen-synchrotron/train67891011_test12_all_feat_no_bottom_eigen/sweeps/uisdetrl --project train67891011_test12_all_feat_no_bottom_eigen --epochs 100 --base_config configs/all_feat/config_all_feat_no_bottom_eigen_1.yaml --slurm
 
 ## 🧹 6. Restoring W&B Runs
 
