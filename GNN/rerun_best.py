@@ -135,7 +135,7 @@ def main():
         final_cfg["experiment"]["model_dir"] = str(save_folder)
         final_cfg["experiment"]["model_name"] = run_name_clean
         final_cfg["experiment"]["wandb_name"] = f"rerun_{safe_name}"
-    
+
         print(f"[INFO] Model will be saved to: {save_folder}/{run_name_clean}.pt")
 
         # ==========================
@@ -169,10 +169,17 @@ def main():
         #SBATCH --job-name=rerun_{idx}
         #SBATCH --output=slurm_rerun_{idx}.out
         #SBATCH --error=slurm_rerun_{idx}.err
+<<<<<<< Updated upstream
         #SBATCH --partition=maxgpu
         #SBATCH --time=1-00:00:00    # 1 days
         #SBATCH --cpus-per-task=70
         #SBATCH --mem=700G
+=======
+        #SBATCH --partition=maxcpu
+        #SBATCH --time=48:00:00
+        #SBATCH --cpus-per-task=4
+        #SBATCH --mem=16G
+>>>>>>> Stashed changes
 
         cd {GNN_DIR}
         python one_run_simple.py --config {yaml_path}

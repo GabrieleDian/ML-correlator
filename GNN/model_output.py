@@ -10,6 +10,7 @@ from torch_geometric.loader import DataLoader
 from graph_builder import create_simple_dataset
 from GNN_architectures import create_gnn_model
 from training_utils import evaluate
+from training_utils import compute_min_positive_prob, evaluate_threshold_from_train
 from load_features import autotune_resources
 
 # Plotting
@@ -319,6 +320,20 @@ def compute_metric_row(y_true, y_prob, y_pred, metrics_dict):
     else:
         lowest_prob_true1 = None
 
+    # Threshold-based evaluation (use minimum prob among true positives on THIS evaluated set)
+    # Useful to quantify how conservative a threshold must be to guarantee zero false negatives.
+    threshold_eval = None
+    train_min_prob = compute_min_positive_prob(
+        torch.as_tensor(y_true, dtype=torch.long),
+        torch.as_tensor(y_prob, dtype=torch.float32)
+    )
+    if train_min_prob is not None:
+        threshold_eval = evaluate_threshold_from_train(
+            train_min_prob,
+            torch.as_tensor(y_true, dtype=torch.long),
+            torch.as_tensor(y_prob, dtype=torch.float32)
+        )
+
     return {
         "accuracy": float(accuracy),
         "recall_1": float(recall_1),
@@ -329,6 +344,11 @@ def compute_metric_row(y_true, y_prob, y_pred, metrics_dict):
         "pr_auc": float(pr_auc) if pr_auc is not None else None,
         "safe_ansatz_fraction": float(safe_frac) if safe_frac is not None else None,
         "lowest_prob_true1": lowest_prob_true1,
+        # Flatten key threshold-eval fields for CSV convenience
+        "nf_threshold": (threshold_eval.get("threshold") if threshold_eval else None),
+        "nf_no_false_negatives": (threshold_eval.get("no_false_negatives") if threshold_eval else None),
+        "nf_negatives_below_threshold": (threshold_eval.get("negatives_below_threshold") if threshold_eval else None),
+        "nf_pct_negatives_below_threshold": (threshold_eval.get("pct_negatives_below_threshold") if threshold_eval else None),
     }
 
 
@@ -524,6 +544,19 @@ def main():
     all_probs = np.concatenate(all_probs)
     all_labels = np.concatenate(all_labels).astype(int)
     all_preds = (all_probs >= args.threshold).astype(int)
+
+    # Threshold-based evaluation on this evaluated dataset (min prob among true positives)
+    eval_min_prob = compute_min_positive_prob(
+        torch.as_tensor(all_labels, dtype=torch.long),
+        torch.as_tensor(all_probs, dtype=torch.float32)
+    )
+    if eval_min_prob is not None:
+        print("\n=== THRESHOLD-BASED EVALUATION (min prob among true positives on this dataset) ===")
+        _ = evaluate_threshold_from_train(
+            eval_min_prob,
+            torch.as_tensor(all_labels, dtype=torch.long),
+            torch.as_tensor(all_probs, dtype=torch.float32)
+        )
 
     # =====================================================
     # Physics-oriented scalar metrics (reduction & FN)

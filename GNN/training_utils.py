@@ -56,6 +56,17 @@ def compute_safe_ansatz_fraction(labels, probs):
     # Fraction of ansatz kept
     return 1-selected / len(probs)
 
+# New helper: return minimum predicted probability among true positives (or None)
+def compute_min_positive_prob(labels, probs):
+    """
+    Return minimum predicted probability among true positives, or None if no positives.
+    """
+    labels = labels.detach().cpu()
+    probs = probs.detach().cpu()
+    true_one_probs = probs[labels == 1]
+    if true_one_probs.numel() == 0:
+        return None
+    return float(true_one_probs.min().item())
 # ==============================================================
 # Training for one epoch
 # ==============================================================
@@ -112,6 +123,12 @@ def train_epoch(model, train_loader, optimizer, device,
     metrics["pr_auc"] = auc(rec, prec)
     safe_fraction = compute_safe_ansatz_fraction(all_labels, all_probs)
     metrics["safe_ansatz_fraction"] = safe_fraction
+
+
+    # Save minimum predicted probability among true positives (training threshold)
+    min_pos = compute_min_positive_prob(all_labels, all_probs)
+    metrics["lowest_prob_true1"] = min_pos
+    metrics["lowest_prob_true1_train"] = min_pos
 
     return avg_loss, accuracy, metrics
 
@@ -196,6 +213,58 @@ def evaluate(model, loader, device, pos_weight=None,
 
     return avg_loss, accuracy, metrics
 
+
+# ==============================================================
+# Threshold-based evaluation using training minimum probability
+# ==============================================================
+def evaluate_threshold_from_train(train_min_prob, test_labels, test_probs):
+    """
+    Uses the minimum probability from true positives in training set as a threshold
+    on the test set to evaluate false negative guarantee and negative coverage.
+    
+    Args:
+        train_min_prob: minimum probability assigned to true positives in training set
+        test_labels: tensor of true labels (0 or 1) on test set
+        test_probs: tensor of predicted probabilities on test set
+    
+    Returns:
+        dict with results and prints summary
+    """
+    test_labels = test_labels.detach().cpu()
+    test_probs = test_probs.detach().cpu()
+    
+    # Apply threshold
+    test_preds = (test_probs >= train_min_prob).long()
+    
+    # Get true positives and false negatives
+    true_positives = ((test_preds == 1) & (test_labels == 1)).sum().item()
+    false_negatives = ((test_preds == 0) & (test_labels == 1)).sum().item()
+    
+    # Check no false negatives
+    no_false_negatives = (false_negatives == 0)
+    
+    # Negatives with probability below threshold
+    true_negatives_below = ((test_probs < train_min_prob) & (test_labels == 0)).sum().item()
+    pct_negatives_below = 100.0 * true_negatives_below / len(test_labels)
+    
+    print(f"\n{'='*60}")
+    print(f"Threshold-based evaluation (threshold={train_min_prob:.4f} from training set)")
+    print(f"{'='*60}")
+    print(f"1) False Negatives Guarantee: {'✓ NO FALSE NEGATIVES' if no_false_negatives else '✗ FALSE NEGATIVES EXIST'}")
+    print(f"   - True Positives: {true_positives}")
+    print(f"   - False Negatives: {false_negatives}")
+    print(f"2) Negatives below threshold: {true_negatives_below}/{len(test_labels)} ({pct_negatives_below:.2f}%)")
+    print(f"{'='*60}\n")
+    
+    return {
+        "threshold": float(train_min_prob),
+        "no_false_negatives": no_false_negatives,
+        "true_positives": true_positives,
+        "false_negatives": false_negatives,
+        "negatives_below_threshold": true_negatives_below,
+        "pct_negatives_below_threshold": pct_negatives_below
+    }
+    
 
 # ==============================================================
 # Main training loop
@@ -406,7 +475,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                 }, step=epoch)
 
     # --------------------------------------------------
-    # AFTER TRAINING: restore best model
+    # AFTER TRAINING: compute test metrics
     # --------------------------------------------------
     model.load_state_dict(best_state)
 
@@ -417,7 +486,30 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
             threshold=config.threshold,
             log_threshold_curves=config.log_threshold_curves,
             split_name="test"
-    )
+        )
+        
+        # Evaluate using training-set threshold to guarantee no false negatives
+        if train_metrics.get("lowest_prob_true1") is not None:
+            # Collect test labels and probabilities for threshold evaluation
+            test_all_probs, test_all_labels = [], []
+            model.eval()
+            with torch.no_grad():
+                for batch in test_loader:
+                    batch = batch.to(device)
+                    out = model(batch.x, batch.edge_index, batch.batch)
+                    probs = torch.sigmoid(out.view(-1))
+                    test_all_probs.append(probs.cpu())
+                    test_all_labels.append(batch.y.float().cpu())
+            
+            test_all_probs = torch.cat(test_all_probs)
+            test_all_labels = torch.cat(test_all_labels)
+            
+            # Apply threshold from training set
+            test_metrics["threshold_eval"] = evaluate_threshold_from_train(
+                train_metrics["lowest_prob_true1"],
+                test_all_labels,
+                test_all_probs
+            )
     else:
         test_loss, test_acc, test_metrics = None, None, {
             "pr_auc": None,
@@ -425,7 +517,6 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
             "recall": None,
             "safe_ansatz_fraction": None
         }
-
 
     total_time = time.time() - start_time
     print(f"Training completed in {total_time:.1f}s.")
@@ -466,7 +557,9 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         "train_roc_auc": train_metrics.get("roc_auc"),
         "train_recall": train_metrics.get("recall"),
         'train_safe_ansatz_fraction': train_metrics.get("safe_ansatz_fraction"),
-
+        # expose the training-set minimum positive probability for downstream evaluation scripts
+        "lowest_prob_true1": train_metrics.get("lowest_prob_true1"),
+        "lowest_prob_true1_train": train_metrics.get("lowest_prob_true1_train"),
 
         # --- VAL metrics (if available) ---
         "val_loss": val_loss if val_dataset is not None else None,
