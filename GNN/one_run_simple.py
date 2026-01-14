@@ -71,6 +71,24 @@ def normalize_loop_order(value):
         return [value.strip()]
     raise ValueError(f"Unsupported loop order format: {value}")
 
+def _clean_wandb_config(cfg):
+    """Remove sweep-metadata keys (parameters.*) while keeping everything else."""
+    if cfg is None:
+        return {}
+
+    # If cfg is a wandb.Config-like object, cast to plain dict first
+    try:
+        cfg = dict(cfg)
+    except Exception:
+        pass
+
+    cleaned = {}
+    for k, v in cfg.items():
+        if k == "parameters" or (isinstance(k, str) and k.startswith("parameters.")):
+            continue
+        cleaned[k] = v
+    return cleaned
+
 def main():
     print("\n=== Starting GNN training run ===")
 
@@ -126,6 +144,12 @@ def main():
                 config_dict.setdefault("model", {})["name"] = getattr(sweep_config, "model_name")
         raw_use_wandb = True
 
+        # IMPORTANT: clean W&B config to avoid logging parameters.* sweep metadata
+        try:
+            wandb.config.update(_clean_wandb_config(wandb.config), allow_val_change=True)
+        except Exception:
+            pass
+
     else:
         print(" Running in normal mode")
         parser = argparse.ArgumentParser(description='Train GNN with pre-computed features')
@@ -165,9 +189,10 @@ def main():
             print(" WandB initialized automatically by sweep")
         else:
             print("Initializing WandB for single run...")
+            # Do NOT send sweep-parameter metadata; keep everything else
             wandb.init(
                 project=config_dict.get('experiment', {}).get('wandb_project', 'cluster-7-loop'),
-                config=config_dict,
+                config=_clean_wandb_config(config_dict),
                 reinit=True
             )
     else:
@@ -457,6 +482,10 @@ def main():
     import contextlib, io
 
     if use_wandb and wandb.run is not None:
+        # Always log model size
+        if results.get("number_of_parameters") is not None:
+            wandb.log({"number_of_parameters": results.get("number_of_parameters")})
+
         if test_dataset is not None:
             print("Logging final TEST metrics to WandB...")
             wandb.log({

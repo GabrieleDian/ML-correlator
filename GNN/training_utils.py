@@ -342,8 +342,13 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
     ).to(device)
 
 
-    num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    # Trainable parameter count (re-exposed)
+    num_params = int(sum(p.numel() for p in model.parameters() if p.requires_grad))
     print(f"Model has {num_params} trainable parameters")
+
+    # If W&B is enabled, log it once
+    if use_wandb and wandb.run is not None:
+        wandb.log({"number_of_parameters": num_params})
 
     optimizer = torch.optim.Adam(model.parameters(),
                                  lr=config.learning_rate,
@@ -547,9 +552,9 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         "test_recall": test_metrics.get("recall"),
         "test_neg_removal_fraction": test_metrics.get("neg_removal_fraction"),
         "total_time": total_time,
-        "number of parameters": num_params})
+        "number_of_parameters": num_params})
     elif use_wandb and wandb.run is not None:
-        wandb.log({"total_time": total_time})
+        wandb.log({"total_time": total_time, "number_of_parameters": num_params})
 
 
     # Optional W&B threshold curves
@@ -593,9 +598,10 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         "test_recall": test_metrics.get("recall") if test_loader is not None else None,
         "test_neg_removal_fraction": (test_metrics.get("neg_removal_fraction") if test_loader is not None else None),
 
-        # --- Runtime ---
-        "total_time": total_time
-        }
+        # --- Runtime / model size ---
+        "total_time": total_time,
+        "number_of_parameters": num_params,
+    }
     
 
 
