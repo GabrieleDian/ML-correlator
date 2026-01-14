@@ -17,6 +17,7 @@ import os, time
 # ==============================================================
 # Basic metrics helper, ansatz fraction calculator
 # ==============================================================
+
 def compute_metrics(y_true, y_pred):
     y_true = y_true.cpu().numpy()
     y_pred = y_pred.cpu().numpy()
@@ -28,33 +29,39 @@ def compute_metrics(y_true, y_pred):
         "confusion_matrix": cm,
     }
 
+def compute_threshold_neg_removal_fraction(labels, probs, min_pos_prob):
+    """Compute fraction of true-0 graphs with prob < min_pos_prob.
+
+    Denominator is the number of true-0 graphs in `labels`.
+    Returns 0.0 if min_pos_prob is None or there are no negatives.
+    """
+    if min_pos_prob is None:
+        return 0.0
+    labels = labels.detach().cpu().view(-1)
+    probs = probs.detach().cpu().view(-1)
+    n_neg = int((labels == 0).sum().item())
+    if n_neg == 0:
+        return 0.0
+    removable_negs = int(((labels == 0) & (probs < float(min_pos_prob))).sum().item())
+    return removable_negs / n_neg
+
+
 def compute_safe_ansatz_fraction(labels, probs):
+    """Backward-compatible wrapper.
+
+    Training split: compute threshold from THIS split (min prob among true positives)
+    and then compute fraction of true negatives below that threshold.
     """
-    labels: tensor (N,) of {0,1}, on CPU
-    probs: tensor (N,) of predicted probabilities in [0,1], on CPU
+    labels = labels.detach().cpu().view(-1)
+    probs = probs.detach().cpu().view(-1)
 
-    Returns float in [0,1]: fraction of total graphs needed to 
-    guarantee all true 1-graphs are included.
-    """
-
-    labels = labels.detach().cpu()
-    probs = probs.detach().cpu()
-
-    # Extract only probabilities of true positives
     true_one_probs = probs[labels == 1]
-
-    # Edge case: if the dataset has zero positive examples
     if true_one_probs.numel() == 0:
         return 0.0
 
-    # Minimum probability among true 1s
-    t_min = true_one_probs.min().item()
+    t_min = float(true_one_probs.min().item())
+    return compute_threshold_neg_removal_fraction(labels, probs, t_min)
 
-    # All graphs predicted above this threshold
-    selected = (probs >= t_min).sum().item()
-
-    # Fraction of ansatz kept
-    return 1-selected / len(probs)
 
 # New helper: return minimum predicted probability among true positives (or None)
 def compute_min_positive_prob(labels, probs):
@@ -121,14 +128,14 @@ def train_epoch(model, train_loader, optimizer, device,
     metrics["roc_auc"] = roc_auc_score(labels_np, probs_np)
     prec, rec, _ = precision_recall_curve(labels_np, probs_np)
     metrics["pr_auc"] = auc(rec, prec)
-    safe_fraction = compute_safe_ansatz_fraction(all_labels, all_probs)
-    metrics["safe_ansatz_fraction"] = safe_fraction
-
 
     # Save minimum predicted probability among true positives (training threshold)
     min_pos = compute_min_positive_prob(all_labels, all_probs)
     metrics["lowest_prob_true1"] = min_pos
     metrics["lowest_prob_true1_train"] = min_pos
+
+    # Training-set neg removal fraction uses training-set min_pos
+    metrics["neg_removal_fraction"] = compute_threshold_neg_removal_fraction(all_labels, all_probs, min_pos)
 
     return avg_loss, accuracy, metrics
 
@@ -137,18 +144,20 @@ def train_epoch(model, train_loader, optimizer, device,
 # Unified evaluation (for validation or test)
 # ==============================================================
 def evaluate(model, loader, device, pos_weight=None,
-             threshold=0.5, log_threshold_curves=False, split_name="val"):
+             threshold=0.5, log_threshold_curves=False, split_name="val",
+             ref_min_pos_prob=None):
     # --------------------------------------------------------------
     # EARLY EXIT: When test set is skipped or loader is None
     # --------------------------------------------------------------
     if loader is None:
-        return 0.0, 0.0, { 
+        return 0.0, 0.0, {
             "roc_auc": None,
             "pr_auc": None,
             "recall": None,
             "accuracy": None,
-            "safe_ansatz_fraction": None
+            "neg_removal_fraction": None,
         }
+
     model.eval()
     total_loss, correct, total = 0.0, 0, 0
     all_probs, all_preds, all_labels = [], [], []
@@ -187,29 +196,13 @@ def evaluate(model, loader, device, pos_weight=None,
     prec, rec, _ = precision_recall_curve(labels_np, probs_np)
     metrics["pr_auc"] = auc(rec, prec)
 
-    # Optional threshold sweep
-    if log_threshold_curves:
-        thresholds = np.linspace(0, 1, 50)
-        accs, precs, recs = [], [], []
-        y_true, y_prob = all_labels.numpy(), all_probs.numpy()
-        for t in thresholds:
-            y_pred = (y_prob >= t).astype(int)
-            accs.append((y_pred == y_true).mean())
-            precs.append(precision_score(y_true, y_pred, zero_division=0))
-            recs.append(recall_score(y_true, y_pred, zero_division=0))
-        metrics["thresholds"] = thresholds
-        metrics["accuracy_vs_threshold"] = accs
-        metrics["precision_vs_threshold"] = precs
-        metrics["recall_vs_threshold"] = recs
+    # Compute neg removal fraction.
+    # For val/test, pass ref_min_pos_prob=train_min_pos_prob to use training-derived threshold.
+    if ref_min_pos_prob is None:
+        # fallback: compute from this split (not preferred for val/test)
+        ref_min_pos_prob = compute_min_positive_prob(all_labels, all_probs)
 
-   # Comment this out inside evaluate():
-# print(f"{split_name.capitalize()} → "
-#       f"Loss: {avg_loss:.4f}, Acc: {accuracy:.4f}, "
-#       f"ROC-AUC: {metrics['roc_auc']:.4f}, PR-AUC: {metrics['pr_auc']:.4f}")
-
-    # Compute your safe-ansatz metric
-    safe_fraction = compute_safe_ansatz_fraction(all_labels, all_probs)
-    metrics["safe_ansatz_fraction"] = safe_fraction
+    metrics["neg_removal_fraction"] = compute_threshold_neg_removal_fraction(all_labels, all_probs, ref_min_pos_prob)
 
     return avg_loss, accuracy, metrics
 
@@ -396,13 +389,17 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
             threshold=config.threshold
         )
 
+        # training-derived threshold to be used for val/test metrics
+        train_min_pos_prob = train_metrics.get("lowest_prob_true1")
+
         # ---- Validation (only if val_dataset exists) ----
         if val_dataset is not None:
             val_loss, val_acc, val_metrics = evaluate(
                 model, val_loader, device,
                 threshold=config.threshold,
                 log_threshold_curves=False,
-                split_name="val"
+                split_name="val",
+                ref_min_pos_prob=train_min_pos_prob,
             )
 
             # Step LR scheduler (plateau only after val)
@@ -428,7 +425,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                     "train_pr_auc": train_metrics.get("pr_auc"),
                     "train_roc_auc": train_metrics.get("roc_auc"),
                     "train_recall": train_metrics.get("recall"),
-                    "train_safe_ansatz_fraction": train_metrics.get("safe_ansatz_fraction"),
+                    "train_neg_removal_fraction": train_metrics.get("neg_removal_fraction"),
                     "lr": optimizer.param_groups[0]["lr"],
                     "in_channels": true_in_channels
                 }
@@ -440,7 +437,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                         "val_pr_auc": val_metrics.get("pr_auc"),
                         "val_roc_auc": val_metrics.get("roc_auc"),
                         "val_recall": val_metrics.get("recall"),
-                        "val_safe_ansatz_fraction": val_metrics.get("safe_ansatz_fraction"),
+                        "val_neg_removal_fraction": val_metrics.get("neg_removal_fraction"),
                     })
 
                 wandb.log(log_dict, step=epoch)
@@ -470,7 +467,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                     "train_pr_auc": train_metrics["pr_auc"],
                     "train_roc_auc": train_metrics["roc_auc"],
                     "train_recall": train_metrics["recall"],
-                    "train_safe_ansatz_fraction": train_metrics.get("safe_ansatz_fraction"),
+                    "train_neg_removal_fraction": train_metrics.get("neg_removal_fraction"),
                     "lr": optimizer.param_groups[0]["lr"]
                 }, step=epoch)
 
@@ -479,17 +476,21 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
     # --------------------------------------------------
     model.load_state_dict(best_state)
 
+    # Get training-derived threshold from the last epoch's metrics (or best epoch if you later store it)
+    train_min_pos_prob = train_metrics.get("lowest_prob_true1")
+
     # Evaluate on test set
     if test_loader is not None:
         test_loss, test_acc, test_metrics = evaluate(
             model, test_loader, device,
             threshold=config.threshold,
             log_threshold_curves=config.log_threshold_curves,
-            split_name="test"
+            split_name="test",
+            ref_min_pos_prob=train_min_pos_prob,
         )
-        
+
         # Evaluate using training-set threshold to guarantee no false negatives
-        if train_metrics.get("lowest_prob_true1") is not None:
+        if train_min_pos_prob is not None:
             # Collect test labels and probabilities for threshold evaluation
             test_all_probs, test_all_labels = [], []
             model.eval()
@@ -500,13 +501,13 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                     probs = torch.sigmoid(out.view(-1))
                     test_all_probs.append(probs.cpu())
                     test_all_labels.append(batch.y.float().cpu())
-            
+
             test_all_probs = torch.cat(test_all_probs)
             test_all_labels = torch.cat(test_all_labels)
-            
+
             # Apply threshold from training set
             test_metrics["threshold_eval"] = evaluate_threshold_from_train(
-                train_metrics["lowest_prob_true1"],
+                train_min_pos_prob,
                 test_all_labels,
                 test_all_probs
             )
@@ -515,11 +516,26 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
             "pr_auc": None,
             "roc_auc": None,
             "recall": None,
-            "safe_ansatz_fraction": None
+            "neg_removal_fraction": None,
         }
 
     total_time = time.time() - start_time
     print(f"Training completed in {total_time:.1f}s.")
+
+    # Print a small end-of-run summary (avoid legacy key names)
+    print("\n=== Summary ===")
+    print(f"Train neg-removal fraction: {train_metrics.get('neg_removal_fraction', None)}")
+
+    if test_loader is not None:
+        print(f"Test  neg-removal fraction: {test_metrics.get('neg_removal_fraction', None)}")
+
+        # If threshold_eval was computed, print it here too
+        te = test_metrics.get("threshold_eval")
+        if isinstance(te, dict):
+            print("\n=== Threshold-based evaluation (train-derived threshold on test set) ===")
+            print(f"Threshold: {te.get('threshold')}")
+            print(f"No false negatives: {te.get('no_false_negatives')}")
+            print(f"Negatives below threshold: {te.get('negatives_below_threshold')} ({te.get('pct_negatives_below_threshold')}%)")
 
     # Final Test metrics logging
     if use_wandb and wandb.run is not None and test_loader is not None:
@@ -529,7 +545,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         "test_pr_auc": test_metrics.get("pr_auc"),
         "test_roc_auc": test_metrics.get("roc_auc"),
         "test_recall": test_metrics.get("recall"),
-        "test_safe_ansatz_fraction": test_metrics.get("safe_ansatz_fraction"),
+        "test_neg_removal_fraction": test_metrics.get("neg_removal_fraction"),
         "total_time": total_time,
         "number of parameters": num_params})
     elif use_wandb and wandb.run is not None:
@@ -556,7 +572,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         "train_pr_auc": train_metrics.get("pr_auc"),
         "train_roc_auc": train_metrics.get("roc_auc"),
         "train_recall": train_metrics.get("recall"),
-        'train_safe_ansatz_fraction': train_metrics.get("safe_ansatz_fraction"),
+        "train_neg_removal_fraction": train_metrics.get("neg_removal_fraction"),
         # expose the training-set minimum positive probability for downstream evaluation scripts
         "lowest_prob_true1": train_metrics.get("lowest_prob_true1"),
         "lowest_prob_true1_train": train_metrics.get("lowest_prob_true1_train"),
@@ -567,7 +583,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         "val_pr_auc": val_metrics.get("pr_auc") if val_dataset is not None else None,
         "val_roc_auc": val_metrics.get("roc_auc") if val_dataset is not None else None,
         "val_recall": val_metrics.get("recall") if val_dataset is not None else None,
-        'val_safe_ansatz_fraction': val_metrics.get("safe_ansatz_fraction") if val_dataset is not None else None,
+        "val_neg_removal_fraction": val_metrics.get("neg_removal_fraction") if val_dataset is not None else None,
 
         # --- TEST metrics ---
         "test_loss": test_loss if test_loader is not None else None,
@@ -575,7 +591,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         "test_pr_auc": test_metrics.get("pr_auc") if test_loader is not None else None,
         "test_roc_auc": test_metrics.get("roc_auc") if test_loader is not None else None,
         "test_recall": test_metrics.get("recall") if test_loader is not None else None,
-        "test_safe_ansatz_fraction": (test_metrics.get("safe_ansatz_fraction") if test_loader is not None else None),
+        "test_neg_removal_fraction": (test_metrics.get("neg_removal_fraction") if test_loader is not None else None),
 
         # --- Runtime ---
         "total_time": total_time

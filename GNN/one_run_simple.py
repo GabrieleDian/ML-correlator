@@ -440,12 +440,12 @@ def main():
     else:
         print("  Test:  SKIPPED\n")
 
-    print("=== Ansatz reduction ===")
-    print(f"  Train: {safe_fmt(results.get('train_safe_ansatz_fraction'))}")
+    print("=== Neg-removal fraction (true 0s below min true-1 prob) ===")
+    print(f"  Train: {safe_fmt(results.get('train_neg_removal_fraction'))}")
     if has_val:
-        print(f"  Val:   {safe_fmt(results.get('val_safe_ansatz_fraction'))}")
+        print(f"  Val:   {safe_fmt(results.get('val_neg_removal_fraction'))}")
     if test_dataset is not None:
-        print(f"  Test:  {safe_fmt(results.get('test_safe_ansatz_fraction'))}\n")
+        print(f"  Test:  {safe_fmt(results.get('test_neg_removal_fraction'))}\n")
     else:
         print("  Test:  SKIPPED\n")
 

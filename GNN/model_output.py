@@ -312,7 +312,7 @@ def compute_metric_row(y_true, y_prob, y_pred, metrics_dict):
     f1 = metrics_dict.get("f1", None)
     roc_auc = metrics_dict.get("roc_auc", None)
     pr_auc = metrics_dict.get("pr_auc", None)
-    safe_frac = metrics_dict.get("safe_ansatz_fraction", None)
+    neg_removal_fraction = metrics_dict.get("neg_removal_fraction", None)
 
     # Lowest predicted probability for true-1 graph
     if (y_true == 1).sum() > 0:
@@ -342,7 +342,7 @@ def compute_metric_row(y_true, y_prob, y_pred, metrics_dict):
         "f1": float(f1) if f1 is not None else None,
         "roc_auc": float(roc_auc) if roc_auc is not None else None,
         "pr_auc": float(pr_auc) if pr_auc is not None else None,
-        "safe_ansatz_fraction": float(safe_frac) if safe_frac is not None else None,
+        "neg_removal_fraction": float(neg_removal_fraction) if neg_removal_fraction is not None else None,
         "lowest_prob_true1": lowest_prob_true1,
         # Flatten key threshold-eval fields for CSV convenience
         "nf_threshold": (threshold_eval.get("threshold") if threshold_eval else None),
@@ -449,6 +449,43 @@ def load_dataset(data_file, selected_features, scaler=None):
     return ds, scaler, file_ext
 
 
+def _predict_probs_and_labels(model, loader, device):
+    """Return (labels:int ndarray, probs:float ndarray) for a loader."""
+    model.eval()
+    all_labels, all_probs = [], []
+    with torch.no_grad():
+        for batch in loader:
+            batch = batch.to(device)
+            out = model(batch.x, batch.edge_index, batch.batch)
+            probs = torch.sigmoid(out.view(-1))
+            all_probs.append(probs.detach().cpu().numpy())
+            all_labels.append(batch.y.detach().cpu().numpy())
+    probs = np.concatenate(all_probs) if len(all_probs) else np.array([], dtype=float)
+    labels = np.concatenate(all_labels).astype(int) if len(all_labels) else np.array([], dtype=int)
+    return labels, probs
+
+
+def _train_fileexts_from_config(data_cfg):
+    """Normalize train_loop_order from config into a list of file_ext strings."""
+    train_order = data_cfg.get("train_loop_order", [])
+    if train_order is None:
+        return []
+    if isinstance(train_order, (str, int)):
+        return [str(train_order)]
+    return [str(x) for x in train_order]
+
+
+def _data_dir_from_config(data_cfg, config_path: Path):
+    """Resolve base_dir relative to config file location."""
+    base_dir = data_cfg.get("base_dir", "")
+    if not base_dir:
+        return None
+    p = Path(base_dir)
+    if p.is_absolute():
+        return p
+    return (config_path.parent / p).resolve()
+
+
 # =====================================================
 # Main evaluation
 # =====================================================
@@ -519,44 +556,73 @@ def main():
     print(f"Accuracy:  {accuracy:.4f}")
     print(f"ROC-AUC:   {metrics['roc_auc']:.4f}")
     print(f"PR-AUC:    {metrics['pr_auc']:.4f}")
-    print(f"Safe-Ansatz Fraction: {metrics['safe_ansatz_fraction']:.4f}")
-    if "precision" in metrics:
-        print(f"Precision: {metrics['precision']:.4f}")
-    if "recall" in metrics:
-        print(f"Recall:    {metrics['recall']:.4f}")
-    if "f1" in metrics:
-        print(f"F1 score:  {metrics['f1']:.4f}")
+    if metrics.get("neg_removal_fraction") is not None:
+        print(f"Neg-removal fraction (true 0s below min true-1 prob): {metrics['neg_removal_fraction']:.4f}")
 
     # Recompute probabilities for physics-oriented analysis
     print("\nRecomputing probabilities for physics-oriented analysis…")
 
-    model.eval()
-    all_labels, all_probs = [], []
-
-    with torch.no_grad():
-        for batch in loader:
-            batch = batch.to(device)
-            out = model(batch.x, batch.edge_index, batch.batch)
-            probs = torch.sigmoid(out.view(-1))
-            all_probs.append(probs.cpu().numpy())
-            all_labels.append(batch.y.cpu().numpy())
-
-    all_probs = np.concatenate(all_probs)
-    all_labels = np.concatenate(all_labels).astype(int)
+    all_labels, all_probs = _predict_probs_and_labels(model, loader, device)
     all_preds = (all_probs >= args.threshold).astype(int)
 
-    # Threshold-based evaluation on this evaluated dataset (min prob among true positives)
-    eval_min_prob = compute_min_positive_prob(
-        torch.as_tensor(all_labels, dtype=torch.long),
-        torch.as_tensor(all_probs, dtype=torch.float32)
-    )
-    if eval_min_prob is not None:
-        print("\n=== THRESHOLD-BASED EVALUATION (min prob among true positives on this dataset) ===")
-        _ = evaluate_threshold_from_train(
-            eval_min_prob,
-            torch.as_tensor(all_labels, dtype=torch.long),
-            torch.as_tensor(all_probs, dtype=torch.float32)
-        )
+    # -----------------------------------------------------
+    # Threshold-based evaluation using TRAINING split minimum
+    # -----------------------------------------------------
+    train_threshold_eval = None
+    train_min_prob = None
+
+    data_cfg = cfg.get("data", {})
+    train_fileexts = _train_fileexts_from_config(data_cfg)
+    train_base_dir = _data_dir_from_config(data_cfg, Path(args.config).resolve())
+
+    if train_base_dir is not None and len(train_fileexts) > 0:
+        train_labels_all, train_probs_all = [], []
+
+        print("\nComputing training-derived threshold (min prob among true positives on training set)…")
+        print(f"[INFO] train_loop_order={train_fileexts}")
+        print(f"[INFO] base_dir={train_base_dir}")
+
+        for tr_ext in train_fileexts:
+            train_npz = train_base_dir / f"den_graph_data_{tr_ext}.npz"
+            if not train_npz.exists():
+                train_npz = train_base_dir / f"den_graph_data_{tr_ext}.csv"
+
+            if not train_npz.exists():
+                print(f"[WARN] Training data file not found for loop {tr_ext}: expected {train_base_dir}/den_graph_data_{tr_ext}.npz (.csv)")
+                continue
+
+            tr_ds, _, _ = load_dataset(
+                data_file=str(train_npz),
+                selected_features=selected_features,
+                scaler=None
+            )
+            tr_loader = DataLoader(tr_ds, batch_size=args.batch_size, shuffle=False)
+            tr_labels, tr_probs = _predict_probs_and_labels(model, tr_loader, device)
+            train_labels_all.append(tr_labels)
+            train_probs_all.append(tr_probs)
+
+        if len(train_labels_all) > 0:
+            train_labels_all = np.concatenate(train_labels_all).astype(int)
+            train_probs_all = np.concatenate(train_probs_all).astype(float)
+
+            train_min_prob = compute_min_positive_prob(
+                torch.as_tensor(train_labels_all, dtype=torch.long),
+                torch.as_tensor(train_probs_all, dtype=torch.float32)
+            )
+
+            if train_min_prob is not None:
+                print("\n=== THRESHOLD-BASED EVALUATION (threshold from TRAIN set, applied to evaluated dataset) ===")
+                train_threshold_eval = evaluate_threshold_from_train(
+                    train_min_prob,
+                    torch.as_tensor(all_labels, dtype=torch.long),
+                    torch.as_tensor(all_probs, dtype=torch.float32)
+                )
+            else:
+                print("[WARN] Training set contains no positives; cannot compute min-positive threshold.")
+        else:
+            print("[WARN] No training datasets were loaded; skipping training-derived threshold evaluation.")
+    else:
+        print("[WARN] Could not resolve training datasets from config; skipping training-derived threshold evaluation.")
 
     # =====================================================
     # Physics-oriented scalar metrics (reduction & FN)
@@ -599,10 +665,16 @@ def main():
         y_pred=all_preds,
         metrics_dict=metrics
     )
-    metric_df = pd.DataFrame([metric_row])
     metric_csv_path = output_dir / f"{prefix}_metrics.csv"
-    metric_df.to_csv(metric_csv_path, index=False)
+    pd.DataFrame([metric_row]).to_csv(metric_csv_path, index=False)
     print(f"[INFO] Saved metrics summary → {metric_csv_path}")
+
+    # Override/augment CSV fields with training-derived threshold evaluation (if available)
+    if train_threshold_eval is not None:
+        metric_row["nf_threshold"] = train_threshold_eval.get("threshold")
+        metric_row["nf_no_false_negatives"] = train_threshold_eval.get("no_false_negatives")
+        metric_row["nf_negatives_below_threshold"] = train_threshold_eval.get("negatives_below_threshold")
+        metric_row["nf_pct_negatives_below_threshold"] = train_threshold_eval.get("pct_negatives_below_threshold")
 
     # =====================================================
     # Generate plots
