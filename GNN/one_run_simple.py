@@ -7,13 +7,13 @@ from pathlib import Path
 import yaml
 import wandb
 import os
-
 # Import the simple dataset creator
 from graph_builder import create_simple_dataset, print_dataset_stats
 from types import SimpleNamespace
 from training_utils import train
 
-
+# Handle properly list of values for training and testing.
+import ast
 
 """Convert nested config dict to SimpleNamespace for compatibility."""
 def config_to_namespace(config_dict):
@@ -28,7 +28,7 @@ def config_to_namespace(config_dict):
         hidden_channels=config_dict.get('model', {}).get('hidden_channels', 64),
         num_layers=config_dict.get('model', {}).get('num_layers', 3),
         dropout=config_dict.get('model', {}).get('dropout', 0.2),
-        
+
         # Training configuration
         learning_rate=config_dict.get('training', {}).get('learning_rate', 0.0005),
         weight_decay=config_dict.get('training', {}).get('weight_decay', 0.001),
@@ -45,8 +45,6 @@ def config_to_namespace(config_dict):
     )
 
 
-# Handle properly list of values for training and testing.
-import ast
 def normalize_loop_order(value):
     """
     Normalize loop order input into a list of strings.
@@ -71,23 +69,6 @@ def normalize_loop_order(value):
         return [value.strip()]
     raise ValueError(f"Unsupported loop order format: {value}")
 
-def _clean_wandb_config(cfg):
-    """Remove sweep-metadata keys (parameters.*) while keeping everything else."""
-    if cfg is None:
-        return {}
-
-    # If cfg is a wandb.Config-like object, cast to plain dict first
-    try:
-        cfg = dict(cfg)
-    except Exception:
-        pass
-
-    cleaned = {}
-    for k, v in cfg.items():
-        if k == "parameters" or (isinstance(k, str) and k.startswith("parameters.")):
-            continue
-        cleaned[k] = v
-    return cleaned
 
 def main():
     print("\n=== Starting GNN training run ===")
@@ -122,8 +103,6 @@ def main():
 
         raw_use_wandb = True
 
-
-
         # Override sweep parameters
         for section, key in [
             ('model', 'hidden_channels'),
@@ -139,16 +118,11 @@ def main():
         ]:
             if hasattr(sweep_config, key) and section in config_dict:
                 config_dict[section][key] = getattr(sweep_config, key)
-             #  override model_name if present in sweep
+            # override model_name if present in sweep
             if hasattr(sweep_config, "model_name"):
                 config_dict.setdefault("model", {})["name"] = getattr(sweep_config, "model_name")
-        raw_use_wandb = True
 
-        # IMPORTANT: clean W&B config to avoid logging parameters.* sweep metadata
-        try:
-            wandb.config.update(_clean_wandb_config(wandb.config), allow_val_change=True)
-        except Exception:
-            pass
+        raw_use_wandb = True
 
     else:
         print(" Running in normal mode")
@@ -183,16 +157,14 @@ def main():
     # ---------------------------------------------------------
     use_wandb = is_sweep or str(raw_use_wandb).lower() in ['1', 'true', 'yes']
 
-
     if use_wandb:
         if is_sweep:
             print(" WandB initialized automatically by sweep")
         else:
             print("Initializing WandB for single run...")
-            # Do NOT send sweep-parameter metadata; keep everything else
             wandb.init(
                 project=config_dict.get('experiment', {}).get('wandb_project', 'cluster-7-loop'),
-                config=_clean_wandb_config(config_dict),
+                config=config_dict,
                 reinit=True
             )
     else:
@@ -217,8 +189,7 @@ def main():
     elif mem_gb < 768:
         auto_chunk_size = 500000
     else:
-        auto_chunk_size = 1000000  # >= 700 GB, use high-performance setting
-
+        auto_chunk_size = 1000000
 
     config_dict.setdefault("data", {})
     config_dict["data"]["n_jobs"] = auto_n_jobs
@@ -226,14 +197,14 @@ def main():
 
     print(f"[INFO] Auto-set n_jobs={auto_n_jobs}, chunk_size={auto_chunk_size} for {mem_gb:.1f} GB RAM")
 
-   # ---------------------------------------------------------
+    # ---------------------------------------------------------
     # 3. Data preparation (configurable validation split)
     train_loop_orders = normalize_loop_order(config_dict.get('data', {}).get('train_loop_order', '7'))
     test_loop_orders = normalize_loop_order(config_dict.get('data', {}).get('test_loop_order', '8'))
     selected_features = config_dict.get('features', {}).get('selected_features', ['degree'])
     seed = config_dict.get('experiment', {}).get('seed', 42)
     base_dir = config_dict.get('data', {}).get('base_dir', 'Graph_Edge_Data')
-    use_val = config_dict.get('data', {}).get('val', False)   # <---- NEW FLAG
+    use_val = config_dict.get('data', {}).get('val', False)
 
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -261,46 +232,27 @@ def main():
 
     if train_scaler is None:
         train_scaler = scaler
-    # ✅ new: always keep the largest feature width seen so far
     if max_features is None or feats > max_features:
         max_features = feats
 
+    val_dataset = None
 
-    val_dataset = None  # default
-
-    # =========================================================
-    # CASE 1: VALIDATION ENABLED
-    # =========================================================
     if use_val:
-        if len(train_datasets) < 1:
-            raise ValueError("Need at least one training loop order to create a validation set.")
-
-        # Use only the last training loop for validation
         last_train_ds = train_datasets[-1]
         n_total = len(last_train_ds)
         n_val = int(0.30 * n_total)
         n_discard = n_total - n_val
 
-        # Split: discard 70%, keep 30% for validation
         discard_ds, val_ds = torch.utils.data.random_split(
             last_train_ds,
             [n_discard, n_val],
             generator=torch.Generator().manual_seed(seed)
         )
 
-        val_dataset = val_ds  # keep 30% validation subset
-
-        # Remove last loop entirely from training (discard its 70% too)
+        val_dataset = val_ds
         train_datasets = train_datasets[:-1]
 
-        # ---------------------------------------------------------
-        # After all training loops have been loaded
-        # ---------------------------------------------------------
-        # Find the largest feature width among all already-loaded graphs
         final_max_features = max(d.x.shape[1] for ds in train_datasets for d in ds)
-        print(f"🔧 Final max feature width across training loops: {final_max_features}")
-
-        # Re-pad every graph in every dataset up to this width
         for ds in train_datasets:
             for data in ds:
                 n_nodes, n_feats = data.x.shape
@@ -308,35 +260,14 @@ def main():
                     pad = torch.zeros(n_nodes, final_max_features - n_feats)
                     data.x = torch.cat([data.x, pad], dim=1)
 
-        # Combine all earlier loops (excluding the last one)
         train_dataset = torch.utils.data.ConcatDataset(train_datasets) if train_datasets else None
 
-        # Print validation info (only when validation is used)
-        print(f"Validation ENABLED: Using 30% of {train_loop_orders[-1]} for validation.")
-        print(f"Discarded 70% of {train_loop_orders[-1]} from training.")
-        if train_dataset:
-            print(f"Training on {len(train_dataset)} samples from {train_loop_orders[:-1]}")
-        print(f"Validation set size: {len(val_dataset)} samples from {train_loop_orders[-1]}")
-
-    # =========================================================
-    # CASE 2: VALIDATION DISABLED
-    # =========================================================
     else:
-        # Train on ALL training loops, including the last one
         train_dataset = torch.utils.data.ConcatDataset(train_datasets)
-        print("Validation DISABLED: Training on all training loops.")
-        print(f"Total training samples: {len(train_dataset)}")
-        #When validation is disabled, still determine the max feature width
         final_max_features = max(d.x.shape[1] for ds in train_datasets for d in ds)
-        print(f"🔧 Final max feature width (no validation): {final_max_features}")
 
-
-
-    # =========================================================
-    # TEST SET (SKIPPED WHEN VALIDATION ENABLED)
-    # =========================================================
+    # Test set (skipped when validation enabled)
     if use_val:
-        print("Validation ENABLED → Skipping test set loading.")
         test_dataset = None
     else:
         test_datasets = []
@@ -354,80 +285,47 @@ def main():
             test_datasets.append(ds)
 
         test_dataset = torch.utils.data.ConcatDataset(test_datasets)
-        print(f"Test set: {len(test_dataset)} samples (loop orders {test_loop_orders})")
 
-
-    
-    
     # Convert config to SimpleNamespace for compatibility
     config = config_to_namespace(config_dict)
 
-    # ---------------------------------------------------------
-    # 4. Determine global max feature width across ALL datasets
+    # Determine global max feature width across ALL datasets
     import itertools
+
     def iter_graphs(ds):
-        """Helper to safely iterate over Data objects in any dataset type."""
         if ds is None:
             return []
         if isinstance(ds, torch.utils.data.ConcatDataset):
             return itertools.chain.from_iterable(ds.datasets)
         return ds
-    # Collect all datasets (some may be None)
+
     all_datasets = [train_dataset]
     if val_dataset is not None:
         all_datasets.append(val_dataset)
     if test_dataset is not None:
         all_datasets.append(test_dataset)
 
-
-    # Compute the global maximum feature width across *all* graphs
     global_in_channels = max(g.x.shape[1] for ds in all_datasets for g in iter_graphs(ds))
-
-    # Assign it directly to the config (so wandb sees it)
     config.in_channels = global_in_channels
-
-    # Update experiment name
-    config.experiment_name = (
-        f"{config.model_name}_train_loop_{train_loop_orders}_"
-        f"test_loop_{test_loop_orders}_train_{'_'.join(selected_features)}"
-    )
-
-    # Print summary
-    print(f"\nTraining configuration:")
-    print(f"  Model: {config.model_name}")
-    print(f"  Input features (max detected) during training: {config.in_channels}")
-    print(f"  Hidden channels: {config.hidden_channels}")
-    print(f"  Epochs: {config.epochs}")
 
     # Print dataset info
     print_dataset_stats(train_dataset, "Train")
-
     if val_dataset is not None:
         print_dataset_stats(val_dataset, "Validation")
-
     if test_dataset is not None:
         print_dataset_stats(test_dataset, "Test")
-    else:
-        print("Test: SKIPPED (validation enabled)")
-
-
-
 
     # Train model
     print("\nStarting training...")
     results = train(config, train_dataset, val_dataset, test_dataset, use_wandb=use_wandb)
 
-    
-    # ---------------------------------------------------------
     # Print final results
-    # ---------------------------------------------------------
     print("\nTraining completed!\n")
 
     def safe_fmt(value):
         return f"{value:.4f}" if isinstance(value, (int, float)) and value is not None else "N/A"
 
-    # Helper flag
-    has_val = results.get("val_acc") is not None
+    has_val = val_dataset is not None
 
     print("=== Accuracy ===")
     print(f"  Train: {safe_fmt(results.get('train_acc'))}")
@@ -436,7 +334,7 @@ def main():
     if test_dataset is not None:
         print(f"  Test:  {safe_fmt(results.get('test_acc'))}\n")
     else:
-        print(f"  Test:  SKIPPED\n")
+        print("  Test:  SKIPPED\n")
 
     print("=== PR AUC ===")
     print(f"  Train: {safe_fmt(results.get('train_pr_auc'))}")
@@ -474,57 +372,49 @@ def main():
     else:
         print("  Test:  SKIPPED\n")
 
+    print("=== Min prob among true-1 graphs (lowest_prob_true1) ===")
+    print(f"  Train: {safe_fmt(results.get('train_lowest_prob_true1'))}")
+    if has_val:
+        print(f"  Val:   {safe_fmt(results.get('val_lowest_prob_true1'))}")
+    if test_dataset is not None:
+        print(f"  Test:  {safe_fmt(results.get('test_lowest_prob_true1'))}\n")
+    else:
+        print("  Test:  SKIPPED\n")
 
-
-    # ---------------------------------------------------------
-    # Final WandB logging — ONLY test summary (no duplicates)
-    # ---------------------------------------------------------
-    import contextlib, io
-
+    # Final WandB logging
     if use_wandb and wandb.run is not None:
-        # Always log model size
         if results.get("number_of_parameters") is not None:
             wandb.log({"number_of_parameters": results.get("number_of_parameters")})
 
         if test_dataset is not None:
-            print("Logging final TEST metrics to WandB...")
             wandb.log({
                 "test_loss": results.get("test_loss", 0),
                 "test_acc": results.get("test_acc", 0),
                 "test_pr_auc": results.get("test_pr_auc", 0),
                 "test_roc_auc": results.get("test_roc_auc", 0),
                 "test_recall": results.get("test_recall", 0),
+                "test_lowest_prob_true1": results.get("test_lowest_prob_true1"),
                 "total_time": results.get("total_time", 0)
             })
-        else:
-            print("Validation mode → skipping WandB TEST logging.")
 
-
-
-
-        # Save model if requested
+    # Save model if requested
     save_model = config_dict.get('experiment', {}).get('save_model', False)
-
     if save_model:
         exp_cfg = config_dict.get('experiment', {})
         model_dir = exp_cfg.get('model_dir', 'models')
-        model_name = exp_cfg.get('model_name', None)  # <-- new entry
+        model_name = exp_cfg.get('model_name', None)
 
         save_dir = Path(model_dir)
         save_dir.mkdir(exist_ok=True)
 
-        # Determine final filename
         if model_name is not None:
             filename = f"{model_name}.pt"
         else:
             filename = f"{config.experiment_name}_best.pt"
 
         model_path = save_dir / filename
-
         torch.save(results['model_state'], model_path)
         print(f"Model saved to: {model_path}")
-
-    
 
 
 if __name__ == "__main__":
