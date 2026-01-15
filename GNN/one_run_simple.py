@@ -37,6 +37,7 @@ def config_to_namespace(config_dict):
         scheduler_type=config_dict.get('training', {}).get('scheduler_type', 'onecycle'),
         threshold=config_dict.get('training', {}).get('threshold', 0.5),
         log_threshold_curves=config_dict.get('training', {}).get('log_threshold_curves', False),
+        pos_weight=config_dict.get('training', {}).get('pos_weight', None),
 
         # WandB configuration
         use_wandb=config_dict.get('experiment', {}).get('use_wandb', True),
@@ -110,6 +111,7 @@ def main():
             ('model', 'dropout'),
             ('training', 'learning_rate'),
             ('training', 'batch_size'),
+            ('training', 'pos_weight'),
             ('features', 'selected_features'),
             ('data', 'train_loop_order'),
             ('data', 'test_loop_order'),

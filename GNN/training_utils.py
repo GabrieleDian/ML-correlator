@@ -76,13 +76,19 @@ def compute_min_positive_prob(labels, probs):
 # ==============================================================
 # Training for one epoch
 # ==============================================================
+
 def train_epoch(model, train_loader, optimizer, device,
                 scheduler=None, pos_weight=None,
                 scheduler_type=None, threshold=0.5):
     model.train()
     total_loss, correct, total = 0.0, 0, 0
     all_probs, all_preds, all_labels = [], [], []
-    loss_fn = nn.BCEWithLogitsLoss()
+
+    # pos_weight is a scalar applied to positive examples in BCEWithLogitsLoss
+    pw = None
+    if pos_weight is not None:
+        pw = torch.as_tensor([float(pos_weight)], dtype=torch.float32, device=device)
+    loss_fn = nn.BCEWithLogitsLoss(pos_weight=pw) if pw is not None else nn.BCEWithLogitsLoss()
 
     for batch in train_loader:
         batch = batch.to(device)
@@ -144,6 +150,7 @@ def train_epoch(model, train_loader, optimizer, device,
 # ==============================================================
 # Unified evaluation (for validation or test)
 # ==============================================================
+
 def evaluate(model, loader, device, pos_weight=None,
              threshold=0.5, log_threshold_curves=False, split_name="val",
              ref_min_pos_prob=None):
@@ -162,7 +169,12 @@ def evaluate(model, loader, device, pos_weight=None,
     model.eval()
     total_loss, correct, total = 0.0, 0, 0
     all_probs, all_preds, all_labels = [], [], []
-    loss_fn = nn.BCEWithLogitsLoss()
+
+    # pos_weight is a scalar applied to positive examples in BCEWithLogitsLoss
+    pw = None
+    if pos_weight is not None:
+        pw = torch.as_tensor([float(pos_weight)], dtype=torch.float32, device=device)
+    loss_fn = nn.BCEWithLogitsLoss(pos_weight=pw) if pw is not None else nn.BCEWithLogitsLoss()
 
     with torch.no_grad():
         for batch in loader:
@@ -216,6 +228,7 @@ def evaluate(model, loader, device, pos_weight=None,
 # ==============================================================
 # Threshold-based evaluation using training minimum probability
 # ==============================================================
+
 def evaluate_threshold_from_train(train_min_prob, test_labels, test_probs):
     """
     Uses the minimum probability from true positives in training set as a threshold
@@ -268,11 +281,17 @@ def evaluate_threshold_from_train(train_min_prob, test_labels, test_probs):
 # ==============================================================
 # Main training loop
 # ==============================================================
+
 def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
     start_time = time.time()
+
+    # Pull pos_weight from config if present
+    pos_weight = getattr(config, "pos_weight", None)
+    if pos_weight is not None:
+        print(f"Using pos_weight={pos_weight}")
 
     # Initialize wandb
     if 'WANDB_SWEEP_ID' in os.environ or getattr(config, 'use_wandb', False):
@@ -352,9 +371,12 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
     num_params = int(sum(p.numel() for p in model.parameters() if p.requires_grad))
     print(f"Model has {num_params} trainable parameters")
 
-    # If W&B is enabled, log it once
+    # If W&B is enabled, log static hyperparams once
     if use_wandb and wandb.run is not None:
-        wandb.log({"number_of_parameters": num_params})
+        wandb.log({
+            "number_of_parameters": num_params,
+            "pos_weight": pos_weight,
+        })
 
     optimizer = torch.optim.Adam(model.parameters(),
                                  lr=config.learning_rate,
@@ -397,7 +419,8 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         train_loss, train_acc, train_metrics = train_epoch(
             model, train_loader, optimizer, device,
             scheduler=scheduler, scheduler_type=scheduler_type,
-            threshold=config.threshold
+            threshold=config.threshold,
+            pos_weight=pos_weight,
         )
 
         train_min_pos_prob = train_metrics.get("lowest_prob_true1")
@@ -410,6 +433,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                 log_threshold_curves=False,
                 split_name="val",
                 ref_min_pos_prob=train_min_pos_prob,
+                pos_weight=pos_weight,
             )
 
             # Step LR scheduler (plateau only after val)
@@ -494,6 +518,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
             log_threshold_curves=config.log_threshold_curves,
             split_name="test",
             ref_min_pos_prob=train_min_pos_prob,
+            pos_weight=pos_weight,
         )
 
         # expose final test-set minimum prob among true 1s
@@ -532,33 +557,44 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
     total_time = time.time() - start_time
     print(f"Training completed in {total_time:.1f}s.")
 
+    # End-of-training predictive model checks
+    train_min = train_metrics.get("train_lowest_prob_true1")
+
+    predictive_model_val = None
+    predictive_model_test = None
+
+    if val_dataset is not None:
+        val_min = None
+        if 'val_metrics' in locals() and isinstance(locals().get('val_metrics'), dict):
+            val_min = val_metrics.get("val_lowest_prob_true1")
+        if train_min is not None and val_min is not None:
+            predictive_model_val = bool(train_min <= val_min)
+
+    # Only compute test predictive metric when validation is disabled and test exists
+    if val_dataset is None and test_loader is not None:
+        test_min = test_metrics.get("test_lowest_prob_true1")
+        if train_min is not None and test_min is not None:
+            predictive_model_test = bool(train_min <= test_min)
+
     # Print a small end-of-run summary (avoid legacy key names)
     print("\n=== Summary ===")
     print(f"Train neg-removal fraction: {train_metrics.get('neg_removal_fraction', None)}")
 
-    if test_loader is not None:
-        print(f"Test  neg-removal fraction: {test_metrics.get('neg_removal_fraction', None)}")
-
-        # If threshold_eval was computed, print it here too
-        te = test_metrics.get("threshold_eval")
-        if isinstance(te, dict):
-            print("\n=== Threshold-based evaluation (train-derived threshold on test set) ===")
-            print(f"Threshold: {te.get('threshold')}")
-            print(f"No false negatives: {te.get('no_false_negatives')}")
-            print(f"Negatives below threshold: {te.get('negatives_below_threshold')} ({te.get('pct_negatives_below_threshold')}%)")
+    if val_dataset is not None:
+        print(f"Predictive model (val): {predictive_model_val}")
+    elif test_loader is not None:
+        print(f"Predictive model (test): {predictive_model_test}")
 
     # Final Test metrics logging
-    if use_wandb and wandb.run is not None and test_loader is not None:
-        wandb.log({
-        "test_loss": test_loss,
-        "test_acc": test_acc,
-        "test_pr_auc": test_metrics.get("pr_auc"),
-        "test_roc_auc": test_metrics.get("roc_auc"),
-        "test_recall": test_metrics.get("recall"),
-        "test_neg_removal_fraction": test_metrics.get("neg_removal_fraction"),
-        "test_lowest_prob_true1": test_metrics.get("test_lowest_prob_true1"),
-        "total_time": total_time,
-        "number_of_parameters": num_params})
+    if use_wandb and wandb.run is not None:
+        # Log predictive model flags once at end
+        end_flags = {}
+        if predictive_model_val is not None:
+            end_flags["predictive_model"] = predictive_model_val
+        if predictive_model_test is not None:
+            end_flags["predictive_model_test"] = predictive_model_test
+        if end_flags:
+            wandb.log(end_flags)
 
     # Optional W&B threshold curves
     if wandb.run is not None and config.log_threshold_curves and "thresholds" in test_metrics:
@@ -600,6 +636,10 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         "test_recall": test_metrics.get("recall") if test_loader is not None else None,
         "test_neg_removal_fraction": (test_metrics.get("neg_removal_fraction") if test_loader is not None else None),
         "test_lowest_prob_true1": (test_metrics.get("test_lowest_prob_true1") if test_loader is not None else None),
+
+        # --- Predictive model flags ---
+        "predictive_model": predictive_model_val,
+        "predictive_model_test": predictive_model_test,
 
         # --- Runtime / model size ---
         "total_time": total_time,
