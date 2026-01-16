@@ -98,6 +98,13 @@ def main():
     out_dir = Path(args.project)
     out_dir.mkdir(exist_ok=True)
 
+    # Extract wandb sweep ID (last part of sweep_path)
+    sweep_id = args.sweep_path.strip().split("/")[-1]
+
+    # Folder for slurm logs: <project>/<sweep_id>/
+    slurm_logs_dir = out_dir / sweep_id
+    slurm_logs_dir.mkdir(parents=True, exist_ok=True)
+
     # -----------------------
     # Process runs
     # -----------------------
@@ -120,9 +127,6 @@ def main():
         # --------------------------------------------------------
         # Create dedicated folder: models/<project>/<sweep_id>/
         # --------------------------------------------------------
-
-        # Extract wandb sweep ID (last part of sweep_path)
-        sweep_id = args.sweep_path.strip().split("/")[-1]
         project_name = args.project
         run_name_clean = safe_name  # run.name already cleaned above
         save_folder = Path("models") / project_name / sweep_id
@@ -155,34 +159,36 @@ def main():
         print("[DEBUG] features:", final_cfg["features"]["selected_features"])
         print("[DEBUG] epochs:", final_cfg["training"]["epochs"])
 
-        # Local run
-        if not args.slurm:
-            print(f"[INFO] Running locally...")
-            subprocess.run(
-                ["python", "one_run_simple.py", "--config", str(yaml_path)],
-                cwd=GNN_DIR,
-            )
+        # Slurm job
+        if args.slurm:
+            job_script = "\n".join([
+                "#!/bin/bash",
+                f"#SBATCH --job-name=rerun_{idx}",
+                f"#SBATCH --output={slurm_logs_dir / f'slurm_rerun_{idx}.out'}",
+                f"#SBATCH --error={slurm_logs_dir / f'slurm_rerun_{idx}.err'}",
+                "#SBATCH --partition=maxgpu",
+                "#SBATCH --time=1-00:00:00",
+                "#SBATCH --cpus-per-task=70",
+                "#SBATCH --mem=700G",
+                "",
+                f"cd {GNN_DIR}",
+                f"python one_run_simple.py --config {yaml_path}",
+                "",
+            ])
+
+            slurm_path = out_dir / f"rerun_{idx}.sbatch"
+            with open(slurm_path, "w") as f:
+                f.write(job_script)
+
+            subprocess.run(["sbatch", str(slurm_path)])
             continue
 
-        # Slurm job
-        job_script = f"""#!/bin/bash
-        #SBATCH --job-name=rerun_{idx}
-        #SBATCH --output=slurm_rerun_{idx}.out
-        #SBATCH --error=slurm_rerun_{idx}.err
-        #SBATCH --partition=maxgpu
-        #SBATCH --time=1-00:00:00    # 1 days
-        #SBATCH --cpus-per-task=70
-        #SBATCH --mem=700G
-
-        cd {GNN_DIR}
-        python one_run_simple.py --config {yaml_path}
-        """
-
-        slurm_path = out_dir / f"rerun_{idx}.sbatch"
-        with open(slurm_path, "w") as f:
-            f.write(job_script)
-
-        subprocess.run(["sbatch", str(slurm_path)])
+        # Local run
+        print(f"[INFO] Running locally...")
+        subprocess.run(
+            ["python", "one_run_simple.py", "--config", str(yaml_path)],
+            cwd=GNN_DIR,
+        )
 
     print("\n🎉 DONE — All reruns launched successfully.")
 

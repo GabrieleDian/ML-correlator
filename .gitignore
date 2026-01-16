@@ -22,3 +22,5 @@ wandb/
 Tree_classifier_for_graphs/new_stuff/*.csv
 Tree_classifier_for_graphs/new_stuff/*.parquet
 Tree_classifier_for_graphs/new_stuff/*.json
+# Local utility cluster scripts
+GNN/rerun_best.py
