@@ -581,6 +581,12 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
     print(f"Train neg-removal fraction: {train_metrics.get('neg_removal_fraction', None)}")
 
     if val_dataset is not None:
+        print(f"Val   neg-removal fraction: {val_metrics.get('neg_removal_fraction', None) if 'val_metrics' in locals() else None}")
+
+    if test_loader is not None:
+        print(f"Test  neg-removal fraction: {test_metrics.get('neg_removal_fraction', None)}")
+
+    if val_dataset is not None:
         print(f"Predictive model (val): {predictive_model_val}")
     elif test_loader is not None:
         print(f"Predictive model (test): {predictive_model_test}")
