@@ -58,28 +58,34 @@ class GINNet(nn.Module):
             nn.Linear(hidden_dim // 2, num_classes)
         )
     
-    def forward(self, x, edge_index, batch=None):
+    def forward(self, x, edge_index, batch=None, return_embedding: bool = False):
         # Store representations from each layer
         layer_representations = []
-        
+
         for i in range(self.num_layers):
             x = self.convs[i](x, edge_index)
             x = self.batch_norms[i](x)
             x = F.relu(x)
             x = F.dropout(x, p=self.dropout, training=self.training)
-            
-            # Store layer representation
             layer_representations.append(x)
-        
-        # Jumping knowledge connection
+
+        # Jumping knowledge connection (node-level)
         x = torch.cat(layer_representations, dim=-1)
         x = self.jump(x)
-        
+
+        # If embedding requested, return node-level embedding pre-pooling
+        if return_embedding:
+            return x
+
         # Global pooling
         if batch is None:
             batch = torch.zeros(x.size(0), dtype=torch.long, device=x.device)
         x = global_add_pool(x, batch)
         return self.classifier(x)
+
+    def node_embeddings(self, x, edge_index, batch=None):
+        """Convenience wrapper: return node-level embeddings after self.jump (pre-pooling)."""
+        return self.forward(x, edge_index, batch=batch, return_embedding=True)
 
 
 class GATNet(nn.Module):

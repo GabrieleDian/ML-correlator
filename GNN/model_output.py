@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from torch_geometric.loader import DataLoader
+from torch_geometric.nn import global_add_pool
 
 from graph_builder import create_simple_dataset
 from GNN_architectures import create_gnn_model
@@ -15,7 +16,6 @@ from load_features import autotune_resources
 
 # Plotting
 import matplotlib.pyplot as plt
-import seaborn as sns
 from matplotlib.backends.backend_pdf import PdfPages
 from sklearn.metrics import (
     precision_recall_curve,
@@ -25,6 +25,12 @@ from sklearn.metrics import (
 )
 
 import os
+
+# Optional plotting deps
+try:
+    import seaborn as sns  # type: ignore
+except Exception:
+    sns = None
 
 # =====================================================
 # Utilities
@@ -393,6 +399,7 @@ def parse_args():
 
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--threshold", type=float, default=0.5)
+    parser.add_argument("--embedding", action="store_true", help="Save per-graph embeddings (GIN pre-pooling jump output) to .npy")
 
     return parser.parse_args()
 
@@ -484,6 +491,17 @@ def _data_dir_from_config(data_cfg, config_path: Path):
     if p.is_absolute():
         return p
     return (config_path.parent / p).resolve()
+
+
+def normalize_loop_order(value):
+    """Normalize loop order input into a list of strings."""
+    if isinstance(value, list):
+        return [str(v) for v in value]
+    if isinstance(value, str):
+        if "," in value:
+            return [v.strip() for v in value.split(",") if v.strip()]
+        return [value.strip()]
+    return [str(value)]
 
 
 # =====================================================
@@ -732,6 +750,30 @@ def main():
     print(f"Saved predictions → {pred_csv_path}")
     print(f"False negatives with metadata → {output_dir / (prefix + '_false_negatives.csv')}")
     print(f"True positive positives with metadata → {output_dir / (prefix + '_true_positives_positive_class.csv')}")
+
+    if args.embedding:
+        # Save embeddings for the evaluated dataset (--data_file)
+        arch = model_cfg.get('name', 'gin')
+        if arch != 'gin':
+            raise ValueError("--embedding currently supported only for model.name='gin'")
+
+        emb_dir = Path('embeddings') / f"{Path(args.model_name).stem}_{Path(args.data_file).stem}"
+        ensure_dir(emb_dir)
+        out_path = emb_dir / 'embeddings.npy'
+
+        embs = []
+        with torch.no_grad():
+            for data in DataLoader(dataset, batch_size=1, shuffle=False):
+                data = data.to(device)
+                node_emb = model(data.x, data.edge_index, data.batch, return_embedding=True)
+                graph_emb = global_add_pool(node_emb, data.batch)
+                embs.append(graph_emb.squeeze(0).detach().cpu().numpy())
+
+        embs = np.stack(embs, axis=0)
+        np.save(out_path, embs)
+        print(f"Saved embeddings: {embs.shape} -> {out_path}")
+
+    return
 
 
 if __name__ == "__main__":
