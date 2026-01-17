@@ -560,31 +560,8 @@ def main():
     model.load_state_dict(checkpoint)
     model.eval()
 
-    # Evaluate (for standard metrics)
-    print("\n=== MODEL EVALUATION (standard metrics) ===")
-
-    avg_loss, accuracy, metrics = evaluate(
-        model, loader, device=device,
-        threshold=args.threshold,
-        log_threshold_curves=True,
-        split_name="eval"
-    )
-
-    print(f"\nLoss:      {avg_loss:.4f}")
-    print(f"Accuracy:  {accuracy:.4f}")
-    print(f"ROC-AUC:   {metrics['roc_auc']:.4f}")
-    print(f"PR-AUC:    {metrics['pr_auc']:.4f}")
-    if metrics.get("neg_removal_fraction") is not None:
-        print(f"Neg-removal fraction (true 0s below min true-1 prob): {metrics['neg_removal_fraction']:.4f}")
-
-    # Recompute probabilities for physics-oriented analysis
-    print("\nRecomputing probabilities for physics-oriented analysis…")
-
-    all_labels, all_probs = _predict_probs_and_labels(model, loader, device)
-    all_preds = (all_probs >= args.threshold).astype(int)
-
     # -----------------------------------------------------
-    # Threshold-based evaluation using TRAINING split minimum
+    # Compute training-derived threshold (min prob among true positives on training set)
     # -----------------------------------------------------
     train_threshold_eval = None
     train_min_prob = None
@@ -612,7 +589,7 @@ def main():
             tr_ds, _, _ = load_dataset(
                 data_file=str(train_npz),
                 selected_features=selected_features,
-                scaler=None
+                scaler=None,
             )
             tr_loader = DataLoader(tr_ds, batch_size=args.batch_size, shuffle=False)
             tr_labels, tr_probs = _predict_probs_and_labels(model, tr_loader, device)
@@ -625,27 +602,58 @@ def main():
 
             train_min_prob = compute_min_positive_prob(
                 torch.as_tensor(train_labels_all, dtype=torch.long),
-                torch.as_tensor(train_probs_all, dtype=torch.float32)
+                torch.as_tensor(train_probs_all, dtype=torch.float32),
             )
 
-            if train_min_prob is not None:
-                print("\n=== THRESHOLD-BASED EVALUATION (threshold from TRAIN set, applied to evaluated dataset) ===")
-                train_threshold_eval = evaluate_threshold_from_train(
-                    train_min_prob,
-                    torch.as_tensor(all_labels, dtype=torch.long),
-                    torch.as_tensor(all_probs, dtype=torch.float32)
-                )
-            else:
+            if train_min_prob is None:
                 print("[WARN] Training set contains no positives; cannot compute min-positive threshold.")
         else:
-            print("[WARN] No training datasets were loaded; skipping training-derived threshold evaluation.")
+            print("[WARN] No training datasets were loaded; cannot compute training-derived threshold.")
     else:
-        print("[WARN] Could not resolve training datasets from config; skipping training-derived threshold evaluation.")
+        print("[WARN] Could not resolve training datasets from config; cannot compute training-derived threshold.")
+
+    # Choose the threshold to use everywhere
+    threshold_used = float(train_min_prob) if train_min_prob is not None else float(args.threshold)
+    print(f"[INFO] Using threshold for evaluation/plots: {threshold_used:.6f} ({'train_min_prob' if train_min_prob is not None else '--threshold'})")
 
     # =====================================================
-    # Physics-oriented scalar metrics (reduction & FN)
+    # Evaluate (standard metrics) using the chosen threshold
     # =====================================================
-    print("\n=== PHYSICS-ORIENTED METRICS (threshold = {:.3f}) ===".format(args.threshold))
+    print("\n=== MODEL EVALUATION (standard metrics) ===")
+
+    avg_loss, accuracy, metrics = evaluate(
+        model, loader, device=device,
+        threshold=threshold_used,
+        log_threshold_curves=True,
+        split_name="eval",
+    )
+
+    print(f"\nLoss:      {avg_loss:.4f}")
+    print(f"Accuracy:  {accuracy:.4f}")
+    print(f"ROC-AUC:   {metrics['roc_auc']:.4f}")
+    print(f"PR-AUC:    {metrics['pr_auc']:.4f}")
+    if metrics.get("neg_removal_fraction") is not None:
+        print(f"Neg-removal fraction (true 0s below min true-1 prob): {metrics['neg_removal_fraction']:.4f}")
+
+    # Recompute probabilities for downstream analysis/plots
+    print("\nRecomputing probabilities for physics-oriented analysis…")
+
+    all_labels, all_probs = _predict_probs_and_labels(model, loader, device)
+    all_preds = (all_probs >= threshold_used).astype(int)
+
+    # If we have a training-derived threshold, also print its transfer evaluation
+    if train_min_prob is not None:
+        print("\n=== THRESHOLD-BASED EVALUATION (threshold from TRAIN set, applied to evaluated dataset) ===")
+        train_threshold_eval = evaluate_threshold_from_train(
+            train_min_prob,
+            torch.as_tensor(all_labels, dtype=torch.long),
+            torch.as_tensor(all_probs, dtype=torch.float32),
+        )
+
+    # =====================================================
+    # Physics-oriented scalar metrics
+    # =====================================================
+    print(f"\n=== PHYSICS-ORIENTED METRICS (threshold = {threshold_used:.6f}) ===")
 
     P = (all_labels == 1).sum()
     tp = ((all_preds == 1) & (all_labels == 1)).sum()
@@ -681,11 +689,8 @@ def main():
         y_true=all_labels,
         y_prob=all_probs,
         y_pred=all_preds,
-        metrics_dict=metrics
+        metrics_dict=metrics,
     )
-    metric_csv_path = output_dir / f"{prefix}_metrics.csv"
-    pd.DataFrame([metric_row]).to_csv(metric_csv_path, index=False)
-    print(f"[INFO] Saved metrics summary → {metric_csv_path}")
 
     # Override/augment CSV fields with training-derived threshold evaluation (if available)
     if train_threshold_eval is not None:
@@ -701,7 +706,7 @@ def main():
 
     figs = []
     figs.append(plot_true_labels_scatter(all_labels, output_dir, prefix))
-    figs.append(plot_probabilities(all_labels, all_probs, threshold=args.threshold,
+    figs.append(plot_probabilities(all_labels, all_probs, threshold=threshold_used,
                                    plot_dir=output_dir, prefix=prefix))
     figs.append(plot_misclassifications(all_labels, all_preds, output_dir, prefix))
     figs.append(plot_pr_curve(all_labels, all_probs, output_dir, prefix))
