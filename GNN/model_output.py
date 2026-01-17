@@ -612,9 +612,15 @@ def main():
     else:
         print("[WARN] Could not resolve training datasets from config; cannot compute training-derived threshold.")
 
-    # Choose the threshold to use everywhere
-    threshold_used = float(train_min_prob) if train_min_prob is not None else float(args.threshold)
-    print(f"[INFO] Using threshold for evaluation/plots: {threshold_used:.6f} ({'train_min_prob' if train_min_prob is not None else '--threshold'})")
+    # Choose the threshold to use everywhere (require training-derived threshold)
+    if train_min_prob is None:
+        raise RuntimeError(
+            "Could not compute training-derived threshold (train_min_prob is None). "
+            "Check data.base_dir and data.train_loop_order in the config, and ensure training files exist and contain positives."
+        )
+
+    threshold_used = float(train_min_prob)
+    print(f"[INFO] Using threshold for evaluation/plots: {threshold_used:.6f} (train_min_prob)")
 
     # =====================================================
     # Evaluate (standard metrics) using the chosen threshold
