@@ -101,8 +101,11 @@ def main():
     # Extract wandb sweep ID (last part of sweep_path)
     sweep_id = args.sweep_path.strip().split("/")[-1]
 
-    # Folder for slurm logs: <project>/<sweep_id>/
-    slurm_logs_dir = out_dir / sweep_id
+    # Folder for this rerun batch (scripts + logs): reruns/<project>/<sweep_id>/
+    reruns_dir = Path("reruns") / args.project / sweep_id
+    reruns_dir.mkdir(parents=True, exist_ok=True)
+
+    slurm_logs_dir = reruns_dir / "slurm_logs"
     slurm_logs_dir.mkdir(parents=True, exist_ok=True)
 
     # -----------------------
@@ -176,7 +179,7 @@ def main():
                 "",
             ])
 
-            slurm_path = out_dir / f"rerun_{idx}.sbatch"
+            slurm_path = reruns_dir / f"rerun_{idx}.sbatch"
             with open(slurm_path, "w") as f:
                 f.write(job_script)
 
