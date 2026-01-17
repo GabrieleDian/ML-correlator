@@ -483,13 +483,33 @@ def _train_fileexts_from_config(data_cfg):
 
 
 def _data_dir_from_config(data_cfg, config_path: Path):
-    """Resolve base_dir relative to config file location."""
+    """Resolve base_dir robustly.
+
+    Priority:
+      1) Absolute base_dir as-is.
+      2) Relative to repo root (parent of this GNN dir).
+      3) Relative to current working directory.
+      4) Fallback: relative to config file (legacy).
+    """
     base_dir = data_cfg.get("base_dir", "")
     if not base_dir:
         return None
-    p = Path(base_dir)
+
+    p = Path(str(base_dir))
     if p.is_absolute():
         return p
+
+    # repo root = .../ML-correlator
+    repo_root = Path(__file__).resolve().parents[1]
+    cand = (repo_root / p).resolve()
+    if cand.exists():
+        return cand
+
+    cand = (Path.cwd() / p).resolve()
+    if cand.exists():
+        return cand
+
+    # Legacy fallback: relative to the config file location
     return (config_path.parent / p).resolve()
 
 
