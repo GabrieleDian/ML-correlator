@@ -125,11 +125,19 @@ def plot_confusion(y_true, y_pred, plot_dir: Path, prefix: str):
     fig = plt.figure(figsize=(4, 3))
     cm = confusion_matrix(y_true, y_pred)
 
-    sns.heatmap(
-        cm, annot=True, fmt="d", cmap="Blues",
-        xticklabels=["Pred 0", "Pred 1"],
-        yticklabels=["True 0", "True 1"]
-    )
+    if sns is None:
+        plt.imshow(cm, cmap="Blues")
+        for (i, j), v in np.ndenumerate(cm):
+            plt.text(j, i, int(v), ha="center", va="center", color="black")
+        plt.xticks([0, 1], ["Pred 0", "Pred 1"])
+        plt.yticks([0, 1], ["True 0", "True 1"])
+    else:
+        sns.heatmap(
+            cm, annot=True, fmt="d", cmap="Blues",
+            xticklabels=["Pred 0", "Pred 1"],
+            yticklabels=["True 0", "True 1"],
+        )
+
     plt.title("Confusion Matrix")
     save_fig(fig, f"{prefix}_confusion_matrix.png", plot_dir)
     return fig
@@ -294,10 +302,8 @@ def plot_recall_vs_ansatz(ansatz_fracs, recalls, plot_dir: Path, prefix: str):
 # Metrics row for CSV & PDF
 # =====================================================
 
-def compute_metric_row(y_true, y_prob, y_pred, metrics_dict):
-    """
-    Build metric dictionary for CSV export and PDF summary.
-    """
+def compute_metric_row(y_true, y_prob, y_pred, metrics_dict, train_threshold=None, eval_threshold=None):
+    """Build metric dictionary for CSV export and PDF summary."""
     y_true = np.array(y_true).astype(int)
     y_pred = np.array(y_pred).astype(int)
     y_prob = np.array(y_prob).astype(float)
@@ -328,16 +334,20 @@ def compute_metric_row(y_true, y_prob, y_pred, metrics_dict):
 
     # Threshold-based evaluation (use minimum prob among true positives on THIS evaluated set)
     # Useful to quantify how conservative a threshold must be to guarantee zero false negatives.
-    threshold_eval = None
-    train_min_prob = compute_min_positive_prob(
-        torch.as_tensor(y_true, dtype=torch.long),
-        torch.as_tensor(y_prob, dtype=torch.float32)
-    )
-    if train_min_prob is not None:
-        threshold_eval = evaluate_threshold_from_train(
-            train_min_prob,
+    train_threshold_eval = None
+    if train_threshold is not None:
+        train_threshold_eval = evaluate_threshold_from_train(
+            float(train_threshold),
             torch.as_tensor(y_true, dtype=torch.long),
-            torch.as_tensor(y_prob, dtype=torch.float32)
+            torch.as_tensor(y_prob, dtype=torch.float32),
+        )
+
+    eval_threshold_eval = None
+    if eval_threshold is not None:
+        eval_threshold_eval = evaluate_threshold_from_train(
+            float(eval_threshold),
+            torch.as_tensor(y_true, dtype=torch.long),
+            torch.as_tensor(y_prob, dtype=torch.float32),
         )
 
     return {
@@ -351,10 +361,15 @@ def compute_metric_row(y_true, y_prob, y_pred, metrics_dict):
         "neg_removal_fraction": float(neg_removal_fraction) if neg_removal_fraction is not None else None,
         "lowest_prob_true1": lowest_prob_true1,
         # Flatten key threshold-eval fields for CSV convenience
-        "nf_threshold": (threshold_eval.get("threshold") if threshold_eval else None),
-        "nf_no_false_negatives": (threshold_eval.get("no_false_negatives") if threshold_eval else None),
-        "nf_negatives_below_threshold": (threshold_eval.get("negatives_below_threshold") if threshold_eval else None),
-        "nf_pct_negatives_below_threshold": (threshold_eval.get("pct_negatives_below_threshold") if threshold_eval else None),
+        "train_nf_threshold": (train_threshold_eval.get("threshold") if train_threshold_eval else None),
+        "train_nf_no_false_negatives": (train_threshold_eval.get("no_false_negatives") if train_threshold_eval else None),
+        "train_nf_negatives_below_threshold": (train_threshold_eval.get("negatives_below_threshold") if train_threshold_eval else None),
+        "train_nf_pct_negatives_below_threshold": (train_threshold_eval.get("pct_negatives_below_threshold") if train_threshold_eval else None),
+
+        "eval_nf_threshold": (eval_threshold_eval.get("threshold") if eval_threshold_eval else None),
+        "eval_nf_no_false_negatives": (eval_threshold_eval.get("no_false_negatives") if eval_threshold_eval else None),
+        "eval_nf_negatives_below_threshold": (eval_threshold_eval.get("negatives_below_threshold") if eval_threshold_eval else None),
+        "eval_nf_pct_negatives_below_threshold": (eval_threshold_eval.get("pct_negatives_below_threshold") if eval_threshold_eval else None),
     }
 
 
@@ -581,7 +596,7 @@ def main():
     model.eval()
 
     # -----------------------------------------------------
-    # Compute training-derived threshold (min prob among true positives on training set)
+    # Compute train_min_prob by running checkpoint over ALL configured training loops
     # -----------------------------------------------------
     train_threshold_eval = None
     train_min_prob = None
@@ -590,10 +605,12 @@ def main():
     train_fileexts = _train_fileexts_from_config(data_cfg)
     train_base_dir = _data_dir_from_config(data_cfg, Path(args.config).resolve())
 
-    if train_base_dir is not None and len(train_fileexts) > 0:
-        train_labels_all, train_probs_all = [], []
+    train_labels_all, train_probs_all = [], []
 
-        print("\nComputing training-derived threshold (min prob among true positives on training set)…")
+    if train_base_dir is None or len(train_fileexts) == 0:
+        print("[WARN] Could not resolve training datasets from config; cannot compute train_min_prob.")
+    else:
+        print("\nComputing TRAIN threshold (min prob among true positives on TRAIN set)…")
         print(f"[INFO] train_loop_order={train_fileexts}")
         print(f"[INFO] base_dir={train_base_dir}")
 
@@ -626,13 +643,12 @@ def main():
             )
 
             if train_min_prob is None:
-                print("[WARN] Training set contains no positives; cannot compute min-positive threshold.")
+                print("[WARN] TRAIN set contains no positives; cannot compute train_min_prob.")
+            else:
+                print(f"[INFO] train_min_prob (TRAIN min positive prob) = {float(train_min_prob):.10f}")
         else:
-            print("[WARN] No training datasets were loaded; cannot compute training-derived threshold.")
-    else:
-        print("[WARN] Could not resolve training datasets from config; cannot compute training-derived threshold.")
+            print("[WARN] No training datasets were loaded; cannot compute train_min_prob.")
 
-    # Choose the threshold to use everywhere (require training-derived threshold)
     if train_min_prob is None:
         raise RuntimeError(
             "Could not compute training-derived threshold (train_min_prob is None). "
@@ -640,7 +656,7 @@ def main():
         )
 
     threshold_used = float(train_min_prob)
-    print(f"[INFO] Using threshold for evaluation/plots: {threshold_used:.6f} (train_min_prob)")
+    print(f"[INFO] Using threshold for main evaluation/plots: {threshold_used:.10f} (TRAIN min-positive threshold)")
 
     # =====================================================
     # Evaluate (standard metrics) using the chosen threshold
@@ -662,16 +678,31 @@ def main():
         print(f"Neg-removal fraction (true 0s below min true-1 prob): {metrics['neg_removal_fraction']:.4f}")
 
     # Recompute probabilities for downstream analysis/plots
-    print("\nRecomputing probabilities for physics-oriented analysis…")
-
     all_labels, all_probs = _predict_probs_and_labels(model, loader, device)
     all_preds = (all_probs >= threshold_used).astype(int)
 
-    # If we have a training-derived threshold, also print its transfer evaluation
-    if train_min_prob is not None:
-        print("\n=== THRESHOLD-BASED EVALUATION (threshold from TRAIN set, applied to evaluated dataset) ===")
-        train_threshold_eval = evaluate_threshold_from_train(
-            train_min_prob,
+    # Also compute eval_min_prob on the evaluated dataset itself
+    eval_min_prob = compute_min_positive_prob(
+        torch.as_tensor(all_labels, dtype=torch.long),
+        torch.as_tensor(all_probs, dtype=torch.float32),
+    )
+    if eval_min_prob is not None:
+        print(f"[INFO] eval_min_prob (EVAL min positive prob on evaluated set) = {float(eval_min_prob):.10f}")
+
+    # -----------------------------------------------------
+    # Threshold-based evaluations (two distinct meanings)
+    # -----------------------------------------------------
+    print("\n=== THRESHOLD-BASED EVALUATION A: THRESHOLD FROM TRAIN SET (applied to evaluated dataset) ===")
+    train_threshold_eval = evaluate_threshold_from_train(
+        threshold_used,
+        torch.as_tensor(all_labels, dtype=torch.long),
+        torch.as_tensor(all_probs, dtype=torch.float32),
+    )
+
+    if eval_min_prob is not None:
+        print("\n=== THRESHOLD-BASED EVALUATION B: THRESHOLD FROM EVALUATED SET (min positive prob on THIS set) ===")
+        _ = evaluate_threshold_from_train(
+            float(eval_min_prob),
             torch.as_tensor(all_labels, dtype=torch.long),
             torch.as_tensor(all_probs, dtype=torch.float32),
         )
@@ -716,14 +747,9 @@ def main():
         y_prob=all_probs,
         y_pred=all_preds,
         metrics_dict=metrics,
+        train_threshold=threshold_used,
+        eval_threshold=(float(eval_min_prob) if eval_min_prob is not None else None),
     )
-
-    # Override/augment CSV fields with training-derived threshold evaluation (if available)
-    if train_threshold_eval is not None:
-        metric_row["nf_threshold"] = train_threshold_eval.get("threshold")
-        metric_row["nf_no_false_negatives"] = train_threshold_eval.get("no_false_negatives")
-        metric_row["nf_negatives_below_threshold"] = train_threshold_eval.get("negatives_below_threshold")
-        metric_row["nf_pct_negatives_below_threshold"] = train_threshold_eval.get("pct_negatives_below_threshold")
 
     # =====================================================
     # Generate plots
