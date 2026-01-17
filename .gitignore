@@ -24,7 +24,3 @@ Tree_classifier_for_graphs/new_stuff/*.parquet
 Tree_classifier_for_graphs/new_stuff/*.json
 # Local utility cluster scripts
 GNN/rerun_best.py
-
-# Rerun artifacts (slurm scripts/logs, local rerun outputs)
-GNN/reruns
-GNN/embeddings
