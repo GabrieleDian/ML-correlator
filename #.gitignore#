@@ -10,6 +10,7 @@ gdian/
 inversecusprule.nb
 inversecusprule.wl
 GNN/wandb
+GNN/embeddings/
 # Ignore Python cache and logs
 __pycache__/
 *.pyc
