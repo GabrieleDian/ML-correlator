@@ -21,7 +21,11 @@ from sklearn.metrics import (
     precision_recall_curve,
     roc_curve,
     auc,
-    confusion_matrix
+    confusion_matrix,
+    precision_score,
+    f1_score,
+    roc_auc_score,
+    average_precision_score,
 )
 
 import os
@@ -766,23 +770,26 @@ def main():
     print(f"[INFO] Using threshold for main evaluation/plots: {threshold_used:.10f} (TRAIN min-positive threshold)")
 
     # =====================================================
-    # Evaluate (standard metrics) using the chosen threshold
+    # Evaluate (standard metrics)
     # =====================================================
+    # If --dropout is enabled, we report metrics based on the uncertainty-gated predictions.
+    # Otherwise we keep the original evaluate(...) behavior.
+
     print("\n=== MODEL EVALUATION (standard metrics) ===")
 
-    avg_loss, accuracy, metrics = evaluate(
-        model, loader, device=device,
-        threshold=threshold_used,
-        log_threshold_curves=True,
-        split_name="eval",
-    )
-
-    print(f"\nLoss:      {avg_loss:.4f}")
-    print(f"Accuracy:  {accuracy:.4f}")
-    print(f"ROC-AUC:   {metrics['roc_auc']:.4f}")
-    print(f"PR-AUC:    {metrics['pr_auc']:.4f}")
-    if metrics.get("neg_removal_fraction") is not None:
-        print(f"Neg-removal fraction (true 0s below min true-1 prob): {metrics['neg_removal_fraction']:.4f}")
+    if args.dropout:
+        # We'll compute probabilities first and then compute gated metrics.
+        # Loss is not computed in this path.
+        avg_loss = float("nan")
+        accuracy = float("nan")
+        metrics = {"roc_auc": float("nan"), "pr_auc": float("nan")}
+    else:
+        avg_loss, accuracy, metrics = evaluate(
+            model, loader, device=device,
+            threshold=threshold_used,
+            log_threshold_curves=True,
+            split_name="eval",
+        )
 
     # Recompute probabilities for downstream analysis/plots
     if args.dropout:
@@ -802,8 +809,33 @@ def main():
             threshold=threshold_used,
             rel_std_max=0.9,
         )
+        gated_metrics = _binary_metrics_from_probs(all_labels, y_prob_used, all_preds)
+        # standard-metrics printout uses gated values
+        print(f"\nLoss:      {avg_loss}")
+        print(f"Accuracy:  {gated_metrics['accuracy']:.4f}" if gated_metrics["accuracy"] is not None else "Accuracy:  None")
+        if gated_metrics.get("roc_auc") is not None:
+            print(f"ROC-AUC:   {gated_metrics['roc_auc']:.4f}")
+        else:
+            print("ROC-AUC:   None")
+        if gated_metrics.get("pr_auc") is not None:
+            print(f"PR-AUC:    {gated_metrics['pr_auc']:.4f}")
+        else:
+            print("PR-AUC:    None")
+        # also pass these through for metric_row
+        metrics.update({
+            "roc_auc": gated_metrics.get("roc_auc"),
+            "pr_auc": gated_metrics.get("pr_auc"),
+            "precision": gated_metrics.get("precision"),
+            "f1": gated_metrics.get("f1"),
+        })
     else:
         all_preds = (y_prob_used >= threshold_used).astype(int)
+        print(f"\nLoss:      {avg_loss:.4f}")
+        print(f"Accuracy:  {accuracy:.4f}")
+        print(f"ROC-AUC:   {metrics['roc_auc']:.4f}")
+        print(f"PR-AUC:    {metrics['pr_auc']:.4f}")
+        if metrics.get("neg_removal_fraction") is not None:
+            print(f"Neg-removal fraction (true 0s below min true-1 prob): {metrics['neg_removal_fraction']:.4f}")
 
     # Also compute eval_min_prob on the evaluated dataset itself
     eval_min_prob = compute_min_positive_prob(
@@ -817,19 +849,64 @@ def main():
     # Threshold-based evaluations (two distinct meanings)
     # -----------------------------------------------------
     print("\n=== THRESHOLD-BASED EVALUATION A: THRESHOLD FROM TRAIN SET (applied to evaluated dataset) ===")
-    train_threshold_eval = evaluate_threshold_from_train(
-        threshold_used,
-        torch.as_tensor(all_labels, dtype=torch.long),
-        torch.as_tensor(y_prob_used, dtype=torch.float32),
-    )
-
-    if eval_min_prob is not None:
-        print("\n=== THRESHOLD-BASED EVALUATION B: THRESHOLD FROM EVALUATED SET (min positive prob on THIS set) ===")
-        _ = evaluate_threshold_from_train(
-            float(eval_min_prob),
+    if args.dropout:
+        # Use gated predictions for the printed evaluation
+        _ = _binary_metrics_from_probs(all_labels, y_prob_used, all_preds)
+        # Also print compat info using the existing helper (mean-only) for reference
+        print("[INFO] (mean-only evaluation below does NOT apply the std/mean gate)")
+        train_threshold_eval = evaluate_threshold_from_train(
+            threshold_used,
             torch.as_tensor(all_labels, dtype=torch.long),
             torch.as_tensor(y_prob_used, dtype=torch.float32),
         )
+        # Print gated FN count to match false_negatives.csv
+        gated_fn = int(((all_labels == 1) & (all_preds == 0)).sum())
+        gated_tp = int(((all_labels == 1) & (all_preds == 1)).sum())
+        print("\n============================================================")
+        print(f"Gated threshold evaluation (threshold={threshold_used:.4f}, rel_std_max=0.9)")
+        print("============================================================")
+        print(f"1) False Negatives Guarantee: {'✓ NO FALSE NEGATIVES' if gated_fn == 0 else '✗ FALSE NEGATIVES EXIST'}")
+        print(f"   - True Positives: {gated_tp}")
+        print(f"   - False Negatives: {gated_fn}")
+        print("============================================================")
+    else:
+        train_threshold_eval = evaluate_threshold_from_train(
+            threshold_used,
+            torch.as_tensor(all_labels, dtype=torch.long),
+            torch.as_tensor(y_prob_used, dtype=torch.float32),
+        )
+
+    if eval_min_prob is not None:
+        print("\n=== THRESHOLD-BASED EVALUATION B: THRESHOLD FROM EVALUATED SET (min positive prob on THIS set) ===")
+        if args.dropout:
+            # gated evaluation using threshold = eval_min_prob
+            eval_preds_gated = _uncertainty_gated_preds(
+                y_prob_mean=y_prob_used,
+                y_prob_std=all_probs_std,
+                threshold=float(eval_min_prob),
+                rel_std_max=0.9,
+            )
+            gated_fn = int(((all_labels == 1) & (eval_preds_gated == 0)).sum())
+            gated_tp = int(((all_labels == 1) & (eval_preds_gated == 1)).sum())
+            print("\n============================================================")
+            print(f"Gated threshold evaluation (threshold={float(eval_min_prob):.4f}, rel_std_max=0.9)")
+            print("============================================================")
+            print(f"1) False Negatives Guarantee: {'✓ NO FALSE NEGATIVES' if gated_fn == 0 else '✗ FALSE NEGATIVES EXIST'}")
+            print(f"   - True Positives: {gated_tp}")
+            print(f"   - False Negatives: {gated_fn}")
+            print("============================================================")
+            print("[INFO] (mean-only evaluation below does NOT apply the std/mean gate)")
+            _ = evaluate_threshold_from_train(
+                float(eval_min_prob),
+                torch.as_tensor(all_labels, dtype=torch.long),
+                torch.as_tensor(y_prob_used, dtype=torch.float32),
+            )
+        else:
+            _ = evaluate_threshold_from_train(
+                float(eval_min_prob),
+                torch.as_tensor(all_labels, dtype=torch.long),
+                torch.as_tensor(y_prob_used, dtype=torch.float32),
+            )
 
     # =====================================================
     # Physics-oriented scalar metrics
@@ -856,7 +933,15 @@ def main():
     # Threshold sweep: recall vs ansatz
     # =====================================================
     print("\n=== THRESHOLD SWEEP (no automatic choice) ===")
-    thresholds, recalls, fn_counts, ansatz_fracs = threshold_sweep_metrics(all_labels, y_prob_used)
+    if args.dropout:
+        thresholds, recalls, fn_counts, ansatz_fracs = _threshold_sweep_metrics_gated(
+            all_labels,
+            y_prob_used,
+            all_probs_std,
+            rel_std_max=0.9,
+        )
+    else:
+        thresholds, recalls, fn_counts, ansatz_fracs = threshold_sweep_metrics(all_labels, y_prob_used)
 
     # Print a small table
     print(f"{'thr':>6} {'recall':>8} {'FN':>6} {'ansatz_frac':>12}")
