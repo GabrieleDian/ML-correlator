@@ -104,12 +104,38 @@ def _mc_dropout_probs_and_labels(model, loader, device, T: int = 5):
     return labels, prob_mean, prob_std
 
 
-def _uncertainty_gated_preds(y_prob_mean: np.ndarray, y_prob_std: np.ndarray, threshold: float, rel_std_max: float = 0.9, eps: float = 1e-12) -> np.ndarray:
-    """Predict 0 only if mean<threshold AND (std/mean)<rel_std_max; else predict 1."""
+def _uncertainty_gated_preds(
+    y_prob_mean: np.ndarray,
+    y_prob_std: np.ndarray,
+    threshold: float,
+    rel_std_max: float = 0.6,
+    eps: float = 1e-12,
+) -> np.ndarray:
+    """Uncertainty-gated hard predictions.
+
+    Policy:
+      - If mean < threshold AND (std / denom) <= rel_std_max  -> predict 0
+      - Otherwise (including "uncertain" where std/denom > rel_std_max) -> predict 1
+
+    Where denom = max(mean, eps).
+
+    Rationale:
+      The decision threshold is derived from the minimum probability among true-1
+      graphs on the TRAIN set; it can be extremely small (e.g. 0.0011 or even
+      smaller). The uncertainty test should therefore be relative to the model's
+      predicted mean probability itself, not to the (possibly tiny) threshold.
+
+      "Uncertain" cases (std/denom > rel_std_max) are assigned to class 1.
+    """
     y_prob_mean = np.asarray(y_prob_mean, dtype=float)
     y_prob_std = np.asarray(y_prob_std, dtype=float)
-    rel = y_prob_std / np.maximum(np.abs(y_prob_mean), eps)
-    return np.where((y_prob_mean < threshold) & (rel < rel_std_max), 0, 1).astype(int)
+
+    # Relative uncertainty: std / max(mean, eps)
+    denom = np.maximum(y_prob_mean, eps)
+    rel = y_prob_std / denom
+
+    # Uncertain (rel > rel_std_max) → predict 1 by construction.
+    return np.where((y_prob_mean < threshold) & (rel <= rel_std_max), 0, 1).astype(int)
 
 
 # =====================================================
@@ -366,45 +392,6 @@ def false_negative_analysis(y_true, y_pred, y_prob, dataset, file_ext, plot_dir:
     figs.append(fig)
 
     return figs, fn_idx, fn_probs
-
-
-# =====================================================
-# Threshold sweep for recall vs ansatz size
-# =====================================================
-
-def threshold_sweep_metrics(y_true, y_prob, num_thresholds=50):
-    thresholds = np.linspace(0.0, 1.0, num_thresholds)
-    recalls = []
-    fn_counts = []
-    ansatz_fracs = []
-
-    N = len(y_true)
-    P = (y_true == 1).sum()
-
-    for t in thresholds:
-        y_pred_t = (y_prob >= t).astype(int)
-        tp = ((y_pred_t == 1) & (y_true == 1)).sum()
-        fn = ((y_pred_t == 0) & (y_true == 1)).sum()
-        ansatz_size = (y_pred_t == 1).sum()
-        recall = tp / P if P > 0 else 0.0
-        ansatz_frac = ansatz_size / N if N > 0 else 0.0
-
-        recalls.append(recall)
-        fn_counts.append(fn)
-        ansatz_fracs.append(ansatz_frac)
-
-    return thresholds, np.array(recalls), np.array(fn_counts), np.array(ansatz_fracs)
-
-
-def plot_recall_vs_ansatz(ansatz_fracs, recalls, plot_dir: Path, prefix: str):
-    fig = plt.figure(figsize=(6, 5))
-    plt.plot(ansatz_fracs, recalls, marker="o")
-    plt.xlabel("Ansatz fraction (fraction of graphs kept)")
-    plt.ylabel("Recall (physics coverage)")
-    plt.title("Recall vs Ansatz Size")
-    plt.grid(True)
-    save_fig(fig, f"{prefix}_recall_vs_ansatz.png", plot_dir)
-    return fig
 
 
 # =====================================================
@@ -807,7 +794,7 @@ def main():
             y_prob_mean=y_prob_used,
             y_prob_std=all_probs_std,
             threshold=threshold_used,
-            rel_std_max=0.9,
+            rel_std_max=0.6,
         )
         gated_metrics = _binary_metrics_from_probs(all_labels, y_prob_used, all_preds)
         # standard-metrics printout uses gated values
@@ -848,27 +835,33 @@ def main():
     # -----------------------------------------------------
     # Threshold-based evaluations (two distinct meanings)
     # -----------------------------------------------------
-    print("\n=== THRESHOLD-BASED EVALUATION A: THRESHOLD FROM TRAIN SET (applied to evaluated dataset) ===")
+
+    # A) Threshold is derived from TRAIN set: train_min_prob (min prob among true positives on TRAIN)
+    # B) Threshold is derived from the CURRENT EVAL set: eval_min_prob (min prob among true positives on THIS dataset)
+    #
+    # Additionally, when --dropout is enabled, we print BOTH:
+    #   - gated evaluation (uses std/mean guard; matches all_preds and false_negatives.csv)
+    #   - mean-only evaluation (legacy helper; ignores std/mean; can report many more FNs)
+
+    print("\n=== THRESHOLD EVALUATION (A) : TRAIN-derived threshold (train_min_prob) applied to THIS dataset ===")
+    print(f"[INFO] threshold_source=TRAIN (min prob among y=1 on TRAIN) → threshold={threshold_used:.10f}")
     if args.dropout:
-        # Use gated predictions for the printed evaluation
-        _ = _binary_metrics_from_probs(all_labels, y_prob_used, all_preds)
-        # Also print compat info using the existing helper (mean-only) for reference
-        print("[INFO] (mean-only evaluation below does NOT apply the std/mean gate)")
+        # Gated counts (match false_negatives.csv)
+        gated_fn = int(((all_labels == 1) & (all_preds == 0)).sum())
+        gated_tp = int(((all_labels == 1) & (all_preds == 1)).sum())
+        print("\n============================================================")
+        print(f"GATED (mean+std) evaluation @ threshold={threshold_used:.4f} (rel_std_max=0.6)")
+        print("============================================================")
+        print(f"False Negatives: {gated_fn} | True Positives: {gated_tp}")
+        print("============================================================")
+
+        # Mean-only reference (can disagree with gated counts)
+        print("\n[INFO] MEAN-ONLY reference below (ignores std/mean gate; not comparable to false_negatives.csv)")
         train_threshold_eval = evaluate_threshold_from_train(
             threshold_used,
             torch.as_tensor(all_labels, dtype=torch.long),
             torch.as_tensor(y_prob_used, dtype=torch.float32),
         )
-        # Print gated FN count to match false_negatives.csv
-        gated_fn = int(((all_labels == 1) & (all_preds == 0)).sum())
-        gated_tp = int(((all_labels == 1) & (all_preds == 1)).sum())
-        print("\n============================================================")
-        print(f"Gated threshold evaluation (threshold={threshold_used:.4f}, rel_std_max=0.9)")
-        print("============================================================")
-        print(f"1) False Negatives Guarantee: {'✓ NO FALSE NEGATIVES' if gated_fn == 0 else '✗ FALSE NEGATIVES EXIST'}")
-        print(f"   - True Positives: {gated_tp}")
-        print(f"   - False Negatives: {gated_fn}")
-        print("============================================================")
     else:
         train_threshold_eval = evaluate_threshold_from_train(
             threshold_used,
@@ -877,25 +870,24 @@ def main():
         )
 
     if eval_min_prob is not None:
-        print("\n=== THRESHOLD-BASED EVALUATION B: THRESHOLD FROM EVALUATED SET (min positive prob on THIS set) ===")
+        print("\n=== THRESHOLD EVALUATION (B) : EVAL-derived threshold (eval_min_prob) on THIS dataset ===")
+        print(f"[INFO] threshold_source=EVAL (min prob among y=1 on THIS dataset) → threshold={float(eval_min_prob):.10f}")
         if args.dropout:
-            # gated evaluation using threshold = eval_min_prob
             eval_preds_gated = _uncertainty_gated_preds(
                 y_prob_mean=y_prob_used,
                 y_prob_std=all_probs_std,
                 threshold=float(eval_min_prob),
-                rel_std_max=0.9,
+                rel_std_max=0.6,
             )
             gated_fn = int(((all_labels == 1) & (eval_preds_gated == 0)).sum())
             gated_tp = int(((all_labels == 1) & (eval_preds_gated == 1)).sum())
             print("\n============================================================")
-            print(f"Gated threshold evaluation (threshold={float(eval_min_prob):.4f}, rel_std_max=0.9)")
+            print(f"GATED (mean+std) evaluation @ threshold={float(eval_min_prob):.4f} (rel_std_max=0.6)")
             print("============================================================")
-            print(f"1) False Negatives Guarantee: {'✓ NO FALSE NEGATIVES' if gated_fn == 0 else '✗ FALSE NEGATIVES EXIST'}")
-            print(f"   - True Positives: {gated_tp}")
-            print(f"   - False Negatives: {gated_fn}")
+            print(f"False Negatives: {gated_fn} | True Positives: {gated_tp}")
             print("============================================================")
-            print("[INFO] (mean-only evaluation below does NOT apply the std/mean gate)")
+
+            print("\n[INFO] MEAN-ONLY reference below (ignores std/mean gate)")
             _ = evaluate_threshold_from_train(
                 float(eval_min_prob),
                 torch.as_tensor(all_labels, dtype=torch.long),
@@ -928,25 +920,6 @@ def main():
     print(f"Reduction factor:       {reduction_factor:.2f}x")
     print(f"Recall on contributing graphs (coverage): {recall_pos:.4f}")
     print(f"False negatives (missed contributors):    {fn}")
-
-    # =====================================================
-    # Threshold sweep: recall vs ansatz
-    # =====================================================
-    print("\n=== THRESHOLD SWEEP (no automatic choice) ===")
-    if args.dropout:
-        thresholds, recalls, fn_counts, ansatz_fracs = _threshold_sweep_metrics_gated(
-            all_labels,
-            y_prob_used,
-            all_probs_std,
-            rel_std_max=0.9,
-        )
-    else:
-        thresholds, recalls, fn_counts, ansatz_fracs = threshold_sweep_metrics(all_labels, y_prob_used)
-
-    # Print a small table
-    print(f"{'thr':>6} {'recall':>8} {'FN':>6} {'ansatz_frac':>12}")
-    for t, r, fn_t, af in zip(thresholds, recalls, fn_counts, ansatz_fracs):
-        print(f"{t:6.3f} {r:8.4f} {int(fn_t):6d} {af:12.4f}")
 
     # =====================================================
     # Metrics CSV for this dataset
@@ -986,9 +959,6 @@ def main():
         figs.append(plot_prob_hist_per_class(all_labels, y_prob_used, output_dir, prefix))
         figs.append(plot_sorted_positive_probs(all_labels, y_prob_used, output_dir, prefix))
 
-        # Recall vs Ansatz plot
-        figs.append(plot_recall_vs_ansatz(ansatz_fracs, recalls, output_dir, prefix))
-
         # Add FN-focused figures
         figs.extend(fn_figs)
 
@@ -1018,14 +988,16 @@ def main():
 
     df_dict = {
         "y_true": all_labels,
-        "y_prob": y_prob_used,
         "y_pred": all_preds,
     }
 
-    # If dropout is enabled, expose mean/std explicitly as additional columns
+    # If dropout is enabled, expose mean/std explicitly as additional columns.
+    # NOTE: when --dropout is on, we intentionally do NOT write a plain 'y_prob' column.
     if args.dropout:
         df_dict["y_prob_mean"] = y_prob_used
         df_dict["y_prob_std"] = all_probs_std
+    else:
+        df_dict["y_prob"] = y_prob_used
 
     df = pd.DataFrame(df_dict)
     df.to_csv(pred_csv_path, index=False)
@@ -1058,6 +1030,46 @@ def main():
         print(f"Saved embeddings: {embs.shape} -> {out_path}")
 
     return
+
+
+def _binary_metrics_from_probs(y_true: np.ndarray, y_prob: np.ndarray, y_pred: np.ndarray) -> dict:
+    """Compute basic binary metrics from probs + hard preds."""
+    y_true = np.asarray(y_true).astype(int)
+    y_prob = np.asarray(y_prob).astype(float)
+    y_pred = np.asarray(y_pred).astype(int)
+
+    out = {
+        "accuracy": float((y_true == y_pred).mean()) if len(y_true) else None,
+        "precision": None,
+        "f1": None,
+        "roc_auc": None,
+        "pr_auc": None,
+    }
+
+    if len(y_true) == 0:
+        return out
+
+    try:
+        out["precision"] = float(precision_score(y_true, y_pred, zero_division=0))
+    except Exception:
+        out["precision"] = None
+
+    try:
+        out["f1"] = float(f1_score(y_true, y_pred, zero_division=0))
+    except Exception:
+        out["f1"] = None
+
+    if len(np.unique(y_true)) >= 2:
+        try:
+            out["roc_auc"] = float(roc_auc_score(y_true, y_prob))
+        except Exception:
+            out["roc_auc"] = None
+        try:
+            out["pr_auc"] = float(average_precision_score(y_true, y_prob))
+        except Exception:
+            out["pr_auc"] = None
+
+    return out
 
 
 if __name__ == "__main__":
