@@ -46,6 +46,61 @@ def save_fig(fig, filename: str, plot_dir: Path):
 
 
 # =====================================================
+# Prediction utilities (deterministic + MC Dropout)
+# =====================================================
+
+def _predict_probs_and_labels(model, loader, device):
+    """Return (labels:int ndarray, probs:float ndarray) for a loader (deterministic)."""
+    model.eval()
+    all_labels, all_probs = [], []
+    with torch.no_grad():
+        for batch in loader:
+            batch = batch.to(device)
+            out = model(batch.x, batch.edge_index, batch.batch)
+            probs = torch.sigmoid(out.view(-1))
+            all_probs.append(probs.detach().cpu().numpy())
+            all_labels.append(batch.y.detach().cpu().numpy())
+    probs = np.concatenate(all_probs) if len(all_probs) else np.array([], dtype=float)
+    labels = np.concatenate(all_labels).astype(int) if len(all_labels) else np.array([], dtype=int)
+    return labels, probs
+
+
+def _mc_dropout_probs_and_labels(model, loader, device, T: int = 5):
+    """MC Dropout inference: sample dropout masks T times and return mean/std of probabilities.
+
+    Returns:
+        labels: [N] int ndarray
+        prob_mean: [N] float ndarray
+        prob_std: [N] float ndarray
+    """
+    # labels are deterministic; read once
+    all_labels = []
+    for batch in loader:
+        all_labels.append(batch.y.detach().cpu().numpy())
+    labels = np.concatenate(all_labels).astype(int) if len(all_labels) else np.array([], dtype=int)
+
+    probs_T = []
+    model.train()  # IMPORTANT: activates dropout at inference
+
+    with torch.no_grad():
+        for _ in range(int(T)):
+            all_probs = []
+            for batch in loader:
+                batch = batch.to(device)
+                out = model(batch.x, batch.edge_index, batch.batch)
+                probs = torch.sigmoid(out.view(-1))
+                all_probs.append(probs.detach().cpu().numpy())
+            probs_T.append(np.concatenate(all_probs) if len(all_probs) else np.array([], dtype=float))
+
+    probs_T = np.stack(probs_T, axis=0) if len(probs_T) else np.zeros((0, 0), dtype=float)  # [T, N]
+    prob_mean = probs_T.mean(axis=0) if probs_T.size else np.array([], dtype=float)
+    prob_std = (probs_T.std(axis=0, ddof=1) if int(T) > 1 else np.zeros_like(prob_mean)) if probs_T.size else np.array([], dtype=float)
+
+    model.eval()  # restore
+    return labels, prob_mean, prob_std
+
+
+# =====================================================
 # Plotting utilities (each returns a figure)
 # =====================================================
 
@@ -416,6 +471,24 @@ def parse_args():
     parser.add_argument("--threshold", type=float, default=0.5)
     parser.add_argument("--embedding", action="store_true", help="Save per-graph embeddings (GIN pre-pooling jump output) to .npy")
 
+    parser.add_argument(
+        "--dropout",
+        action="store_true",
+        help="Enable MC Dropout at inference: run T stochastic passes and output mean/std of probabilities."
+    )
+    parser.add_argument(
+        "--T",
+        type=int,
+        default=5,
+        help="Number of MC Dropout samples (default: 5). Only used with --dropout."
+    )
+
+    parser.add_argument(
+        "--plots",
+        action="store_true",
+        help="Generate plots and a PDF report. If not set, no plots/PDF are generated."
+    )
+
     return parser.parse_args()
 
 
@@ -469,22 +542,6 @@ def load_dataset(data_file, selected_features, scaler=None):
     )
 
     return ds, scaler, file_ext
-
-
-def _predict_probs_and_labels(model, loader, device):
-    """Return (labels:int ndarray, probs:float ndarray) for a loader."""
-    model.eval()
-    all_labels, all_probs = [], []
-    with torch.no_grad():
-        for batch in loader:
-            batch = batch.to(device)
-            out = model(batch.x, batch.edge_index, batch.batch)
-            probs = torch.sigmoid(out.view(-1))
-            all_probs.append(probs.detach().cpu().numpy())
-            all_labels.append(batch.y.detach().cpu().numpy())
-    probs = np.concatenate(all_probs) if len(all_probs) else np.array([], dtype=float)
-    labels = np.concatenate(all_labels).astype(int) if len(all_labels) else np.array([], dtype=int)
-    return labels, probs
 
 
 def _train_fileexts_from_config(data_cfg):
@@ -678,7 +735,13 @@ def main():
         print(f"Neg-removal fraction (true 0s below min true-1 prob): {metrics['neg_removal_fraction']:.4f}")
 
     # Recompute probabilities for downstream analysis/plots
-    all_labels, all_probs = _predict_probs_and_labels(model, loader, device)
+    if args.dropout:
+        print(f"[INFO] MC Dropout enabled for outputs (T={int(args.T)})")
+        all_labels, all_probs, all_probs_std = _mc_dropout_probs_and_labels(model, loader, device, T=int(args.T))
+    else:
+        all_labels, all_probs = _predict_probs_and_labels(model, loader, device)
+        all_probs_std = None
+
     all_preds = (all_probs >= threshold_used).astype(int)
 
     # Also compute eval_min_prob on the evaluated dataset itself
@@ -754,59 +817,69 @@ def main():
     # =====================================================
     # Generate plots
     # =====================================================
-    print("\n=== Generating Plots and PDF Report ===")
+    if args.plots:
+        print("\n=== Generating Plots and PDF Report ===")
 
-    figs = []
-    figs.append(plot_true_labels_scatter(all_labels, output_dir, prefix))
-    figs.append(plot_probabilities(all_labels, all_probs, threshold=threshold_used,
-                                   plot_dir=output_dir, prefix=prefix))
-    figs.append(plot_misclassifications(all_labels, all_preds, output_dir, prefix))
-    figs.append(plot_pr_curve(all_labels, all_probs, output_dir, prefix))
-    figs.append(plot_roc_curve(all_labels, all_probs, output_dir, prefix))
-    figs.append(plot_confusion(all_labels, all_preds, output_dir, prefix))
-    figs.append(plot_prob_hist_per_class(all_labels, all_probs, output_dir, prefix))
-    figs.append(plot_sorted_positive_probs(all_labels, all_probs, output_dir, prefix))
+        figs = []
+        figs.append(plot_true_labels_scatter(all_labels, output_dir, prefix))
+        figs.append(plot_probabilities(all_labels, all_probs, threshold=threshold_used,
+                                       plot_dir=output_dir, prefix=prefix))
+        figs.append(plot_misclassifications(all_labels, all_preds, output_dir, prefix))
+        figs.append(plot_pr_curve(all_labels, all_probs, output_dir, prefix))
+        figs.append(plot_roc_curve(all_labels, all_probs, output_dir, prefix))
+        figs.append(plot_confusion(all_labels, all_preds, output_dir, prefix))
+        figs.append(plot_prob_hist_per_class(all_labels, all_probs, output_dir, prefix))
+        figs.append(plot_sorted_positive_probs(all_labels, all_probs, output_dir, prefix))
 
-    # Recall vs Ansatz plot
-    figs.append(plot_recall_vs_ansatz(ansatz_fracs, recalls, output_dir, prefix))
+        # Recall vs Ansatz plot
+        figs.append(plot_recall_vs_ansatz(ansatz_fracs, recalls, output_dir, prefix))
 
-    # False Negative Analysis with metadata
-    print("\n=== False Negative Analysis ===")
-    fn_figs, fn_idx, fn_probs = false_negative_analysis(
-        all_labels, all_preds, all_probs, dataset, file_ext, output_dir, prefix
-    )
-    figs.extend(fn_figs)
+        # False Negative Analysis with metadata
+        print("\n=== False Negative Analysis ===")
+        fn_figs, fn_idx, fn_probs = false_negative_analysis(
+            all_labels, all_preds, all_probs, dataset, file_ext, output_dir, prefix
+        )
+        figs.extend(fn_figs)
 
-    # =====================================================
-    # Save PDF report (metrics page + all figs)
-    # =====================================================
-    pdf_path = output_dir / f"{prefix}_evaluation_report.pdf"
-    with PdfPages(pdf_path) as pdf:
-        # First page: metrics summary
-        metrics_fig = metrics_figure(metric_row)
-        pdf.savefig(metrics_fig, bbox_inches="tight")
-        plt.close(metrics_fig)
+        # =====================================================
+        # Save PDF report (metrics page + all figs)
+        # =====================================================
+        pdf_path = output_dir / f"{prefix}_evaluation_report.pdf"
+        with PdfPages(pdf_path) as pdf:
+            # First page: metrics summary
+            metrics_fig = metrics_figure(metric_row)
+            pdf.savefig(metrics_fig, bbox_inches="tight")
+            plt.close(metrics_fig)
 
-        # Then all plot figures
-        for fig in figs:
-            pdf.savefig(fig, bbox_inches="tight")
-            plt.close(fig)
+            # Then all plot figures
+            for fig in figs:
+                pdf.savefig(fig, bbox_inches="tight")
+                plt.close(fig)
 
-    print(f"Saved PDF report → {pdf_path}")
+        print(f"Saved PDF report → {pdf_path}")
+    else:
+        print("\n[INFO] --plots not set; skipping plot/PDF generation.")
+        # Still write FN/TP metadata CSVs? Keep original behavior: only when plotting.
 
     # =====================================================
     # Save predictions CSV
     # =====================================================
     pred_csv_path = output_dir / f"{prefix}_predictions.csv"
-    df = pd.DataFrame({
+    df_dict = {
         "y_true": all_labels,
         "y_prob": all_probs,
         "y_pred": all_preds
-    })
+    }
+    if all_probs_std is not None:
+        df_dict["y_prob_std"] = all_probs_std
+
+    df = pd.DataFrame(df_dict)
     df.to_csv(pred_csv_path, index=False)
     print(f"Saved predictions → {pred_csv_path}")
-    print(f"False negatives with metadata → {output_dir / (prefix + '_false_negatives.csv')}")
-    print(f"True positive positives with metadata → {output_dir / (prefix + '_true_positives_positive_class.csv')}")
+
+    if args.plots:
+        print(f"False negatives with metadata → {output_dir / (prefix + '_false_negatives.csv')}")
+        print(f"True positive positives with metadata → {output_dir / (prefix + '_true_positives_positive_class.csv')}")
 
     if args.embedding:
         # Save embeddings for the evaluated dataset (--data_file)
