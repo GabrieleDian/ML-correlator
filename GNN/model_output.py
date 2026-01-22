@@ -737,17 +737,20 @@ def main():
     # Recompute probabilities for downstream analysis/plots
     if args.dropout:
         print(f"[INFO] MC Dropout enabled for outputs (T={int(args.T)})")
-        all_labels, all_probs, all_probs_std = _mc_dropout_probs_and_labels(model, loader, device, T=int(args.T))
+        all_labels, all_probs_mean, all_probs_std = _mc_dropout_probs_and_labels(model, loader, device, T=int(args.T))
+        y_prob_used = all_probs_mean
     else:
-        all_labels, all_probs = _predict_probs_and_labels(model, loader, device)
+        all_labels, all_probs_det = _predict_probs_and_labels(model, loader, device)
         all_probs_std = None
+        y_prob_used = all_probs_det
 
-    all_preds = (all_probs >= threshold_used).astype(int)
+    # NOTE: all downstream metrics/plots/FN analysis use y_prob_used (MC mean if --dropout).
+    all_preds = (y_prob_used >= threshold_used).astype(int)
 
     # Also compute eval_min_prob on the evaluated dataset itself
     eval_min_prob = compute_min_positive_prob(
         torch.as_tensor(all_labels, dtype=torch.long),
-        torch.as_tensor(all_probs, dtype=torch.float32),
+        torch.as_tensor(y_prob_used, dtype=torch.float32),
     )
     if eval_min_prob is not None:
         print(f"[INFO] eval_min_prob (EVAL min positive prob on evaluated set) = {float(eval_min_prob):.10f}")
@@ -759,7 +762,7 @@ def main():
     train_threshold_eval = evaluate_threshold_from_train(
         threshold_used,
         torch.as_tensor(all_labels, dtype=torch.long),
-        torch.as_tensor(all_probs, dtype=torch.float32),
+        torch.as_tensor(y_prob_used, dtype=torch.float32),
     )
 
     if eval_min_prob is not None:
@@ -767,7 +770,7 @@ def main():
         _ = evaluate_threshold_from_train(
             float(eval_min_prob),
             torch.as_tensor(all_labels, dtype=torch.long),
-            torch.as_tensor(all_probs, dtype=torch.float32),
+            torch.as_tensor(y_prob_used, dtype=torch.float32),
         )
 
     # =====================================================
@@ -795,7 +798,7 @@ def main():
     # Threshold sweep: recall vs ansatz
     # =====================================================
     print("\n=== THRESHOLD SWEEP (no automatic choice) ===")
-    thresholds, recalls, fn_counts, ansatz_fracs = threshold_sweep_metrics(all_labels, all_probs)
+    thresholds, recalls, fn_counts, ansatz_fracs = threshold_sweep_metrics(all_labels, y_prob_used)
 
     # Print a small table
     print(f"{'thr':>6} {'recall':>8} {'FN':>6} {'ansatz_frac':>12}")
@@ -807,7 +810,7 @@ def main():
     # =====================================================
     metric_row = compute_metric_row(
         y_true=all_labels,
-        y_prob=all_probs,
+        y_prob=y_prob_used,
         y_pred=all_preds,
         metrics_dict=metrics,
         train_threshold=threshold_used,
@@ -822,14 +825,14 @@ def main():
 
         figs = []
         figs.append(plot_true_labels_scatter(all_labels, output_dir, prefix))
-        figs.append(plot_probabilities(all_labels, all_probs, threshold=threshold_used,
+        figs.append(plot_probabilities(all_labels, y_prob_used, threshold=threshold_used,
                                        plot_dir=output_dir, prefix=prefix))
         figs.append(plot_misclassifications(all_labels, all_preds, output_dir, prefix))
-        figs.append(plot_pr_curve(all_labels, all_probs, output_dir, prefix))
-        figs.append(plot_roc_curve(all_labels, all_probs, output_dir, prefix))
+        figs.append(plot_pr_curve(all_labels, y_prob_used, output_dir, prefix))
+        figs.append(plot_roc_curve(all_labels, y_prob_used, output_dir, prefix))
         figs.append(plot_confusion(all_labels, all_preds, output_dir, prefix))
-        figs.append(plot_prob_hist_per_class(all_labels, all_probs, output_dir, prefix))
-        figs.append(plot_sorted_positive_probs(all_labels, all_probs, output_dir, prefix))
+        figs.append(plot_prob_hist_per_class(all_labels, y_prob_used, output_dir, prefix))
+        figs.append(plot_sorted_positive_probs(all_labels, y_prob_used, output_dir, prefix))
 
         # Recall vs Ansatz plot
         figs.append(plot_recall_vs_ansatz(ansatz_fracs, recalls, output_dir, prefix))
@@ -837,7 +840,7 @@ def main():
         # False Negative Analysis with metadata
         print("\n=== False Negative Analysis ===")
         fn_figs, fn_idx, fn_probs = false_negative_analysis(
-            all_labels, all_preds, all_probs, dataset, file_ext, output_dir, prefix
+            all_labels, all_preds, y_prob_used, dataset, file_ext, output_dir, prefix
         )
         figs.extend(fn_figs)
 
@@ -865,12 +868,16 @@ def main():
     # Save predictions CSV
     # =====================================================
     pred_csv_path = output_dir / f"{prefix}_predictions.csv"
+
     df_dict = {
         "y_true": all_labels,
-        "y_prob": all_probs,
-        "y_pred": all_preds
+        "y_prob": y_prob_used,
+        "y_pred": all_preds,
     }
-    if all_probs_std is not None:
+
+    # If dropout is enabled, expose mean/std explicitly as additional columns
+    if args.dropout:
+        df_dict["y_prob_mean"] = y_prob_used
         df_dict["y_prob_std"] = all_probs_std
 
     df = pd.DataFrame(df_dict)
