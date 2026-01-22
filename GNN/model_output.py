@@ -100,6 +100,14 @@ def _mc_dropout_probs_and_labels(model, loader, device, T: int = 5):
     return labels, prob_mean, prob_std
 
 
+def _uncertainty_gated_preds(y_prob_mean: np.ndarray, y_prob_std: np.ndarray, threshold: float, rel_std_max: float = 0.9, eps: float = 1e-12) -> np.ndarray:
+    """Predict 0 only if mean<threshold AND (std/mean)<rel_std_max; else predict 1."""
+    y_prob_mean = np.asarray(y_prob_mean, dtype=float)
+    y_prob_std = np.asarray(y_prob_std, dtype=float)
+    rel = y_prob_std / np.maximum(np.abs(y_prob_mean), eps)
+    return np.where((y_prob_mean < threshold) & (rel < rel_std_max), 0, 1).astype(int)
+
+
 # =====================================================
 # Plotting utilities (each returns a figure)
 # =====================================================
@@ -229,57 +237,99 @@ def plot_sorted_positive_probs(y_true, y_prob, plot_dir: Path, prefix: str):
 # False Negative Analysis
 # =====================================================
 
-def false_negative_analysis(y_true, y_pred, y_prob, dataset, file_ext, plot_dir: Path, prefix: str):
+def false_negative_analysis(y_true, y_pred, y_prob, dataset, file_ext, plot_dir: Path, prefix: str, make_plots: bool = True, y_prob_std: np.ndarray | None = None):
     """
     Focus on false negatives (true=1, pred=0).
-    Save CSV with metadata and generate FN-focused plots.
+    Always saves CSVs with metadata.
+
+    If make_plots is True, also generates and saves FN-focused plots.
+
+    If y_prob_std is provided, it is saved alongside probability as 'y_prob_std'.
     """
     fn_idx = np.where((y_true == 1) & (y_pred == 0))[0]
     fn_probs = y_prob[fn_idx]
+    fn_stds = None
+    if y_prob_std is not None:
+        fn_stds = np.asarray(y_prob_std)[fn_idx]
 
     tp_pos_idx = np.where((y_true == 1) & (y_pred == 1))[0]
     tp_probs = y_prob[tp_pos_idx]
+    tp_stds = None
+    if y_prob_std is not None:
+        tp_stds = np.asarray(y_prob_std)[tp_pos_idx]
 
     # Build FN metadata
     rows_fn = []
-    for idx, prob in zip(fn_idx, fn_probs):
-        data = dataset[idx]
-        num_nodes = data.num_nodes if hasattr(data, "num_nodes") else data.x.shape[0]
-        # assuming undirected with duplicated edges; if directed, remove //2
-        num_edges = data.edge_index.shape[1] // 2
-        rows_fn.append({
-            "index": int(idx),
-            "y_true": int(y_true[idx]),
-            "y_pred": int(y_pred[idx]),
-            "probability": float(prob),
-            "num_nodes": int(num_nodes),
-            "num_edges": int(num_edges),
-        })
+    if fn_stds is None:
+        for idx, prob in zip(fn_idx, fn_probs):
+            data = dataset[idx]
+            num_nodes = data.num_nodes if hasattr(data, "num_nodes") else data.x.shape[0]
+            # assuming undirected with duplicated edges; if directed, remove //2
+            num_edges = data.edge_index.shape[1] // 2
+            rows_fn.append({
+                "index": int(idx),
+                "y_true": int(y_true[idx]),
+                "y_pred": int(y_pred[idx]),
+                "probability": float(prob),
+                "num_nodes": int(num_nodes),
+                "num_edges": int(num_edges),
+            })
+    else:
+        for idx, prob, std in zip(fn_idx, fn_probs, fn_stds):
+            data = dataset[idx]
+            num_nodes = data.num_nodes if hasattr(data, "num_nodes") else data.x.shape[0]
+            num_edges = data.edge_index.shape[1] // 2
+            rows_fn.append({
+                "index": int(idx),
+                "y_true": int(y_true[idx]),
+                "y_pred": int(y_pred[idx]),
+                "probability": float(prob),
+                "y_prob_std": float(std),
+                "num_nodes": int(num_nodes),
+                "num_edges": int(num_edges),
+            })
 
     fn_df = pd.DataFrame(rows_fn)
     fn_csv_path = plot_dir / f"{prefix}_false_negatives.csv"
     fn_df.to_csv(fn_csv_path, index=False)
 
-    # TP positives metadata (optional)
+    # TP positives metadata
     rows_tp = []
-    for idx, prob in zip(tp_pos_idx, tp_probs):
-        data = dataset[idx]
-        num_nodes = data.num_nodes if hasattr(data, "num_nodes") else data.x.shape[0]
-        num_edges = data.edge_index.shape[1] // 2
-        rows_tp.append({
-            "index": int(idx),
-            "y_true": int(y_true[idx]),
-            "y_pred": int(y_pred[idx]),
-            "probability": float(prob),
-            "num_nodes": int(num_nodes),
-            "num_edges": int(num_edges),
-        })
+    if tp_stds is None:
+        for idx, prob in zip(tp_pos_idx, tp_probs):
+            data = dataset[idx]
+            num_nodes = data.num_nodes if hasattr(data, "num_nodes") else data.x.shape[0]
+            num_edges = data.edge_index.shape[1] // 2
+            rows_tp.append({
+                "index": int(idx),
+                "y_true": int(y_true[idx]),
+                "y_pred": int(y_pred[idx]),
+                "probability": float(prob),
+                "num_nodes": int(num_nodes),
+                "num_edges": int(num_edges),
+            })
+    else:
+        for idx, prob, std in zip(tp_pos_idx, tp_probs, tp_stds):
+            data = dataset[idx]
+            num_nodes = data.num_nodes if hasattr(data, "num_nodes") else data.x.shape[0]
+            num_edges = data.edge_index.shape[1] // 2
+            rows_tp.append({
+                "index": int(idx),
+                "y_true": int(y_true[idx]),
+                "y_pred": int(y_pred[idx]),
+                "probability": float(prob),
+                "y_prob_std": float(std),
+                "num_nodes": int(num_nodes),
+                "num_edges": int(num_edges),
+            })
 
     tp_df = pd.DataFrame(rows_tp)
     tp_csv_path = plot_dir / f"{prefix}_true_positives_positive_class.csv"
     tp_df.to_csv(tp_csv_path, index=False)
 
     figs = []
+    if not make_plots:
+        return figs, fn_idx, fn_probs
 
     # 1. FN scatter
     fig = plt.figure(figsize=(12, 3))
@@ -745,7 +795,15 @@ def main():
         y_prob_used = all_probs_det
 
     # NOTE: all downstream metrics/plots/FN analysis use y_prob_used (MC mean if --dropout).
-    all_preds = (y_prob_used >= threshold_used).astype(int)
+    if args.dropout:
+        all_preds = _uncertainty_gated_preds(
+            y_prob_mean=y_prob_used,
+            y_prob_std=all_probs_std,
+            threshold=threshold_used,
+            rel_std_max=0.9,
+        )
+    else:
+        all_preds = (y_prob_used >= threshold_used).astype(int)
 
     # Also compute eval_min_prob on the evaluated dataset itself
     eval_min_prob = compute_min_positive_prob(
@@ -818,7 +876,16 @@ def main():
     )
 
     # =====================================================
-    # Generate plots
+    # Always write FN/TP metadata CSVs
+    # =====================================================
+    fn_figs, fn_idx, fn_probs = false_negative_analysis(
+        all_labels, all_preds, y_prob_used, dataset, file_ext, output_dir, prefix,
+        make_plots=bool(args.plots),
+        y_prob_std=(all_probs_std if args.dropout else None)
+    )
+
+    # =====================================================
+    # Generate plots (only if --plots)
     # =====================================================
     if args.plots:
         print("\n=== Generating Plots and PDF Report ===")
@@ -837,11 +904,7 @@ def main():
         # Recall vs Ansatz plot
         figs.append(plot_recall_vs_ansatz(ansatz_fracs, recalls, output_dir, prefix))
 
-        # False Negative Analysis with metadata
-        print("\n=== False Negative Analysis ===")
-        fn_figs, fn_idx, fn_probs = false_negative_analysis(
-            all_labels, all_preds, y_prob_used, dataset, file_ext, output_dir, prefix
-        )
+        # Add FN-focused figures
         figs.extend(fn_figs)
 
         # =====================================================
@@ -862,10 +925,9 @@ def main():
         print(f"Saved PDF report → {pdf_path}")
     else:
         print("\n[INFO] --plots not set; skipping plot/PDF generation.")
-        # Still write FN/TP metadata CSVs? Keep original behavior: only when plotting.
 
     # =====================================================
-    # Save predictions CSV
+    # Save predictions CSV (always)
     # =====================================================
     pred_csv_path = output_dir / f"{prefix}_predictions.csv"
 
@@ -884,9 +946,9 @@ def main():
     df.to_csv(pred_csv_path, index=False)
     print(f"Saved predictions → {pred_csv_path}")
 
-    if args.plots:
-        print(f"False negatives with metadata → {output_dir / (prefix + '_false_negatives.csv')}")
-        print(f"True positive positives with metadata → {output_dir / (prefix + '_true_positives_positive_class.csv')}")
+    # Always print FN/TP CSV paths
+    print(f"False negatives with metadata → {output_dir / (prefix + '_false_negatives.csv')}")
+    print(f"True positive positives with metadata → {output_dir / (prefix + '_true_positives_positive_class.csv')}")
 
     if args.embedding:
         # Save embeddings for the evaluated dataset (--data_file)
