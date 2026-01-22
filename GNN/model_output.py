@@ -669,13 +669,17 @@ def main():
     N = len(dataset)
 
     # Recreate model from config
+    forced_dropout = 0.2
+    if model_cfg.get("dropout", None) != forced_dropout:
+        print(f"[INFO] Forcing model dropout={forced_dropout} (ignoring config model.dropout={model_cfg.get('dropout', None)})")
+
     model = create_gnn_model(
         architecture=model_cfg["name"],
         num_features=num_features,
         hidden_dim=model_cfg["hidden_channels"],
         num_classes=1,
-        dropout=model_cfg["dropout"],
-        num_layers=model_cfg["num_layers"]
+        dropout=forced_dropout,
+        num_layers=model_cfg["num_layers"],
     ).to(device)
 
     # Output directory based on wandb_project, model_name and file_ext
@@ -836,42 +840,33 @@ def main():
     # Threshold-based evaluations (two distinct meanings)
     # -----------------------------------------------------
 
-    # A) Threshold is derived from TRAIN set: train_min_prob (min prob among true positives on TRAIN)
-    # B) Threshold is derived from the CURRENT EVAL set: eval_min_prob (min prob among true positives on THIS dataset)
-    #
-    # Additionally, when --dropout is enabled, we print BOTH:
-    #   - gated evaluation (uses std/mean guard; matches all_preds and false_negatives.csv)
-    #   - mean-only evaluation (legacy helper; ignores std/mean; can report many more FNs)
+    # Print the mean-only (legacy) threshold evaluation ONCE per threshold source.
 
     print("\n=== THRESHOLD EVALUATION (A) : TRAIN-derived threshold (train_min_prob) applied to THIS dataset ===")
     print(f"[INFO] threshold_source=TRAIN (min prob among y=1 on TRAIN) → threshold={threshold_used:.10f}")
+
     if args.dropout:
-        # Gated counts (match false_negatives.csv)
         gated_fn = int(((all_labels == 1) & (all_preds == 0)).sum())
         gated_tp = int(((all_labels == 1) & (all_preds == 1)).sum())
         print("\n============================================================")
-        print(f"GATED (mean+std) evaluation @ threshold={threshold_used:.4f} (rel_std_max=0.6)")
+        print(f"GATED (mean+std) evaluation @ TRAIN threshold={threshold_used:.4f} (rel_std_max=0.6)")
         print("============================================================")
         print(f"False Negatives: {gated_fn} | True Positives: {gated_tp}")
         print("============================================================")
 
-        # Mean-only reference (can disagree with gated counts)
-        print("\n[INFO] MEAN-ONLY reference below (ignores std/mean gate; not comparable to false_negatives.csv)")
-        train_threshold_eval = evaluate_threshold_from_train(
-            threshold_used,
-            torch.as_tensor(all_labels, dtype=torch.long),
-            torch.as_tensor(y_prob_used, dtype=torch.float32),
-        )
-    else:
-        train_threshold_eval = evaluate_threshold_from_train(
-            threshold_used,
-            torch.as_tensor(all_labels, dtype=torch.long),
-            torch.as_tensor(y_prob_used, dtype=torch.float32),
-        )
+        print("\n[INFO] MEAN-ONLY reference below (ignores std/mean gate)")
+
+    # Mean-only evaluation (printed exactly once)
+    train_threshold_eval = evaluate_threshold_from_train(
+        float(threshold_used),
+        torch.as_tensor(all_labels, dtype=torch.long),
+        torch.as_tensor(y_prob_used, dtype=torch.float32),
+    )
 
     if eval_min_prob is not None:
         print("\n=== THRESHOLD EVALUATION (B) : EVAL-derived threshold (eval_min_prob) on THIS dataset ===")
         print(f"[INFO] threshold_source=EVAL (min prob among y=1 on THIS dataset) → threshold={float(eval_min_prob):.10f}")
+
         if args.dropout:
             eval_preds_gated = _uncertainty_gated_preds(
                 y_prob_mean=y_prob_used,
@@ -882,23 +877,19 @@ def main():
             gated_fn = int(((all_labels == 1) & (eval_preds_gated == 0)).sum())
             gated_tp = int(((all_labels == 1) & (eval_preds_gated == 1)).sum())
             print("\n============================================================")
-            print(f"GATED (mean+std) evaluation @ threshold={float(eval_min_prob):.4f} (rel_std_max=0.6)")
+            print(f"GATED (mean+std) evaluation @ EVAL threshold={float(eval_min_prob):.4f} (rel_std_max=0.6)")
             print("============================================================")
             print(f"False Negatives: {gated_fn} | True Positives: {gated_tp}")
             print("============================================================")
 
             print("\n[INFO] MEAN-ONLY reference below (ignores std/mean gate)")
-            _ = evaluate_threshold_from_train(
-                float(eval_min_prob),
-                torch.as_tensor(all_labels, dtype=torch.long),
-                torch.as_tensor(y_prob_used, dtype=torch.float32),
-            )
-        else:
-            _ = evaluate_threshold_from_train(
-                float(eval_min_prob),
-                torch.as_tensor(all_labels, dtype=torch.long),
-                torch.as_tensor(y_prob_used, dtype=torch.float32),
-            )
+
+        # Mean-only evaluation (printed exactly once)
+        _ = evaluate_threshold_from_train(
+            float(eval_min_prob),
+            torch.as_tensor(all_labels, dtype=torch.long),
+            torch.as_tensor(y_prob_used, dtype=torch.float32),
+        )
 
     # =====================================================
     # Physics-oriented scalar metrics

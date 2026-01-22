@@ -260,7 +260,7 @@ def evaluate_threshold_from_train(train_min_prob, test_labels, test_probs):
     pct_negatives_below = 100.0 * true_negatives_below / len(test_labels)
     
     print(f"\n{'='*60}")
-    print(f"Threshold-based evaluation (threshold={train_min_prob:.4f} from training set)")
+    print(f"Threshold-based evaluation (threshold={train_min_prob:.4f} )")
     print(f"{'='*60}")
     print(f"1) False Negatives Guarantee: {'✓ NO FALSE NEGATIVES' if no_false_negatives else '✗ FALSE NEGATIVES EXIST'}")
     print(f"   - True Positives: {true_positives}")
