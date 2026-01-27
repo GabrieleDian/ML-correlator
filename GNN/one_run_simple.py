@@ -365,12 +365,12 @@ def main():
     else:
         print("  Test:  SKIPPED\n")
 
-    print("=== Neg-removal fraction (true 0s below min true-1 prob) ===")
-    print(f"  Train: {safe_fmt(results.get('train_neg_removal_fraction'))}")
+    print("=== True-negative rate (true 0s below min true-1 prob) ===")
+    print(f"  Train: {safe_fmt(results.get('train_true_negative_rate'))}")
     if has_val:
-        print(f"  Val:   {safe_fmt(results.get('val_neg_removal_fraction'))}")
+        print(f"  Val:   {safe_fmt(results.get('val_true_negative_rate'))}")
     if test_dataset is not None:
-        print(f"  Test:  {safe_fmt(results.get('test_neg_removal_fraction'))}\n")
+        print(f"  Test:  {safe_fmt(results.get('test_true_negative_rate'))}\n")
     else:
         print("  Test:  SKIPPED\n")
 
@@ -395,6 +395,7 @@ def main():
                 "test_pr_auc": results.get("test_pr_auc", 0),
                 "test_roc_auc": results.get("test_roc_auc", 0),
                 "test_recall": results.get("test_recall", 0),
+                "test_true_negative_rate": results.get("test_true_negative_rate", 0),
                 "test_lowest_prob_true1": results.get("test_lowest_prob_true1"),
                 "total_time": results.get("total_time", 0)
             })

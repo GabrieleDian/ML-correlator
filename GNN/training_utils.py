@@ -140,9 +140,9 @@ def train_epoch(model, train_loader, optimizer, device,
     metrics["lowest_prob_true1_train"] = min_pos
     metrics["train_lowest_prob_true1"] = min_pos
 
-    # Training-set neg removal fraction uses training-set min_pos
-    nrf = compute_threshold_neg_removal_fraction(all_labels, all_probs, min_pos)
-    metrics["neg_removal_fraction"] = nrf
+    # Training-set true negative rate uses training-set min_pos
+    tnr = compute_threshold_neg_removal_fraction(all_labels, all_probs, min_pos)
+    metrics["true_negative_rate"] = tnr
 
     return avg_loss, accuracy, metrics
 
@@ -163,7 +163,7 @@ def evaluate(model, loader, device, pos_weight=None,
             "pr_auc": None,
             "recall": None,
             "accuracy": None,
-            "neg_removal_fraction": None,
+            "true_negative_rate": None,
         }
 
     model.eval()
@@ -215,12 +215,32 @@ def evaluate(model, loader, device, pos_weight=None,
     if split_name:
         metrics[f"{split_name}_lowest_prob_true1"] = split_min_pos
 
-    # Compute neg removal fraction.
-    # For val/test, pass ref_min_pos_prob=train_min_pos_prob to use training-derived threshold.
-    if ref_min_pos_prob is None:
-        ref_min_pos_prob = split_min_pos
+    # Threshold selection for metrics on this split.
+    # If ref_min_pos_prob is provided (train-derived), use it; otherwise fall back to this split.
+    eval_threshold = ref_min_pos_prob if ref_min_pos_prob is not None else split_min_pos
 
-    metrics["neg_removal_fraction"] = compute_threshold_neg_removal_fraction(all_labels, all_probs, ref_min_pos_prob)
+    # Recompute hard predictions for recall/precision/etc. using the chosen threshold.
+    if eval_threshold is not None:
+        preds_for_metrics = (all_probs > float(eval_threshold)).long()
+        metrics = compute_metrics(all_labels, preds_for_metrics)
+    else:
+        metrics = compute_metrics(all_labels, all_preds)
+
+    # Move to CPU before converting to numpy
+    labels_np = all_labels.detach().cpu().numpy()
+    probs_np = all_probs.detach().cpu().numpy()
+
+    metrics["roc_auc"] = roc_auc_score(labels_np, probs_np)
+    prec, rec, _ = precision_recall_curve(labels_np, probs_np)
+    metrics["pr_auc"] = auc(rec, prec)
+
+    # Keep lowest prob fields
+    metrics["lowest_prob_true1"] = split_min_pos
+    if split_name:
+        metrics[f"{split_name}_lowest_prob_true1"] = split_min_pos
+
+    # Compute true negative rate using the chosen threshold.
+    metrics["true_negative_rate"] = compute_threshold_neg_removal_fraction(all_labels, all_probs, eval_threshold)
 
     return avg_loss, accuracy, metrics
 
@@ -459,14 +479,14 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                     "train_pr_auc": train_metrics.get("pr_auc"),
                     "train_roc_auc": train_metrics.get("roc_auc"),
                     "train_recall": train_metrics.get("recall"),
-                    "train_neg_removal_fraction": train_metrics.get("neg_removal_fraction"),
+                    "train_true_negative_rate": train_metrics.get("true_negative_rate"),
                     "train_lowest_prob_true1": train_metrics.get("train_lowest_prob_true1"),
                     "val_loss": val_loss,
                     "val_acc": val_acc,
                     "val_pr_auc": val_metrics.get("pr_auc"),
                     "val_roc_auc": val_metrics.get("roc_auc"),
                     "val_recall": val_metrics.get("recall"),
-                    "val_neg_removal_fraction": val_metrics.get("neg_removal_fraction"),
+                    "val_true_negative_rate": val_metrics.get("true_negative_rate"),
                     "val_lowest_prob_true1": val_metrics.get("val_lowest_prob_true1"),
                     "lr": optimizer.param_groups[0]["lr"],
                     "in_channels": true_in_channels,
@@ -497,7 +517,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                     "train_pr_auc": train_metrics.get("pr_auc"),
                     "train_roc_auc": train_metrics.get("roc_auc"),
                     "train_recall": train_metrics.get("recall"),
-                    "train_neg_removal_fraction": train_metrics.get("neg_removal_fraction"),
+                    "train_true_negative_rate": train_metrics.get("true_negative_rate"),
                     "train_lowest_prob_true1": train_metrics.get("train_lowest_prob_true1"),
                     "lr": optimizer.param_groups[0]["lr"],
                 }, step=epoch)
@@ -551,7 +571,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
             "pr_auc": None,
             "roc_auc": None,
             "recall": None,
-            "neg_removal_fraction": None,
+            "true_negative_rate": None,
         }
 
     total_time = time.time() - start_time
@@ -578,13 +598,13 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
 
     # Print a small end-of-run summary (avoid legacy key names)
     print("\n=== Summary ===")
-    print(f"Train neg-removal fraction: {train_metrics.get('neg_removal_fraction', None)}")
+    print(f"Train true-negative rate: {train_metrics.get('true_negative_rate', None)}")
 
     if val_dataset is not None:
-        print(f"Val   neg-removal fraction: {val_metrics.get('neg_removal_fraction', None) if 'val_metrics' in locals() else None}")
+        print(f"Val   true-negative rate: {val_metrics.get('true_negative_rate', None) if 'val_metrics' in locals() else None}")
 
     if test_loader is not None:
-        print(f"Test  neg-removal fraction: {test_metrics.get('neg_removal_fraction', None)}")
+        print(f"Test  true-negative rate: {test_metrics.get('true_negative_rate', None)}")
 
     if val_dataset is not None:
         print(f"Predictive model (val): {predictive_model_val}")
@@ -622,7 +642,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         "train_pr_auc": train_metrics.get("pr_auc"),
         "train_roc_auc": train_metrics.get("roc_auc"),
         "train_recall": train_metrics.get("recall"),
-        "train_neg_removal_fraction": train_metrics.get("neg_removal_fraction"),
+        "train_true_negative_rate": train_metrics.get("true_negative_rate"),
         "train_lowest_prob_true1": train_metrics.get("train_lowest_prob_true1"),
 
         # --- VAL metrics (if available) ---
@@ -631,7 +651,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         "val_pr_auc": val_metrics.get("pr_auc") if val_dataset is not None else None,
         "val_roc_auc": val_metrics.get("roc_auc") if val_dataset is not None else None,
         "val_recall": val_metrics.get("recall") if val_dataset is not None else None,
-        "val_neg_removal_fraction": val_metrics.get("neg_removal_fraction") if val_dataset is not None else None,
+        "val_true_negative_rate": val_metrics.get("true_negative_rate") if val_dataset is not None else None,
         "val_lowest_prob_true1": val_metrics.get("val_lowest_prob_true1") if val_dataset is not None else None,
 
         # --- TEST metrics ---
@@ -640,7 +660,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
         "test_pr_auc": test_metrics.get("pr_auc") if test_loader is not None else None,
         "test_roc_auc": test_metrics.get("roc_auc") if test_loader is not None else None,
         "test_recall": test_metrics.get("recall") if test_loader is not None else None,
-        "test_neg_removal_fraction": (test_metrics.get("neg_removal_fraction") if test_loader is not None else None),
+        "test_true_negative_rate": (test_metrics.get("true_negative_rate") if test_loader is not None else None),
         "test_lowest_prob_true1": (test_metrics.get("test_lowest_prob_true1") if test_loader is not None else None),
 
         # --- Predictive model flags ---
