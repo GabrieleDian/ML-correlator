@@ -74,6 +74,160 @@ def merge_configs(base_cfg, sweep_cfg, epochs, project, run_name,
     return cfg
 
 
+def _resolve_base_dir(base_dir_value: str | None, config_path: Path) -> Path:
+    if not base_dir_value:
+        raise RuntimeError("data.base_dir is missing in config.")
+    p = Path(str(base_dir_value))
+    if p.is_absolute():
+        return p
+
+    # Prefer repo root (..../ML-correlator)
+    repo_root = Path(__file__).resolve().parents[1]
+    cand = (repo_root / p).resolve()
+    if cand.exists():
+        return cand
+
+    cand = (Path.cwd() / p).resolve()
+    if cand.exists():
+        return cand
+
+    # Legacy: relative to config file
+    return (config_path.parent / p).resolve()
+
+
+def _normalize_loop_order(value):
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(v) for v in value]
+    if isinstance(value, (str, int)):
+        s = str(value)
+        if "," in s:
+            return [x.strip() for x in s.split(",") if x.strip()]
+        return [s.strip()]
+    return [str(value)]
+
+
+def _load_test_dataset_from_config(config_path: Path):
+    """Load (concat) test dataset according to config.
+
+    NOTE: This aims to match one_run_simple.py behavior: fit scaler on TRAIN and apply to test.
+    """
+    import torch
+    from graph_builder import create_simple_dataset
+
+    with open(config_path, "r") as f:
+        cfg = yaml.safe_load(f)
+
+    data_cfg = cfg.get("data", {})
+    features_cfg = cfg.get("features", {})
+
+    selected_features = features_cfg.get("selected_features", None)
+    if not selected_features:
+        raise RuntimeError("features.selected_features is missing/empty in config.")
+
+    base_dir = _resolve_base_dir(data_cfg.get("base_dir", None), config_path)
+
+    train_exts = _normalize_loop_order(data_cfg.get("train_loop_order", None))
+    test_exts = _normalize_loop_order(data_cfg.get("test_loop_order", None))
+
+    if len(train_exts) == 0:
+        raise RuntimeError("data.train_loop_order is missing/empty in config (needed to fit scaler).")
+    if len(test_exts) == 0:
+        raise RuntimeError("data.test_loop_order is missing/empty in config.")
+
+    # Optional perf knobs (if present)
+    n_jobs = int(data_cfg.get("n_jobs", 1))
+    chunk_size = int(data_cfg.get("chunk_size", 100000))
+
+    # Fit scaler on train loops
+    train_scaler = None
+    max_features = None
+    for ext in train_exts:
+        ds, scaler, feats = create_simple_dataset(
+            file_ext=str(ext),
+            selected_features=selected_features,
+            normalize=True,
+            data_dir=str(base_dir),
+            scaler=train_scaler,
+            max_features=max_features,
+            n_jobs=n_jobs,
+            chunk_size=chunk_size,
+        )
+        if train_scaler is None:
+            train_scaler = scaler
+        if max_features is None or feats > max_features:
+            max_features = feats
+
+    # Load test loops using train scaler + max_features
+    test_datasets = []
+    for ext in test_exts:
+        ds, _, _ = create_simple_dataset(
+            file_ext=str(ext),
+            selected_features=selected_features,
+            normalize=True,
+            data_dir=str(base_dir),
+            scaler=train_scaler,
+            max_features=max_features,
+            n_jobs=n_jobs,
+            chunk_size=chunk_size,
+        )
+        test_datasets.append(ds)
+
+    test_dataset = torch.utils.data.ConcatDataset(test_datasets) if len(test_datasets) > 1 else test_datasets[0]
+    return test_dataset
+
+
+def _predict_probs_from_checkpoint(config_path: Path, checkpoint_path: Path):
+    """Return (y_true:int ndarray, y_prob:float ndarray) for the test set from one checkpoint."""
+    import numpy as np
+    import torch
+    from torch_geometric.loader import DataLoader
+
+    from GNN_architectures import create_gnn_model
+
+    with open(config_path, "r") as f:
+        cfg = yaml.safe_load(f)
+
+    model_cfg = cfg.get("model", {})
+    training_cfg = cfg.get("training", {})
+
+    test_dataset = _load_test_dataset_from_config(config_path)
+    loader = DataLoader(test_dataset, batch_size=int(training_cfg.get("batch_size", 64)), shuffle=False)
+
+    # Determine num_features
+    first_graph = test_dataset[0] if not hasattr(test_dataset, "datasets") else test_dataset.datasets[0][0]
+    num_features = int(first_graph.x.shape[1])
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    model = create_gnn_model(
+        architecture=model_cfg.get("name", "gin"),
+        num_features=num_features,
+        hidden_dim=int(model_cfg.get("hidden_channels", 64)),
+        num_classes=1,
+        dropout=float(model_cfg.get("dropout", 0.2)),
+        num_layers=int(model_cfg.get("num_layers", 3)),
+    ).to(device)
+
+    state = torch.load(checkpoint_path, map_location=device)
+    model.load_state_dict(state)
+    model.eval()
+
+    all_labels, all_probs = [], []
+    with torch.no_grad():
+        for batch in loader:
+            batch = batch.to(device)
+            out = model(batch.x, batch.edge_index, batch.batch)
+            probs = torch.sigmoid(out.view(-1))
+            all_probs.append(probs.detach().cpu().numpy())
+            all_labels.append(batch.y.detach().cpu().numpy())
+
+    y_prob = np.concatenate(all_probs).astype(float) if len(all_probs) else np.array([], dtype=float)
+    y_true = np.concatenate(all_labels).astype(int) if len(all_labels) else np.array([], dtype=int)
+    return y_true, y_prob
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--sweep_path", required=True)
@@ -83,6 +237,11 @@ def main():
     parser.add_argument("--train_loop", nargs="*")
     parser.add_argument("--test_loop", nargs="*")
     parser.add_argument("--slurm", action="store_true")
+    parser.add_argument(
+        "--average",
+        action="store_true",
+        help="After launching reruns, also compute per-sample mean/std probabilities across all best-tagged runs and save as a CSV under models/<project>/<sweep_id>/.",
+    )
     args = parser.parse_args()
 
     # Load sweep
@@ -104,6 +263,11 @@ def main():
     # Folder for slurm logs: <project>/<sweep_id>/
     slurm_logs_dir = out_dir / sweep_id
     slurm_logs_dir.mkdir(parents=True, exist_ok=True)
+
+    # Track config paths for averaging
+    generated_configs = []
+    # Track checkpoint paths for averaging
+    generated_checkpoints = []
 
     # -----------------------
     # Process runs
@@ -154,6 +318,8 @@ def main():
 
         print(f"[INFO] Saved combined config to: {yaml_path}")
 
+        generated_configs.append(yaml_path)
+        generated_checkpoints.append(save_folder / f"{run_name_clean}.pt")
 
         print(f"[INFO] Saved: {yaml_path}")
         print("[DEBUG] features:", final_cfg["features"]["selected_features"])
@@ -190,7 +356,60 @@ def main():
             cwd=GNN_DIR,
         )
 
-    print("\n🎉 DONE — All reruns launched successfully.")
+    # --------------------------------------------------------
+    # Optional: average predictions over all best-tagged runs
+    # --------------------------------------------------------
+    if args.average:
+        if args.slurm:
+            raise RuntimeError("--average is not supported with --slurm (jobs run asynchronously). Run without --slurm to aggregate immediately.")
+
+        import numpy as np
+        import pandas as pd
+
+        if len(generated_configs) == 0:
+            raise RuntimeError("No configs were generated; cannot average predictions.")
+
+        # Folder for output CSV is the same as model_dir used above
+        sweep_id = args.sweep_path.strip().split("/")[-1]
+        save_folder = Path("models") / args.project / sweep_id
+        save_folder.mkdir(parents=True, exist_ok=True)
+
+        pred_probs = []
+        y_true_ref = None
+
+        for cfg_path, ckpt_path in zip(generated_configs, generated_checkpoints):
+            if not ckpt_path.exists():
+                raise RuntimeError(f"Checkpoint not found (did training save it?): {ckpt_path}")
+
+            y_true, y_prob = _predict_probs_from_checkpoint(cfg_path, ckpt_path)
+
+            if y_true_ref is None:
+                y_true_ref = y_true
+            else:
+                if len(y_true) != len(y_true_ref) or not np.array_equal(y_true, y_true_ref):
+                    raise RuntimeError(
+                        "Predictions are not aligned across runs (different dataset ordering/length). "
+                        "Ensure all runs evaluate the exact same test file(s) and ordering."
+                    )
+
+            pred_probs.append(y_prob)
+
+        probs = np.stack(pred_probs, axis=0)  # [R, N]
+        mean = probs.mean(axis=0)
+        std = probs.std(axis=0, ddof=1) if probs.shape[0] > 1 else np.zeros_like(mean)
+
+        out_df = pd.DataFrame({
+            "index": np.arange(len(mean), dtype=int),
+            "y_true": y_true_ref,
+            "prob_mean": mean,
+            "prob_std": std,
+        })
+
+        out_path = save_folder / "ensemble_test_predictions_mean_std.csv"
+        out_df.to_csv(out_path, index=False)
+        print(f"[INFO] Saved averaged predictions CSV → {out_path}")
+
+    print("\nDONE — All reruns launched successfully.")
 
 
 if __name__ == "__main__":
