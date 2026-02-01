@@ -47,7 +47,7 @@ fnumtodialnum[loop_,fnum_]:=Position[Table[Range[#[[i]]+1,#[[i+1]]],{i,1,Length[
 dialnumtofnum[loop_,{dial_,num_}]:=(Table[Range[#[[i]]+1,#[[i+1]]],{i,1,Length[#]-1}]&@Prepend[Accumulate[Length/@fGraphNums[loop]],0])[[dial,num]]
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Graph Analysis*)
 
 
@@ -98,7 +98,7 @@ cycle[dial_,ve_]:=If[MemberQ[dial,ve],Join[Take[dial,{Position[dial,ve][[1,1]],L
 displayfgraph[fgraph_]:=Column[{PlanarGraph[Denominator[fgraph]/.Times->List/.x->List,VertexLabels->"Name"],Numerator[fgraph]}]
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*generate new graphs via binary relations*)
 
 
@@ -230,7 +230,7 @@ SetAttributes[ProdToList,Listable]
 ProdToList[x_]:=Block[{Times=List,Power=Table},If[Head[x]===List,Flatten@x,{x}]]
 
 
-nn=8;
+nn=9;
 
 
 (* ::Subsubsection:: *)
@@ -240,10 +240,13 @@ nn=8;
 nonZeroFgraph=Select[Thread[{amplitudeCoefficients[nn],fGraphListcan[nn]}],!(#[[1]]===0)&];
 
 
-result=generateRungWithCoeff[nonZeroFgraph];
+result=parallelGenerateRungWithCoeff[nonZeroFgraph];
 
 
 test=PlanarGraphQ[Graph[List@@@(List@@Denominator[#[[2]]])]]&/@result;
+
+
+DeleteDuplicates@test
 
 
 (*Save f-graph data*)
@@ -268,6 +271,12 @@ Print[ToString[nn]<>"to"<>ToString[nn+1]<>"f-graph completed. Lenght ", Length[d
 sameDen={1,#[[1,2]]}&/@ GatherBy[data,#[[2]]&];
 
 
+Length[sameDen]
+
+
+sameDen[[1]]
+
+
 csv=Prepend[sameDen,{"COEFFICIENTS","EDGES"}];
 Export["den_graph_data_"<>ToString[nn]<>"to"<>ToString[nn+1]<>".csv",csv]
 
@@ -284,7 +293,7 @@ Flatten[Extract[amplitudeCoefficients[7],%]]
 First/@result===%*)
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*n+2 loop from n loops*)
 
 
@@ -395,3 +404,58 @@ First/@result===%*)
 Position[fGraphListcan[7],#[[2]]]&/@result;
 Flatten[Extract[amplitudeCoefficients[7],%]]===First/@result
 *)
+
+
+(* ::Section:: *)
+(*Match with graphs*)
+
+
+den10=Import["C:\\Users\\pharm\\Documents\\GitHub\\ML-correlator\\Graph_Edge_Data\\den_graph_data_10.csv"]
+
+
+den10New={ToExpression[#[[1]]],StringReplace[StringReplace[ #[[2]],{"("|"["->"{",")"|"]"->"}"}],"()"->"{}"]}& /@den10;
+den10New={#[[1]],ToExpression@StringReplace[StringReplace[ #[[2]],{"("|"["->"{",")"|"]"->"}"}],"()"->"{}"]}& /@den10New;
+
+
+Position[Drop[den10New,1], #]&/@ Take[sameDen,10]
+
+
+den10NewCan=ParallelMap[{#[[1]],CanonicalGraph[#[[2]]]}&,den10New];
+
+
+sameDenCan=ParallelMap[{#[[1]],CanonicalGraph[#[[2]]]}&,sameDen];
+
+
+Timing[Position[Drop[den10NewCan,1], sameDenCan[[-1]]]]
+
+
+Timing[Position[Drop[den10NewCan,1], sameDenCan[[-1,2]]]]
+
+
+den10can2=#[[2]]&/@Drop[den10NewCan,1];
+sameDenCan2=#[[2]]&/@sameDenCan;
+Timing[Position[den10can2, sameDenCan2[[-1]]]]
+
+
+positions=ParallelMap[Position[den10can2, #]&,sameDenCan2]
+
+
+FullForm@den10NewCan[[2]]
+
+
+(* 1. Create the Association Index *)
+(* This maps each {int, Graph} pair to its positions in den10can2 *)
+index = PositionIndex[den10can2];
+
+
+
+
+(* 2. Perform the lookup *)
+(* Lookup is extremely fast O(1) per element *)
+positions = Lookup[index, sameDenCan2, {}];
+
+
+pos=Sort[Flatten@positions];
+
+
+Export["graph_positions.json", pos]
