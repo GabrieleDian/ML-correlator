@@ -47,7 +47,7 @@ fnumtodialnum[loop_,fnum_]:=Position[Table[Range[#[[i]]+1,#[[i+1]]],{i,1,Length[
 dialnumtofnum[loop_,{dial_,num_}]:=(Table[Range[#[[i]]+1,#[[i+1]]],{i,1,Length[#]-1}]&@Prepend[Accumulate[Length/@fGraphNums[loop]],0])[[dial,num]]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Graph Analysis*)
 
 
@@ -98,7 +98,7 @@ cycle[dial_,ve_]:=If[MemberQ[dial,ve],Join[Take[dial,{Position[dial,ve][[1,1]],L
 displayfgraph[fgraph_]:=Column[{PlanarGraph[Denominator[fgraph]/.Times->List/.x->List,VertexLabels->"Name"],Numerator[fgraph]}]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*generate new graphs via binary relations*)
 
 
@@ -113,6 +113,9 @@ While[Length[dtscurrent]>0,
 dtsnoniso=Append[dtsnoniso,dtscurrent[[1]]];
 dtscurrent=Complement[dtscurrent,Table[VertexReplace[dtscurrent[[1]],ii],{ii,autos}],SameTest->IGSameGraphQ  ]];
 ({#[[1,1]],#[[2,2]],#[[1,2]],#[[3,2]]}&)/@EdgeList/@dtsnoniso]
+
+
+SymmetricDifference[list1_List,list2_List]:= Sort@Join[Complement[list1,list2],Complement[list2,list1]]
 
 
 (*Join two list such that if they form a double triangle the shared edges correposnd to the first two position*)
@@ -148,7 +151,7 @@ CanonicalizeDihedral/@doubletrianglesfgraph[fg]//Sort
 *)
 
 
-fullRungRule[fg_]:=Module[{facets,goodSquares,nn,newfgs},
+fullRungRule[fg_]:=Module[{facets,goodSquares,nn,newfgs,triangles},
 facets=facetsFgraph[fg];
 triangles=Select[facets,Length[#]===3&];
 goodSquares=Join[Select[facets,Length[#]===4&],doubleTrFromTriangles[triangles]];
@@ -227,7 +230,7 @@ SetAttributes[ProdToList,Listable]
 ProdToList[x_]:=Block[{Times=List,Power=Table},If[Head[x]===List,Flatten@x,{x}]]
 
 
-nn=9;
+nn=8;
 
 
 (* ::Subsubsection:: *)
@@ -237,7 +240,7 @@ nn=9;
 nonZeroFgraph=Select[Thread[{amplitudeCoefficients[nn],fGraphListcan[nn]}],!(#[[1]]===0)&];
 
 
-result=parallelGenerateRungWithCoeff[nonZeroFgraph];
+result=generateRungWithCoeff[nonZeroFgraph];
 
 
 test=PlanarGraphQ[Graph[List@@@(List@@Denominator[#[[2]]])]]&/@result;
@@ -247,6 +250,9 @@ test=PlanarGraphQ[Graph[List@@@(List@@Denominator[#[[2]]])]]&/@result;
 
 
 data={#[[1]],List@@@(List@@Denominator[#[[2]]]),List@@@(ProdToList[Numerator[#[[2]]]])}&/@result;
+
+
+Length[data]
 
 
 csv=Prepend[data,{"COEFFICIENTS","DEN_EDGES","NUM_EDGES"}];
@@ -326,7 +332,7 @@ Flatten[Extract[amplitudeCoefficients[7],%]]
 First/@result===%*)
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*n+3 loop from n loops*)
 
 
@@ -374,7 +380,7 @@ Flatten[Extract[amplitudeCoefficients[7],%]]
 First/@result===%*)
 
 
-(* ::Subsubsection:: *)
+(* ::Subsubsection::Closed:: *)
 (*Check*)
 
 
