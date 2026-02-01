@@ -98,7 +98,7 @@ cycle[dial_,ve_]:=If[MemberQ[dial,ve],Join[Take[dial,{Position[dial,ve][[1,1]],L
 displayfgraph[fgraph_]:=Column[{PlanarGraph[Denominator[fgraph]/.Times->List/.x->List,VertexLabels->"Name"],Numerator[fgraph]}]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*generate new graphs via binary relations*)
 
 
@@ -206,7 +206,7 @@ newfgs=If[dts==={},{},(fg*(Numerator[fg]/.x[a_,b_]:>x[a/.{#[[7]]->#[[8]],#[[8]]-
 canonicalizefgraph/@newfgs]
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*L+n loop graphs from L loops (only rung rule)*)
 
 
@@ -440,22 +440,22 @@ Timing[Position[den10can2, sameDenCan2[[-1]]]]
 positions=ParallelMap[Position[den10can2, #]&,sameDenCan2]
 
 
-FullForm@den10NewCan[[2]]
+den10NewCan[[1]]
 
 
 (* 1. Create the Association Index *)
 (* This maps each {int, Graph} pair to its positions in den10can2 *)
 index = PositionIndex[den10can2];
 
-
-
-
 (* 2. Perform the lookup *)
 (* Lookup is extremely fast O(1) per element *)
 positions = Lookup[index, sameDenCan2, {}];
 
 
+
+
+
 pos=Sort[Flatten@positions];
 
 
-Export["graph_positions.json", pos]
+Export["rung_9to10.json", pos]
