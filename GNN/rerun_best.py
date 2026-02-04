@@ -24,25 +24,116 @@ ALLOWED_SWEEP_KEYS = {
 }
 
 
+def _set_by_path(cfg: dict, path: tuple[str, ...], value):
+    """Set cfg[path[0]]...[path[-1]] = value, creating intermediate dicts."""
+    cur = cfg
+    for k in path[:-1]:
+        nxt = cur.get(k)
+        if not isinstance(nxt, dict):
+            nxt = {}
+            cur[k] = nxt
+        cur = nxt
+    cur[path[-1]] = value
+
+
+def _get_from_path(cfg: dict, path: tuple[str, ...]):
+    """Get cfg[path[0]]...[path[-1]] if present, else None."""
+    cur = cfg
+    for k in path:
+        if not isinstance(cur, dict):
+            return None
+        if k not in cur:
+            return None
+        cur = cur[k]
+    return cur
+
+
+def _coerce_sweep_cfg(sweep_cfg: dict | None) -> dict:
+    """Return a flat dict of sweep hyperparameters.
+
+    Handles cases where W&B stores nested config under sections (model/training)
+    instead of top-level keys.
+    """
+    raw = sweep_cfg or {}
+    out: dict = {}
+
+    # First, keep any already-flat allowed keys
+    for k in ALLOWED_SWEEP_KEYS:
+        if k in raw:
+            out[k] = raw.get(k)
+
+    # Also accept nested forms used by some runs
+    model_block = raw.get("model") if isinstance(raw.get("model"), dict) else {}
+    training_block = raw.get("training") if isinstance(raw.get("training"), dict) else {}
+
+    # Architecture may be stored as model.name
+    if "model_name" not in out:
+        out["model_name"] = model_block.get("name", None)
+
+    # Training hparams may be stored under training.*
+    for k in ["learning_rate", "weight_decay", "batch_size", "scheduler_type", "threshold"]:
+        if k not in out:
+            out[k] = training_block.get(k, None)
+
+    # Model hparams may be stored under model.*
+    for k in ["dropout", "hidden_channels", "num_layers"]:
+        if k not in out:
+            out[k] = model_block.get(k, None)
+
+    return out
+
+
+# Map sweep keys to canonical config paths.
+# NOTE: model_name is treated as an alias for model.name.
+SWEEP_KEY_TO_PATH: dict[str, tuple[str, ...]] = {
+    "learning_rate": ("training", "learning_rate"),
+    "weight_decay": ("training", "weight_decay"),
+    "batch_size": ("training", "batch_size"),
+    "scheduler_type": ("training", "scheduler_type"),
+    "threshold": ("training", "threshold"),
+    "dropout": ("model", "dropout"),
+    "hidden_channels": ("model", "hidden_channels"),
+    "num_layers": ("model", "num_layers"),
+    "model_name": ("model", "name"),
+}
+
+
 def merge_configs(base_cfg, sweep_cfg, epochs, project, run_name,
                   train_loop_override=None, test_loop_override=None):
-    """Combine base_config + sweep hyperparameters into a clean final config."""
+    """Combine base_config + sweep hyperparameters into a clean final config.
+
+    Policy: base_config takes precedence. Sweep values are only applied for keys
+    that are not explicitly set in base_config.
+    """
 
     cfg = copy.deepcopy(base_cfg)
 
+    sweep_flat = _coerce_sweep_cfg(sweep_cfg)
+
     # -----------------------
-    # Apply sweep hyperparameters
+    # Apply sweep hyperparameters (uniformly, base wins)
     # -----------------------
-    for key, value in sweep_cfg.items():
+    for key, value in (sweep_flat or {}).items():
         if key not in ALLOWED_SWEEP_KEYS:
             continue
 
-        if key in ["learning_rate", "weight_decay", "batch_size",
-                   "scheduler_type", "threshold"]:
-            cfg.setdefault("training", {})[key] = value
+        # Uniform rule: don't clobber base config with unset sweep values
+        if value is None:
+            continue
 
-        elif key in ["dropout", "hidden_channels", "num_layers", "model_name"]:
-            cfg.setdefault("model", {})[key] = value
+        path = SWEEP_KEY_TO_PATH.get(key)
+        if not path:
+            continue
+
+        # Base has precedence: if base config specifies this path (even if falsy), do not override.
+        if _get_from_path(base_cfg, path) is not None:
+            continue
+
+        _set_by_path(cfg, path, value)
+
+    # Never keep a duplicate/legacy field under model; architecture is model.name
+    if isinstance(cfg.get("model"), dict):
+        cfg["model"].pop("model_name", None)
 
     # -----------------------
     # Override epochs
