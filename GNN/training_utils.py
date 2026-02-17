@@ -73,6 +73,26 @@ def compute_min_positive_prob(labels, probs):
         return None
     return float(true_one_probs.min().item())
 
+# New helper: compute min-positive prob by running a model over a loader
+def compute_min_positive_prob_from_loader(model, loader, device):
+    """Compute minimum sigmoid(prob) among true-1 labels over a loader."""
+    if loader is None:
+        return None
+    model.eval()
+    all_probs, all_labels = [], []
+    with torch.no_grad():
+        for batch in loader:
+            batch = batch.to(device)
+            out = model(batch.x, batch.edge_index, batch.batch)
+            probs = torch.sigmoid(out.view(-1))
+            all_probs.append(probs.detach().cpu())
+            all_labels.append(batch.y.detach().cpu().view(-1))
+    if not all_probs:
+        return None
+    probs = torch.cat(all_probs)
+    labels = torch.cat(all_labels)
+    return compute_min_positive_prob(labels, probs)
+
 # ==============================================================
 # Training for one epoch
 # ==============================================================
@@ -435,6 +455,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
     # TRAINING LOOP
     # --------------------------------------------------
     for epoch in range(config.epochs):
+        is_last_epoch = (epoch == int(config.epochs) - 1)
         # ---- Training ----
         train_loss, train_acc, train_metrics = train_epoch(
             model, train_loader, optimizer, device,
@@ -443,16 +464,18 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
             pos_weight=pos_weight,
         )
 
-        train_min_pos_prob = train_metrics.get("lowest_prob_true1")
+        # NOTE: During training we keep using config.threshold for training metrics.
+        # We intentionally do NOT compute/train with train_lowest_prob_true1 per epoch anymore.
 
         # ---- Validation ----
         if val_dataset is not None:
+            # During training-time validation, keep using config.threshold (do not use train_min_pos yet).
             val_loss, val_acc, val_metrics = evaluate(
                 model, val_loader, device,
                 threshold=config.threshold,
                 log_threshold_curves=False,
                 split_name="val",
-                ref_min_pos_prob=train_min_pos_prob,
+                ref_min_pos_prob=None,
                 pos_weight=pos_weight,
             )
 
@@ -470,7 +493,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                       f"Train Loss={train_loss:.4f}, Val Loss={val_loss:.4f}, "
                       f"Train Acc={train_acc:.4f}, Val Acc={val_acc:.4f}")
 
-            # ---- W&B logging ----
+            # ---- W&B logging (per-epoch: train + val) ----
             if use_wandb and wandb.run is not None:
                 log_dict = {
                     "epoch": epoch,
@@ -480,14 +503,14 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                     "train_roc_auc": train_metrics.get("roc_auc"),
                     "train_recall": train_metrics.get("recall"),
                     "train_true_negative_rate": train_metrics.get("true_negative_rate"),
-                    "train_lowest_prob_true1": train_metrics.get("train_lowest_prob_true1"),
+                    # train_lowest_prob_true1 is computed at end-of-run
                     "val_loss": val_loss,
                     "val_acc": val_acc,
                     "val_pr_auc": val_metrics.get("pr_auc"),
                     "val_roc_auc": val_metrics.get("roc_auc"),
                     "val_recall": val_metrics.get("recall"),
                     "val_true_negative_rate": val_metrics.get("true_negative_rate"),
-                    "val_lowest_prob_true1": val_metrics.get("val_lowest_prob_true1"),
+                    # val_lowest_prob_true1 is computed at end-of-run
                     "lr": optimizer.param_groups[0]["lr"],
                     "in_channels": true_in_channels,
                 }
@@ -508,7 +531,7 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                 best_val_loss = train_loss
                 best_state = model.state_dict().copy()
 
-            # W&B logging
+            # ---- W&B logging (per-epoch: train only) ----
             if use_wandb and wandb.run is not None:
                 wandb.log({
                     "epoch": epoch,
@@ -518,17 +541,31 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
                     "train_roc_auc": train_metrics.get("roc_auc"),
                     "train_recall": train_metrics.get("recall"),
                     "train_true_negative_rate": train_metrics.get("true_negative_rate"),
-                    "train_lowest_prob_true1": train_metrics.get("train_lowest_prob_true1"),
+                    # train_lowest_prob_true1 is computed at end-of-run
                     "lr": optimizer.param_groups[0]["lr"],
                 }, step=epoch)
 
     # --------------------------------------------------
-    # AFTER TRAINING: compute test metrics
+    # AFTER TRAINING: compute train_lowest_prob_true1 once for the selected model
     # --------------------------------------------------
-    model.load_state_dict(best_state)
+    if best_state is not None:
+        model.load_state_dict(best_state)
 
-    # Get training-derived threshold from the last epoch's metrics (or best epoch if you later store it)
-    train_min_pos_prob = train_metrics.get("lowest_prob_true1")
+    # Compute TRAIN-derived threshold from the FINAL selected model
+    train_lowest_prob_true1 = compute_min_positive_prob_from_loader(model, train_loader, device)
+
+    # Evaluate on val/test using TRAIN-derived threshold (if available)
+    val_loss = val_acc = None
+    val_metrics = None
+    if val_loader is not None:
+        val_loss, val_acc, val_metrics = evaluate(
+            model, val_loader, device,
+            threshold=config.threshold,
+            log_threshold_curves=False,
+            split_name="val",
+            ref_min_pos_prob=train_lowest_prob_true1,
+            pos_weight=pos_weight,
+        )
 
     # Evaluate on test set
     if test_loader is not None:
@@ -537,15 +574,12 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
             threshold=config.threshold,
             log_threshold_curves=config.log_threshold_curves,
             split_name="test",
-            ref_min_pos_prob=train_min_pos_prob,
+            ref_min_pos_prob=train_lowest_prob_true1,
             pos_weight=pos_weight,
         )
-
-        # expose final test-set minimum prob among true 1s
         test_metrics["test_lowest_prob_true1"] = test_metrics.get("lowest_prob_true1")
 
-        # Evaluate using training-set threshold to guarantee no false negatives
-        if train_min_pos_prob is not None:
+        if train_lowest_prob_true1 is not None:
             # Collect test labels and probabilities for threshold evaluation
             test_all_probs, test_all_labels = [], []
             model.eval()
@@ -560,9 +594,8 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
             test_all_probs = torch.cat(test_all_probs)
             test_all_labels = torch.cat(test_all_labels)
 
-            # Apply threshold from training set
             test_metrics["threshold_eval"] = evaluate_threshold_from_train(
-                train_min_pos_prob,
+                train_lowest_prob_true1,
                 test_all_labels,
                 test_all_probs
             )
@@ -574,105 +607,76 @@ def train(config, train_dataset, val_dataset, test_dataset, use_wandb=False):
             "true_negative_rate": None,
         }
 
+    # Expose val/test min-prob fields computed at end-of-run
+    val_lowest_prob_true1 = None
+    if val_metrics is not None:
+        val_lowest_prob_true1 = val_metrics.get("val_lowest_prob_true1")
+
+    # Final metrics logging (end of run): save train/val/test lowest_prob_true1
+    if use_wandb and wandb.run is not None:
+        end_log = {"train_lowest_prob_true1": train_lowest_prob_true1}
+        if val_lowest_prob_true1 is not None:
+            end_log["val_lowest_prob_true1"] = val_lowest_prob_true1
+        if test_metrics.get("test_lowest_prob_true1") is not None:
+            end_log["test_lowest_prob_true1"] = test_metrics.get("test_lowest_prob_true1")
+        # Ensure monotonic step ordering: log after last epoch
+        end_step = int(config.epochs)
+        wandb.log(end_log, step=end_step)
+
+    # --------------------------------------------------
+    # End-of-run summary printing (keep legacy summary output)
+    # --------------------------------------------------
     total_time = time.time() - start_time
-    print(f"Training completed in {total_time:.1f}s.")
-
-    # End-of-training predictive model checks
-    train_min = train_metrics.get("train_lowest_prob_true1")
-
-    predictive_model_val = None
-    predictive_model_test = None
-
-    if val_dataset is not None:
-        val_min = None
-        if 'val_metrics' in locals() and isinstance(locals().get('val_metrics'), dict):
-            val_min = val_metrics.get("val_lowest_prob_true1")
-        if train_min is not None and val_min is not None:
-            predictive_model_val = bool(train_min <= val_min)
-
-    # Only compute test predictive metric when validation is disabled and test exists
-    if val_dataset is None and test_loader is not None:
-        test_min = test_metrics.get("test_lowest_prob_true1")
-        if train_min is not None and test_min is not None:
-            predictive_model_test = bool(train_min <= test_min)
-
-    # Print a small end-of-run summary (avoid legacy key names)
     print("\n=== Summary ===")
+    print(f"Total time: {total_time:.1f}s")
     print(f"Train true-negative rate: {train_metrics.get('true_negative_rate', None)}")
+    print(f"Train lowest_prob_true1: {train_lowest_prob_true1}")
 
-    if val_dataset is not None:
-        print(f"Val   true-negative rate: {val_metrics.get('true_negative_rate', None) if 'val_metrics' in locals() else None}")
+    if val_metrics is not None:
+        print(f"Val   true-negative rate: {val_metrics.get('true_negative_rate', None)}")
+        print(f"Val   lowest_prob_true1: {val_lowest_prob_true1}")
 
     if test_loader is not None:
         print(f"Test  true-negative rate: {test_metrics.get('true_negative_rate', None)}")
+        print(f"Test  lowest_prob_true1: {test_metrics.get('test_lowest_prob_true1', None)}")
 
-    if val_dataset is not None:
-        print(f"Predictive model (val): {predictive_model_val}")
-    elif test_loader is not None:
-        print(f"Predictive model (test): {predictive_model_test}")
-
-    # Final Test metrics logging
-    if use_wandb and wandb.run is not None:
-        # Log predictive model flags once at end
-        end_flags = {}
-        if predictive_model_val is not None:
-            end_flags["predictive_model"] = predictive_model_val
-        if predictive_model_test is not None:
-            end_flags["predictive_model_test"] = predictive_model_test
-        if end_flags:
-            wandb.log(end_flags)
-
-    # Optional W&B threshold curves
-    if wandb.run is not None and config.log_threshold_curves and "thresholds" in test_metrics:
-        plt.figure()
-        plt.plot(test_metrics["thresholds"], test_metrics["accuracy_vs_threshold"], label="Accuracy")
-        plt.plot(test_metrics["thresholds"], test_metrics["precision_vs_threshold"], label="Precision")
-        plt.plot(test_metrics["thresholds"], test_metrics["recall_vs_threshold"], label="Recall")
-        plt.xlabel("Threshold"); plt.ylabel("Score"); plt.legend()
-        plt.title(f"Threshold curves ({config.train_loop_order}→{config.test_loop_order})")
-        wandb.log({"threshold_curves": wandb.Image(plt)})
-        plt.close()
-
+    # --------------------------------------------------
+    # Results dict (include end-of-run lowest_prob_true1 values)
+    # --------------------------------------------------
     results = {
         "model_state": model.state_dict().copy(),
 
-        # --- TRAIN metrics ---
+        # --- TRAIN metrics (training metrics use config.threshold) ---
         "train_loss": train_loss,
         "train_acc": train_acc,
         "train_pr_auc": train_metrics.get("pr_auc"),
         "train_roc_auc": train_metrics.get("roc_auc"),
         "train_recall": train_metrics.get("recall"),
         "train_true_negative_rate": train_metrics.get("true_negative_rate"),
-        "train_lowest_prob_true1": train_metrics.get("train_lowest_prob_true1"),
+        "train_lowest_prob_true1": train_lowest_prob_true1,
 
-        # --- VAL metrics (if available) ---
-        "val_loss": val_loss if val_dataset is not None else None,
-        "val_acc": val_acc if val_dataset is not None else None,
-        "val_pr_auc": val_metrics.get("pr_auc") if val_dataset is not None else None,
-        "val_roc_auc": val_metrics.get("roc_auc") if val_dataset is not None else None,
-        "val_recall": val_metrics.get("recall") if val_dataset is not None else None,
-        "val_true_negative_rate": val_metrics.get("true_negative_rate") if val_dataset is not None else None,
-        "val_lowest_prob_true1": val_metrics.get("val_lowest_prob_true1") if val_dataset is not None else None,
+        # --- VAL metrics (end-of-run, thresholded by train_lowest_prob_true1) ---
+        "val_loss": val_loss,
+        "val_acc": val_acc,
+        "val_pr_auc": (val_metrics.get("pr_auc") if val_metrics is not None else None),
+        "val_roc_auc": (val_metrics.get("roc_auc") if val_metrics is not None else None),
+        "val_recall": (val_metrics.get("recall") if val_metrics is not None else None),
+        "val_true_negative_rate": (val_metrics.get("true_negative_rate") if val_metrics is not None else None),
+        "val_lowest_prob_true1": val_lowest_prob_true1,
 
-        # --- TEST metrics ---
-        "test_loss": test_loss if test_loader is not None else None,
-        "test_acc": test_acc if test_loader is not None else None,
-        "test_pr_auc": test_metrics.get("pr_auc") if test_loader is not None else None,
-        "test_roc_auc": test_metrics.get("roc_auc") if test_loader is not None else None,
-        "test_recall": test_metrics.get("recall") if test_loader is not None else None,
+        # --- TEST metrics (end-of-run, thresholded by train_lowest_prob_true1) ---
+        "test_loss": test_loss,
+        "test_acc": test_acc,
+        "test_pr_auc": (test_metrics.get("pr_auc") if test_loader is not None else None),
+        "test_roc_auc": (test_metrics.get("roc_auc") if test_loader is not None else None),
+        "test_recall": (test_metrics.get("recall") if test_loader is not None else None),
         "test_true_negative_rate": (test_metrics.get("true_negative_rate") if test_loader is not None else None),
         "test_lowest_prob_true1": (test_metrics.get("test_lowest_prob_true1") if test_loader is not None else None),
-
-        # --- Predictive model flags ---
-        "predictive_model": predictive_model_val,
-        "predictive_model_test": predictive_model_test,
 
         # --- Runtime / model size ---
         "total_time": total_time,
         "number_of_parameters": num_params,
     }
-    
-
 
     return results
 

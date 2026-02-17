@@ -20,6 +20,7 @@ ALLOWED_SWEEP_KEYS = {
     "batch_size",
     "scheduler_type",
     "threshold",
+    "pos_weight",
     "model_name",
 }
 
@@ -71,7 +72,7 @@ def _coerce_sweep_cfg(sweep_cfg: dict | None) -> dict:
         out["model_name"] = model_block.get("name", None)
 
     # Training hparams may be stored under training.*
-    for k in ["learning_rate", "weight_decay", "batch_size", "scheduler_type", "threshold"]:
+    for k in ["learning_rate", "weight_decay", "batch_size", "scheduler_type", "threshold", "pos_weight"]:
         if k not in out:
             out[k] = training_block.get(k, None)
 
@@ -91,6 +92,7 @@ SWEEP_KEY_TO_PATH: dict[str, tuple[str, ...]] = {
     "batch_size": ("training", "batch_size"),
     "scheduler_type": ("training", "scheduler_type"),
     "threshold": ("training", "threshold"),
+    "pos_weight": ("training", "pos_weight"),
     "dropout": ("model", "dropout"),
     "hidden_channels": ("model", "hidden_channels"),
     "num_layers": ("model", "num_layers"),

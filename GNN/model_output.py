@@ -669,16 +669,12 @@ def main():
     N = len(dataset)
 
     # Recreate model from config
-    forced_dropout = 0.2
-    if model_cfg.get("dropout", None) != forced_dropout:
-        print(f"[INFO] Forcing model dropout={forced_dropout} (ignoring config model.dropout={model_cfg.get('dropout', None)})")
-
     model = create_gnn_model(
         architecture=model_cfg["name"],
         num_features=num_features,
         hidden_dim=model_cfg["hidden_channels"],
         num_classes=1,
-        dropout=forced_dropout,
+        dropout=model_cfg.get("dropout", 0.0),
         num_layers=model_cfg["num_layers"],
     ).to(device)
 
@@ -693,8 +689,39 @@ def main():
     checkpoint_path = Path(experiment_cfg["model_dir"]) / args.model_name
     print(f"Loading model checkpoint: {checkpoint_path}")
 
-    checkpoint = torch.load(checkpoint_path, map_location=device)
-    model.load_state_dict(checkpoint)
+    checkpoint_raw = torch.load(checkpoint_path, map_location=device)
+
+    def _extract_state_dict(ckpt):
+        """Return a plausible model state_dict from a checkpoint object."""
+        if isinstance(ckpt, dict):
+            # common wrappers
+            for k in ("model_state_dict", "state_dict", "model", "net"):
+                v = ckpt.get(k)
+                if isinstance(v, dict):
+                    return v
+            # already a state_dict
+            if all(isinstance(k, str) for k in ckpt.keys()):
+                return ckpt
+        return ckpt
+
+    state_dict = _extract_state_dict(checkpoint_raw)
+
+    try:
+        model.load_state_dict(state_dict)
+    except RuntimeError as e:
+        # Provide a more actionable error message.
+        sd_keys = list(state_dict.keys()) if isinstance(state_dict, dict) else []
+        head = sd_keys[:20]
+        raise RuntimeError(
+            "Failed to load checkpoint into the reconstructed model. "
+            "This usually means the evaluation config's model architecture/hidden_channels/num_layers/dropout "
+            "does not match the checkpoint (e.g., loading a GAT checkpoint with a GIN config), "
+            "or the checkpoint is wrapped under a different key.\n\n"
+            f"Checkpoint type: {type(checkpoint_raw)} | extracted_state_dict_keys(sample): {head}\n"
+            f"Config model: name={model_cfg.get('name')} hidden_channels={model_cfg.get('hidden_channels')} num_layers={model_cfg.get('num_layers')} dropout={model_cfg.get('dropout')}\n\n"
+            f"Original load_state_dict error:\n{e}"
+        )
+
     model.eval()
 
     # -----------------------------------------------------
@@ -707,7 +734,13 @@ def main():
     train_fileexts = _train_fileexts_from_config(data_cfg)
     train_base_dir = _data_dir_from_config(data_cfg, Path(args.config).resolve())
 
+    # IMPORTANT: mimic training-time preprocessing:
+    #   - fit a scaler on the first training loop, then reuse it
+    #   - keep a running max feature width for padding
+    # This is required for train_min_prob to match wandb's train_lowest_prob_true1.
     train_labels_all, train_probs_all = [], []
+    train_scaler = None
+    train_max_features = None
 
     if train_base_dir is None or len(train_fileexts) == 0:
         print("[WARN] Could not resolve training datasets from config; cannot compute train_min_prob.")
@@ -716,28 +749,58 @@ def main():
         print(f"[INFO] train_loop_order={train_fileexts}")
         print(f"[INFO] base_dir={train_base_dir}")
 
+        # 1) Load all training datasets with training-like scaler/max_features reuse
+        train_datasets = []
         for tr_ext in train_fileexts:
-            train_npz = train_base_dir / f"den_graph_data_{tr_ext}.npz"
-            if not train_npz.exists():
-                train_npz = train_base_dir / f"den_graph_data_{tr_ext}.csv"
+            train_path = train_base_dir / f"den_graph_data_{tr_ext}.npz"
+            if not train_path.exists():
+                train_path = train_base_dir / f"den_graph_data_{tr_ext}.csv"
 
-            if not train_npz.exists():
+            if not train_path.exists():
                 print(f"[WARN] Training data file not found for loop {tr_ext}: expected {train_base_dir}/den_graph_data_{tr_ext}.npz (.csv)")
                 continue
 
-            tr_ds, _, _ = load_dataset(
-                data_file=str(train_npz),
+            # Use create_simple_dataset directly so we can control scaler/max_features reuse.
+            # (load_dataset() always re-autotunes and doesn't let us keep max_features.)
+            n_jobs, chunk_size = autotune_resources()
+            tr_ds, train_scaler, feats = create_simple_dataset(
+                file_ext=extract_file_ext(Path(train_path)),
                 selected_features=selected_features,
-                scaler=None,
+                normalize=True,
+                data_dir=str(Path(train_path).parent),
+                scaler=train_scaler,
+                max_features=train_max_features,
+                n_jobs=n_jobs,
+                chunk_size=chunk_size,
             )
-            tr_loader = DataLoader(tr_ds, batch_size=args.batch_size, shuffle=False)
-            tr_labels, tr_probs = _predict_probs_and_labels(model, tr_loader, device)
-            train_labels_all.append(tr_labels)
-            train_probs_all.append(tr_probs)
 
-        if len(train_labels_all) > 0:
-            train_labels_all = np.concatenate(train_labels_all).astype(int)
-            train_probs_all = np.concatenate(train_probs_all).astype(float)
+            # Update running max feature width after reading this dataset
+            if train_max_features is None or int(feats) > int(train_max_features):
+                train_max_features = int(feats)
+
+            train_datasets.append(tr_ds)
+
+        if len(train_datasets) == 0:
+            print("[WARN] No training datasets were loaded; cannot compute train_min_prob.")
+        else:
+            # 2) Pad all training datasets to a consistent width (training does this)
+            final_max_features = max(int(d.x.shape[1]) for ds in train_datasets for d in ds)
+            for ds in train_datasets:
+                for data in ds:
+                    n_nodes, n_feats = data.x.shape
+                    if n_feats < final_max_features:
+                        pad = torch.zeros(n_nodes, final_max_features - n_feats, dtype=data.x.dtype)
+                        data.x = torch.cat([data.x, pad], dim=1)
+
+            # 3) Run the checkpoint over each training dataset and aggregate labels/probs
+            for tr_ds in train_datasets:
+                tr_loader = DataLoader(tr_ds, batch_size=args.batch_size, shuffle=False)
+                tr_labels, tr_probs = _predict_probs_and_labels(model, tr_loader, device)
+                train_labels_all.append(tr_labels)
+                train_probs_all.append(tr_probs)
+
+            train_labels_all = np.concatenate(train_labels_all).astype(int) if len(train_labels_all) else np.array([], dtype=int)
+            train_probs_all = np.concatenate(train_probs_all).astype(float) if len(train_probs_all) else np.array([], dtype=float)
 
             train_min_prob = compute_min_positive_prob(
                 torch.as_tensor(train_labels_all, dtype=torch.long),
@@ -748,8 +811,6 @@ def main():
                 print("[WARN] TRAIN set contains no positives; cannot compute train_min_prob.")
             else:
                 print(f"[INFO] train_min_prob (TRAIN min positive prob) = {float(train_min_prob):.10f}")
-        else:
-            print("[WARN] No training datasets were loaded; cannot compute train_min_prob.")
 
     if train_min_prob is None:
         raise RuntimeError(
@@ -757,8 +818,10 @@ def main():
             "Check data.base_dir and data.train_loop_order in the config, and ensure training files exist and contain positives."
         )
 
-    threshold_used = float(train_min_prob)
-    print(f"[INFO] Using threshold for main evaluation/plots: {threshold_used:.10f} (TRAIN min-positive threshold)")
+    # Use TRAIN-derived threshold everywhere (plots/metrics/predictions).
+    train_threshold_used = float(train_min_prob)
+    threshold_used = train_threshold_used  # backwards-compat alias; do not overwrite with eval_min_prob
+    print(f"[INFO] train_threshold_used (TRAIN min-positive) = {train_threshold_used:.18e}")
 
     # =====================================================
     # Evaluate (standard metrics)
@@ -777,7 +840,7 @@ def main():
     else:
         avg_loss, accuracy, metrics = evaluate(
             model, loader, device=device,
-            threshold=threshold_used,
+            threshold=train_threshold_used,
             log_threshold_curves=True,
             split_name="eval",
         )
@@ -797,7 +860,7 @@ def main():
         all_preds = _uncertainty_gated_preds(
             y_prob_mean=y_prob_used,
             y_prob_std=all_probs_std,
-            threshold=threshold_used,
+            threshold=train_threshold_used,
             rel_std_max=0.6,
         )
         gated_metrics = _binary_metrics_from_probs(all_labels, y_prob_used, all_preds)
@@ -820,7 +883,7 @@ def main():
             "f1": gated_metrics.get("f1"),
         })
     else:
-        all_preds = (y_prob_used >= threshold_used).astype(int)
+        all_preds = (y_prob_used >= train_threshold_used).astype(int)
         print(f"\nLoss:      {avg_loss:.4f}")
         print(f"Accuracy:  {accuracy:.4f}")
         print(f"ROC-AUC:   {metrics['roc_auc']:.4f}")
@@ -828,28 +891,27 @@ def main():
         if metrics.get("neg_removal_fraction") is not None:
             print(f"Neg-removal fraction (true 0s below min true-1 prob): {metrics['neg_removal_fraction']:.4f}")
 
-    # Also compute eval_min_prob on the evaluated dataset itself
+    # Optionally compute eval_min_prob on the evaluated dataset itself (diagnostic only; never used as main threshold)
     eval_min_prob = compute_min_positive_prob(
         torch.as_tensor(all_labels, dtype=torch.long),
         torch.as_tensor(y_prob_used, dtype=torch.float32),
     )
     if eval_min_prob is not None:
-        print(f"[INFO] eval_min_prob (EVAL min positive prob on evaluated set) = {float(eval_min_prob):.10f}")
+        print(f"[INFO] eval_min_prob (EVAL min-positive; diagnostic only) = {float(eval_min_prob):.18e}")
+        print(f"[INFO] Sanity: threshold used for preds/plots remains train_threshold_used = {train_threshold_used:.18e}")
 
     # -----------------------------------------------------
     # Threshold-based evaluations (two distinct meanings)
     # -----------------------------------------------------
 
-    # Print the mean-only (legacy) threshold evaluation ONCE per threshold source.
-
     print("\n=== THRESHOLD EVALUATION (A) : TRAIN-derived threshold (train_min_prob) applied to THIS dataset ===")
-    print(f"[INFO] threshold_source=TRAIN (min prob among y=1 on TRAIN) → threshold={threshold_used:.10f}")
+    print(f"[INFO] threshold_source=TRAIN (min prob among y=1 on TRAIN) → threshold={train_threshold_used:.10f}")
 
     if args.dropout:
         gated_fn = int(((all_labels == 1) & (all_preds == 0)).sum())
         gated_tp = int(((all_labels == 1) & (all_preds == 1)).sum())
         print("\n============================================================")
-        print(f"GATED (mean+std) evaluation @ TRAIN threshold={threshold_used:.4f} (rel_std_max=0.6)")
+        print(f"GATED (mean+std) evaluation @ TRAIN threshold={train_threshold_used:.4f} (rel_std_max=0.6)")
         print("============================================================")
         print(f"False Negatives: {gated_fn} | True Positives: {gated_tp}")
         print("============================================================")
@@ -858,13 +920,13 @@ def main():
 
     # Mean-only evaluation (printed exactly once)
     train_threshold_eval = evaluate_threshold_from_train(
-        float(threshold_used),
+        float(train_threshold_used),
         torch.as_tensor(all_labels, dtype=torch.long),
         torch.as_tensor(y_prob_used, dtype=torch.float32),
     )
 
     if eval_min_prob is not None:
-        print("\n=== THRESHOLD EVALUATION (B) : EVAL-derived threshold (eval_min_prob) on THIS dataset ===")
+        print("\n=== THRESHOLD EVALUATION (B) : EVAL-derived threshold (eval_min_prob) on THIS dataset (diagnostic) ===")
         print(f"[INFO] threshold_source=EVAL (min prob among y=1 on THIS dataset) → threshold={float(eval_min_prob):.10f}")
 
         if args.dropout:
@@ -894,7 +956,7 @@ def main():
     # =====================================================
     # Physics-oriented scalar metrics
     # =====================================================
-    print(f"\n=== PHYSICS-ORIENTED METRICS (threshold = {threshold_used:.6f}) ===")
+    print(f"\n=== PHYSICS-ORIENTED METRICS (threshold = {train_threshold_used:.6f}) ===")
 
     P = (all_labels == 1).sum()
     tp = ((all_preds == 1) & (all_labels == 1)).sum()
@@ -920,7 +982,7 @@ def main():
         y_prob=y_prob_used,
         y_pred=all_preds,
         metrics_dict=metrics,
-        train_threshold=threshold_used,
+        train_threshold=train_threshold_used,
         eval_threshold=(float(eval_min_prob) if eval_min_prob is not None else None),
     )
 
@@ -941,7 +1003,7 @@ def main():
 
         figs = []
         figs.append(plot_true_labels_scatter(all_labels, output_dir, prefix))
-        figs.append(plot_probabilities(all_labels, y_prob_used, threshold=threshold_used,
+        figs.append(plot_probabilities(all_labels, y_prob_used, threshold=train_threshold_used,
                                        plot_dir=output_dir, prefix=prefix))
         figs.append(plot_misclassifications(all_labels, all_preds, output_dir, prefix))
         figs.append(plot_pr_curve(all_labels, y_prob_used, output_dir, prefix))
@@ -992,75 +1054,8 @@ def main():
 
     df = pd.DataFrame(df_dict)
     df.to_csv(pred_csv_path, index=False)
-    print(f"Saved predictions → {pred_csv_path}")
 
-    # Always print FN/TP CSV paths
-    print(f"False negatives with metadata → {output_dir / (prefix + '_false_negatives.csv')}")
-    print(f"True positive positives with metadata → {output_dir / (prefix + '_true_positives_positive_class.csv')}")
-
-    if args.embedding:
-        # Save embeddings for the evaluated dataset (--data_file)
-        arch = model_cfg.get('name', 'gin')
-        if arch != 'gin':
-            raise ValueError("--embedding currently supported only for model.name='gin'")
-
-        emb_dir = Path('embeddings') / f"{Path(args.model_name).stem}_{Path(args.data_file).stem}"
-        ensure_dir(emb_dir)
-        out_path = emb_dir / 'embeddings.npy'
-
-        embs = []
-        with torch.no_grad():
-            for data in DataLoader(dataset, batch_size=1, shuffle=False):
-                data = data.to(device)
-                node_emb = model(data.x, data.edge_index, data.batch, return_embedding=True)
-                graph_emb = global_add_pool(node_emb, data.batch)
-                embs.append(graph_emb.squeeze(0).detach().cpu().numpy())
-
-        embs = np.stack(embs, axis=0)
-        np.save(out_path, embs)
-        print(f"Saved embeddings: {embs.shape} -> {out_path}")
-
-    return
-
-
-def _binary_metrics_from_probs(y_true: np.ndarray, y_prob: np.ndarray, y_pred: np.ndarray) -> dict:
-    """Compute basic binary metrics from probs + hard preds."""
-    y_true = np.asarray(y_true).astype(int)
-    y_prob = np.asarray(y_prob).astype(float)
-    y_pred = np.asarray(y_pred).astype(int)
-
-    out = {
-        "accuracy": float((y_true == y_pred).mean()) if len(y_true) else None,
-        "precision": None,
-        "f1": None,
-        "roc_auc": None,
-        "pr_auc": None,
-    }
-
-    if len(y_true) == 0:
-        return out
-
-    try:
-        out["precision"] = float(precision_score(y_true, y_pred, zero_division=0))
-    except Exception:
-        out["precision"] = None
-
-    try:
-        out["f1"] = float(f1_score(y_true, y_pred, zero_division=0))
-    except Exception:
-        out["f1"] = None
-
-    if len(np.unique(y_true)) >= 2:
-        try:
-            out["roc_auc"] = float(roc_auc_score(y_true, y_prob))
-        except Exception:
-            out["roc_auc"] = None
-        try:
-            out["pr_auc"] = float(average_precision_score(y_true, y_prob))
-        except Exception:
-            out["pr_auc"] = None
-
-    return out
+    print(f"Saved predictions CSV → {pred_csv_path}")
 
 
 if __name__ == "__main__":
