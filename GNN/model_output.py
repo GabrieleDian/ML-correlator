@@ -50,7 +50,7 @@ def save_fig(fig, filename: str, plot_dir: Path):
 
 
 # =====================================================
-# Prediction utilities (deterministic + MC Dropout)
+# Prediction utilities (deterministic)
 # =====================================================
 
 def _predict_probs_and_labels(model, loader, device):
@@ -69,73 +69,40 @@ def _predict_probs_and_labels(model, loader, device):
     return labels, probs
 
 
-def _mc_dropout_probs_and_labels(model, loader, device, T: int = 5):
-    """MC Dropout inference: sample dropout masks T times and return mean/std of probabilities.
+def _binary_metrics_from_probs(y_true: np.ndarray, y_prob: np.ndarray, y_pred: np.ndarray) -> dict:
+    """Compute common binary classification metrics from arrays."""
+    y_true = np.asarray(y_true).astype(int)
+    y_prob = np.asarray(y_prob).astype(float)
+    y_pred = np.asarray(y_pred).astype(int)
 
-    Returns:
-        labels: [N] int ndarray
-        prob_mean: [N] float ndarray
-        prob_std: [N] float ndarray
-    """
-    # labels are deterministic; read once
-    all_labels = []
-    for batch in loader:
-        all_labels.append(batch.y.detach().cpu().numpy())
-    labels = np.concatenate(all_labels).astype(int) if len(all_labels) else np.array([], dtype=int)
+    out = {
+        "accuracy": float((y_true == y_pred).mean()) if y_true.size else None,
+        "precision": None,
+        "f1": None,
+        "roc_auc": None,
+        "pr_auc": None,
+    }
 
-    probs_T = []
-    model.train()  # IMPORTANT: activates dropout at inference
+    if y_true.size:
+        # these can throw when only one class present
+        try:
+            out["precision"] = float(precision_score(y_true, y_pred, zero_division=0))
+        except Exception:
+            out["precision"] = None
+        try:
+            out["f1"] = float(f1_score(y_true, y_pred, zero_division=0))
+        except Exception:
+            out["f1"] = None
+        try:
+            out["roc_auc"] = float(roc_auc_score(y_true, y_prob))
+        except Exception:
+            out["roc_auc"] = None
+        try:
+            out["pr_auc"] = float(average_precision_score(y_true, y_prob))
+        except Exception:
+            out["pr_auc"] = None
 
-    with torch.no_grad():
-        for _ in range(int(T)):
-            all_probs = []
-            for batch in loader:
-                batch = batch.to(device)
-                out = model(batch.x, batch.edge_index, batch.batch)
-                probs = torch.sigmoid(out.view(-1))
-                all_probs.append(probs.detach().cpu().numpy())
-            probs_T.append(np.concatenate(all_probs) if len(all_probs) else np.array([], dtype=float))
-
-    probs_T = np.stack(probs_T, axis=0) if len(probs_T) else np.zeros((0, 0), dtype=float)  # [T, N]
-    prob_mean = probs_T.mean(axis=0) if probs_T.size else np.array([], dtype=float)
-    prob_std = (probs_T.std(axis=0, ddof=1) if int(T) > 1 else np.zeros_like(prob_mean)) if probs_T.size else np.array([], dtype=float)
-
-    model.eval()  # restore
-    return labels, prob_mean, prob_std
-
-
-def _uncertainty_gated_preds(
-    y_prob_mean: np.ndarray,
-    y_prob_std: np.ndarray,
-    threshold: float,
-    rel_std_max: float = 0.6,
-    eps: float = 1e-12,
-) -> np.ndarray:
-    """Uncertainty-gated hard predictions.
-
-    Policy:
-      - If mean < threshold AND (std / denom) <= rel_std_max  -> predict 0
-      - Otherwise (including "uncertain" where std/denom > rel_std_max) -> predict 1
-
-    Where denom = max(mean, eps).
-
-    Rationale:
-      The decision threshold is derived from the minimum probability among true-1
-      graphs on the TRAIN set; it can be extremely small (e.g. 0.0011 or even
-      smaller). The uncertainty test should therefore be relative to the model's
-      predicted mean probability itself, not to the (possibly tiny) threshold.
-
-      "Uncertain" cases (std/denom > rel_std_max) are assigned to class 1.
-    """
-    y_prob_mean = np.asarray(y_prob_mean, dtype=float)
-    y_prob_std = np.asarray(y_prob_std, dtype=float)
-
-    # Relative uncertainty: std / max(mean, eps)
-    denom = np.maximum(y_prob_mean, eps)
-    rel = y_prob_std / denom
-
-    # Uncertain (rel > rel_std_max) → predict 1 by construction.
-    return np.where((y_prob_mean < threshold) & (rel <= rel_std_max), 0, 1).astype(int)
+    return out
 
 
 # =====================================================
@@ -513,18 +480,6 @@ def parse_args():
     parser.add_argument("--embedding", action="store_true", help="Save per-graph embeddings (GIN pre-pooling jump output) to .npy")
 
     parser.add_argument(
-        "--dropout",
-        action="store_true",
-        help="Enable MC Dropout at inference: run T stochastic passes and output mean/std of probabilities."
-    )
-    parser.add_argument(
-        "--T",
-        type=int,
-        default=5,
-        help="Number of MC Dropout samples (default: 5). Only used with --dropout."
-    )
-
-    parser.add_argument(
         "--plots",
         action="store_true",
         help="Generate plots and a PDF report. If not set, no plots/PDF are generated."
@@ -637,6 +592,56 @@ def normalize_loop_order(value):
     return [str(value)]
 
 
+def _model_kwargs_from_config(architecture: str, model_cfg: dict) -> dict:
+    """Map config model keys to create_gnn_model kwargs.
+
+    Ensures GATNet receives the correct parameter names as defined in GNN_architectures.py.
+    """
+    arch = str(architecture).lower().strip()
+
+    # Start with common keys that the caller already passes explicitly.
+    out: dict = {}
+
+    # Optional: allow nested dict for architecture-specific params.
+    extra = model_cfg.get("params", {})
+    if isinstance(extra, dict):
+        out.update(extra)
+
+    if arch == "gat":
+        # Support a few common config naming variants.
+        rename_map = {
+            "heads": "num_heads",
+            "n_heads": "num_heads",
+            "num_heads": "num_heads",
+            "attn_dropout": "attn_dropout",
+            "attention_dropout": "attn_dropout",
+            "pool": "pooling",
+            "pooling": "pooling",
+            "jk": "jk_mode",
+            "jk_mode": "jk_mode",
+            "residual": "residual",
+            "activation": "activation",
+            "negative_slope": "negative_slope",
+        }
+
+        for src, dst in rename_map.items():
+            if src in model_cfg and model_cfg[src] is not None:
+                out[dst] = model_cfg[src]
+
+        # Also accept a nested "gat" config block if present.
+        gat_block = model_cfg.get("gat", {})
+        if isinstance(gat_block, dict):
+            for src, dst in rename_map.items():
+                if src in gat_block and gat_block[src] is not None:
+                    out[dst] = gat_block[src]
+
+        # If config mistakenly uses "head"-style keys, prefer explicit num_heads.
+        if "num_heads" in out:
+            out["num_heads"] = int(out["num_heads"])
+
+    return out
+
+
 # =====================================================
 # Main evaluation
 # =====================================================
@@ -669,13 +674,17 @@ def main():
     N = len(dataset)
 
     # Recreate model from config
+    arch_name = model_cfg["name"]
+    model_kwargs = _model_kwargs_from_config(arch_name, model_cfg)
+
     model = create_gnn_model(
-        architecture=model_cfg["name"],
+        architecture=arch_name,
         num_features=num_features,
         hidden_dim=model_cfg["hidden_channels"],
         num_classes=1,
         dropout=model_cfg.get("dropout", 0.0),
         num_layers=model_cfg["num_layers"],
+        **model_kwargs,
     ).to(device)
 
     # Output directory based on wandb_project, model_name and file_ext
@@ -826,70 +835,30 @@ def main():
     # =====================================================
     # Evaluate (standard metrics)
     # =====================================================
-    # If --dropout is enabled, we report metrics based on the uncertainty-gated predictions.
-    # Otherwise we keep the original evaluate(...) behavior.
 
     print("\n=== MODEL EVALUATION (standard metrics) ===")
 
-    if args.dropout:
-        # We'll compute probabilities first and then compute gated metrics.
-        # Loss is not computed in this path.
-        avg_loss = float("nan")
-        accuracy = float("nan")
-        metrics = {"roc_auc": float("nan"), "pr_auc": float("nan")}
-    else:
-        avg_loss, accuracy, metrics = evaluate(
-            model, loader, device=device,
-            threshold=train_threshold_used,
-            log_threshold_curves=True,
-            split_name="eval",
-        )
+    avg_loss, accuracy, metrics = evaluate(
+        model, loader, device=device,
+        threshold=train_threshold_used,
+        log_threshold_curves=True,
+        split_name="eval",
+    )
 
-    # Recompute probabilities for downstream analysis/plots
-    if args.dropout:
-        print(f"[INFO] MC Dropout enabled for outputs (T={int(args.T)})")
-        all_labels, all_probs_mean, all_probs_std = _mc_dropout_probs_and_labels(model, loader, device, T=int(args.T))
-        y_prob_used = all_probs_mean
-    else:
-        all_labels, all_probs_det = _predict_probs_and_labels(model, loader, device)
-        all_probs_std = None
-        y_prob_used = all_probs_det
+    # Deterministic probabilities for downstream analysis/plots
+    all_labels, y_prob_used = _predict_probs_and_labels(model, loader, device)
+    all_preds = (y_prob_used >= train_threshold_used).astype(int)
 
-    # NOTE: all downstream metrics/plots/FN analysis use y_prob_used (MC mean if --dropout).
-    if args.dropout:
-        all_preds = _uncertainty_gated_preds(
-            y_prob_mean=y_prob_used,
-            y_prob_std=all_probs_std,
-            threshold=train_threshold_used,
-            rel_std_max=0.6,
-        )
-        gated_metrics = _binary_metrics_from_probs(all_labels, y_prob_used, all_preds)
-        # standard-metrics printout uses gated values
-        print(f"\nLoss:      {avg_loss}")
-        print(f"Accuracy:  {gated_metrics['accuracy']:.4f}" if gated_metrics["accuracy"] is not None else "Accuracy:  None")
-        if gated_metrics.get("roc_auc") is not None:
-            print(f"ROC-AUC:   {gated_metrics['roc_auc']:.4f}")
-        else:
-            print("ROC-AUC:   None")
-        if gated_metrics.get("pr_auc") is not None:
-            print(f"PR-AUC:    {gated_metrics['pr_auc']:.4f}")
-        else:
-            print("PR-AUC:    None")
-        # also pass these through for metric_row
-        metrics.update({
-            "roc_auc": gated_metrics.get("roc_auc"),
-            "pr_auc": gated_metrics.get("pr_auc"),
-            "precision": gated_metrics.get("precision"),
-            "f1": gated_metrics.get("f1"),
-        })
-    else:
-        all_preds = (y_prob_used >= train_threshold_used).astype(int)
-        print(f"\nLoss:      {avg_loss:.4f}")
-        print(f"Accuracy:  {accuracy:.4f}")
-        print(f"ROC-AUC:   {metrics['roc_auc']:.4f}")
-        print(f"PR-AUC:    {metrics['pr_auc']:.4f}")
-        if metrics.get("neg_removal_fraction") is not None:
-            print(f"Neg-removal fraction (true 0s below min true-1 prob): {metrics['neg_removal_fraction']:.4f}")
+    # Refresh displayed metrics from actual downstream arrays (keeps print + CSV consistent)
+    refreshed = _binary_metrics_from_probs(all_labels, y_prob_used, all_preds)
+    metrics.update({k: refreshed.get(k) for k in ("roc_auc", "pr_auc", "precision", "f1")})
+
+    print(f"\nLoss:      {avg_loss:.4f}")
+    print(f"Accuracy:  {refreshed['accuracy']:.4f}" if refreshed["accuracy"] is not None else "Accuracy:  None")
+    print(f"ROC-AUC:   {refreshed['roc_auc']:.4f}" if refreshed.get("roc_auc") is not None else "ROC-AUC:   None")
+    print(f"PR-AUC:    {refreshed['pr_auc']:.4f}" if refreshed.get("pr_auc") is not None else "PR-AUC:    None")
+    if metrics.get("neg_removal_fraction") is not None:
+        print(f"Neg-removal fraction (true 0s below min true-1 prob): {metrics['neg_removal_fraction']:.4f}")
 
     # Optionally compute eval_min_prob on the evaluated dataset itself (diagnostic only; never used as main threshold)
     eval_min_prob = compute_min_positive_prob(
@@ -907,17 +876,6 @@ def main():
     print("\n=== THRESHOLD EVALUATION (A) : TRAIN-derived threshold (train_min_prob) applied to THIS dataset ===")
     print(f"[INFO] threshold_source=TRAIN (min prob among y=1 on TRAIN) → threshold={train_threshold_used:.10f}")
 
-    if args.dropout:
-        gated_fn = int(((all_labels == 1) & (all_preds == 0)).sum())
-        gated_tp = int(((all_labels == 1) & (all_preds == 1)).sum())
-        print("\n============================================================")
-        print(f"GATED (mean+std) evaluation @ TRAIN threshold={train_threshold_used:.4f} (rel_std_max=0.6)")
-        print("============================================================")
-        print(f"False Negatives: {gated_fn} | True Positives: {gated_tp}")
-        print("============================================================")
-
-        print("\n[INFO] MEAN-ONLY reference below (ignores std/mean gate)")
-
     # Mean-only evaluation (printed exactly once)
     train_threshold_eval = evaluate_threshold_from_train(
         float(train_threshold_used),
@@ -928,23 +886,6 @@ def main():
     if eval_min_prob is not None:
         print("\n=== THRESHOLD EVALUATION (B) : EVAL-derived threshold (eval_min_prob) on THIS dataset (diagnostic) ===")
         print(f"[INFO] threshold_source=EVAL (min prob among y=1 on THIS dataset) → threshold={float(eval_min_prob):.10f}")
-
-        if args.dropout:
-            eval_preds_gated = _uncertainty_gated_preds(
-                y_prob_mean=y_prob_used,
-                y_prob_std=all_probs_std,
-                threshold=float(eval_min_prob),
-                rel_std_max=0.6,
-            )
-            gated_fn = int(((all_labels == 1) & (eval_preds_gated == 0)).sum())
-            gated_tp = int(((all_labels == 1) & (eval_preds_gated == 1)).sum())
-            print("\n============================================================")
-            print(f"GATED (mean+std) evaluation @ EVAL threshold={float(eval_min_prob):.4f} (rel_std_max=0.6)")
-            print("============================================================")
-            print(f"False Negatives: {gated_fn} | True Positives: {gated_tp}")
-            print("============================================================")
-
-            print("\n[INFO] MEAN-ONLY reference below (ignores std/mean gate)")
 
         # Mean-only evaluation (printed exactly once)
         _ = evaluate_threshold_from_train(
@@ -992,7 +933,7 @@ def main():
     fn_figs, fn_idx, fn_probs = false_negative_analysis(
         all_labels, all_preds, y_prob_used, dataset, file_ext, output_dir, prefix,
         make_plots=bool(args.plots),
-        y_prob_std=(all_probs_std if args.dropout else None)
+        y_prob_std=None,
     )
 
     # =====================================================
@@ -1042,15 +983,8 @@ def main():
     df_dict = {
         "y_true": all_labels,
         "y_pred": all_preds,
+        "y_prob": y_prob_used,
     }
-
-    # If dropout is enabled, expose mean/std explicitly as additional columns.
-    # NOTE: when --dropout is on, we intentionally do NOT write a plain 'y_prob' column.
-    if args.dropout:
-        df_dict["y_prob_mean"] = y_prob_used
-        df_dict["y_prob_std"] = all_probs_std
-    else:
-        df_dict["y_prob"] = y_prob_used
 
     df = pd.DataFrame(df_dict)
     df.to_csv(pred_csv_path, index=False)
