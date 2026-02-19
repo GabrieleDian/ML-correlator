@@ -671,7 +671,6 @@ def main():
 
     loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False)
     num_features = dataset[0].x.shape[1]
-    N = len(dataset)
 
     # Recreate model from config
     arch_name = model_cfg["name"]
@@ -732,6 +731,28 @@ def main():
         )
 
     model.eval()
+
+    # =====================================================
+    # FAST PATH (no plots): only run inference on --data_file and save predictions CSV
+    # =====================================================
+    if not args.plots:
+        all_labels, y_prob_used = _predict_probs_and_labels(model, loader, device)
+        threshold_used = float(args.threshold)
+        all_preds = (y_prob_used >= threshold_used).astype(int)
+
+        pred_csv_path = output_dir / f"{prefix}_predictions.csv"
+        df = pd.DataFrame({
+            "y_true": all_labels,
+            "y_pred": all_preds,
+            "y_prob": y_prob_used,
+        })
+        df.to_csv(pred_csv_path, index=False)
+        print(f"Saved predictions CSV → {pred_csv_path}")
+        return
+
+    # =====================================================
+    # FULL PATH (--plots): compute TRAIN-derived threshold, then metrics/plots/report
+    # =====================================================
 
     # -----------------------------------------------------
     # Compute train_min_prob by running checkpoint over ALL configured training loops
@@ -897,6 +918,7 @@ def main():
     # =====================================================
     # Physics-oriented scalar metrics
     # =====================================================
+    N = len(dataset)
     print(f"\n=== PHYSICS-ORIENTED METRICS (threshold = {train_threshold_used:.6f}) ===")
 
     P = (all_labels == 1).sum()
@@ -939,54 +961,49 @@ def main():
     # =====================================================
     # Generate plots (only if --plots)
     # =====================================================
-    if args.plots:
-        print("\n=== Generating Plots and PDF Report ===")
+    print("\n=== Generating Plots and PDF Report ===")
 
-        figs = []
-        figs.append(plot_true_labels_scatter(all_labels, output_dir, prefix))
-        figs.append(plot_probabilities(all_labels, y_prob_used, threshold=train_threshold_used,
-                                       plot_dir=output_dir, prefix=prefix))
-        figs.append(plot_misclassifications(all_labels, all_preds, output_dir, prefix))
-        figs.append(plot_pr_curve(all_labels, y_prob_used, output_dir, prefix))
-        figs.append(plot_roc_curve(all_labels, y_prob_used, output_dir, prefix))
-        figs.append(plot_confusion(all_labels, all_preds, output_dir, prefix))
-        figs.append(plot_prob_hist_per_class(all_labels, y_prob_used, output_dir, prefix))
-        figs.append(plot_sorted_positive_probs(all_labels, y_prob_used, output_dir, prefix))
+    figs = []
+    figs.append(plot_true_labels_scatter(all_labels, output_dir, prefix))
+    figs.append(plot_probabilities(all_labels, y_prob_used, threshold=train_threshold_used,
+                                   plot_dir=output_dir, prefix=prefix))
+    figs.append(plot_misclassifications(all_labels, all_preds, output_dir, prefix))
+    figs.append(plot_pr_curve(all_labels, y_prob_used, output_dir, prefix))
+    figs.append(plot_roc_curve(all_labels, y_prob_used, output_dir, prefix))
+    figs.append(plot_confusion(all_labels, all_preds, output_dir, prefix))
+    figs.append(plot_prob_hist_per_class(all_labels, y_prob_used, output_dir, prefix))
+    figs.append(plot_sorted_positive_probs(all_labels, y_prob_used, output_dir, prefix))
 
-        # Add FN-focused figures
-        figs.extend(fn_figs)
+    # Add FN-focused figures
+    figs.extend(fn_figs)
 
-        # =====================================================
-        # Save PDF report (metrics page + all figs)
-        # =====================================================
-        pdf_path = output_dir / f"{prefix}_evaluation_report.pdf"
-        with PdfPages(pdf_path) as pdf:
-            # First page: metrics summary
-            metrics_fig = metrics_figure(metric_row)
-            pdf.savefig(metrics_fig, bbox_inches="tight")
-            plt.close(metrics_fig)
+    # =====================================================
+    # Save PDF report (metrics page + all figs)
+    # =====================================================
+    pdf_path = output_dir / f"{prefix}_evaluation_report.pdf"
+    with PdfPages(pdf_path) as pdf:
+        # First page: metrics summary
+        metrics_fig = metrics_figure(metric_row)
+        pdf.savefig(metrics_fig, bbox_inches="tight")
+        plt.close(metrics_fig)
 
-            # Then all plot figures
-            for fig in figs:
-                pdf.savefig(fig, bbox_inches="tight")
-                plt.close(fig)
+        # Then all plot figures
+        for fig in figs:
+            pdf.savefig(fig, bbox_inches="tight")
+            plt.close(fig)
 
-        print(f"Saved PDF report → {pdf_path}")
-    else:
-        print("\n[INFO] --plots not set; skipping plot/PDF generation.")
+    print(f"Saved PDF report → {pdf_path}")
 
     # =====================================================
     # Save predictions CSV (always)
     # =====================================================
     pred_csv_path = output_dir / f"{prefix}_predictions.csv"
 
-    df_dict = {
+    df = pd.DataFrame({
         "y_true": all_labels,
         "y_pred": all_preds,
         "y_prob": y_prob_used,
-    }
-
-    df = pd.DataFrame(df_dict)
+    })
     df.to_csv(pred_csv_path, index=False)
 
     print(f"Saved predictions CSV → {pred_csv_path}")
