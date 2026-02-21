@@ -35,7 +35,7 @@
 - 5-9 -> 11: /home/ec2-user/ML-correlator/Tree_classifier_for_graphs/new_stuff/bayes_results/bayes_results_merged/20260115-230846_reopt2_train_56789_test11_vstep1/merged_looporder_20260116-000021
 
 - 5-10 -> 11: /home/ec2-user/ML-correlator/Tree_classifier_for_graphs/new_stuff/bayes_results/bayes_results_merged/20260116-032047_reopt2_train_5678910_test11_vstep1/merged_looporder_20260116-032055
-- 5-10 -> 12: Use same model as above - tested:
+- 5-10 -> 12: Use same model as above - tested: /home/ec2-user/ML-correlator/Tree_classifier_for_graphs/new_stuff/12_loop_inference.ipynb
 
 - 5-11 -> 11: trained model: /home/ec2-user/ML-correlator/Tree_classifier_for_graphs/new_stuff/bayes_results/bayes_results_merged/20260116-032047_reopt2_train_5678910_test11_vstep1/merged_looporder_20260116-032055
-- tested here: 
+- tested here: /home/ec2-user/ML-correlator/Tree_classifier_for_graphs/new_stuff/12_loop_inference.ipynb
