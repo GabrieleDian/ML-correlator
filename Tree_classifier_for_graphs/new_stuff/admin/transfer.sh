@@ -6,8 +6,8 @@
 #LOCAL_DIR="$1"
 #S3_URI="$2"
 
-LOCAL_DIR="/home/ec2-user/ML-correlator/bayes_results"
-S3_URI="s3://physicsml/fgraphs_gnn/den_graphs/results/bayes_results"
+LOCAL_DIR="/home/ec2-user/ML-correlator/Tree_classifier_for_graphs/new_stuff/features/merged/dataset/dataset/dataset"
+S3_URI="s3://physicsml/fgraphs_gnn/den_graphs/features/"
 
 if [ -z "$LOCAL_DIR" ] || [ -z "$S3_URI" ]; then
   echo "Usage: $0 <local-folder> <s3-uri>"
