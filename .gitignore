@@ -22,3 +22,5 @@ wandb/
 # Ignore large pickle files
 *.pkl
 *.pickle
+bayes_results/*
+Tree_classifier_for_graphs/new_stuff/bayes_results/*

@@ -18,7 +18,7 @@
 #   - Row-level parallelism + intra-row parallelism
 # -------------------------------------------------------------
 
-import os, argparse, ast, warnings, math, random, json
+import os, sys, argparse, ast, warnings, math, random, json
 from collections import Counter, defaultdict
 from itertools import combinations
 from math import log2
@@ -37,6 +37,8 @@ os.environ.setdefault("BLIS_NUM_THREADS", "1")
 os.environ.setdefault("VECLIB_MAXIMUM_THREADS", "1")
 os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
 
+# Suppress all UserWarnings (including networkx hash warnings)
+warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", message="Precision loss occurred in moment calculation.*", category=RuntimeWarning)
 try:
     from scipy._lib._warnings import ConstantInputWarning
@@ -69,6 +71,46 @@ try:
     _HAS_WL = True
 except Exception:
     _HAS_WL = False
+# helpers
+
+import subprocess
+
+def s3_upload(local_path: str, s3_uri: str, profile: str = None):
+    # Ensure trailing slash behavior is sane: we upload the file into that prefix
+    s3_uri = s3_uri.rstrip("/") + "/"
+    cmd = ["aws"]
+    if profile:
+        cmd += ["--profile", profile]
+    cmd += ["s3", "cp", local_path, s3_uri]
+    subprocess.run(cmd, check=True)
+
+import subprocess
+import io
+
+def write_frame_to_s3_stream(df: pd.DataFrame, s3_uri: str, filename: str, fmt: str):
+    """
+    Streams DataFrame directly to S3 using aws s3 cp - s3://...
+    """
+    s3_path = s3_uri.rstrip("/") + "/" + filename
+
+    if fmt == "csv":
+        cmd = ["aws", "s3", "cp", "-", s3_path]
+        proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+        df.to_csv(proc.stdin, index=False)
+        proc.stdin.close()
+        proc.wait()
+    else:
+        # parquet requires a bytes buffer
+        buf = io.BytesIO()
+        df.to_parquet(buf, index=False)
+        buf.seek(0)
+        cmd = ["aws", "s3", "cp", "-", s3_path]
+        proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+        proc.stdin.write(buf.read())
+        proc.stdin.close()
+        proc.wait()
+
+
 
 # ========================= Desired feature set =========================
 DESIRED_COLUMNS = [
@@ -338,7 +380,15 @@ def parse_groups(arg_groups: Optional[str]) -> Dict[str, bool]:
 
 # ========================= tqdm helper =========================
 def _tqdm(it=None, **kwargs):
-    return tqdm(it, dynamic_ncols=True, mininterval=0.1, smoothing=0.1, leave=False, **kwargs)
+    # Force tqdm to write to stderr and ensure it's visible
+    kwargs.setdefault('file', sys.stderr)
+    kwargs.setdefault('dynamic_ncols', True)
+    kwargs.setdefault('mininterval', 0.1)
+    kwargs.setdefault('smoothing', 0.1)
+    kwargs.setdefault('leave', False)
+    # Force disable=False to ensure progress bar shows even if not a TTY
+    kwargs.setdefault('disable', False)
+    return tqdm(it, **kwargs)
 
 # ========================= Helpers =========================
 def shannon_entropy(counter: Counter) -> float:
@@ -1756,9 +1806,18 @@ def main():
         if args.keep_coeff_first and "COEFFICIENTS" in feat_df.columns:
             cols = ["COEFFICIENTS"] + [c for c in feat_df.columns if c != "COEFFICIENTS"]
             feat_df = feat_df.reindex(columns=cols)
-        write_frame(feat_df, args.output, out_fmt)
+        #write_frame(feat_df, args.output, out_fmt)
+
+        if args.s3_uri and args.stream_to_s3:
+            fname = os.path.basename(args.output)
+            write_frame_to_s3_stream(feat_df, args.s3_uri, fname, out_fmt)
+            print(f"✓ Streamed to S3 → {args.s3_uri}/{fname}")
+        else:
+            write_frame(feat_df, args.output, out_fmt)
+
         print(f"✓ Feature table saved → {args.output}")
 
+    
         # Manifest (single)
         manifest_path = f"{args.output}.manifest.json"
         manifest = {
@@ -1889,7 +1948,14 @@ def main():
             cols = ["COEFFICIENTS"] + [c for c in feat_df.columns if c != "COEFFICIENTS"]
             feat_df = feat_df.reindex(columns=cols)
 
-        write_frame(feat_df, out_path, out_fmt)
+        #write_frame(feat_df, out_path, out_fmt)
+        if args.s3_uri and args.stream_to_s3:
+            fname = os.path.basename(out_path)
+            write_frame_to_s3_stream(feat_df, args.s3_uri, fname, out_fmt)
+            print(f"✓ Streamed batch → {args.s3_uri}/{fname}")
+        else:
+            write_frame(feat_df, out_path, out_fmt)
+
 
         manifest["batches"].append({
             "index": int(batch_idx),
